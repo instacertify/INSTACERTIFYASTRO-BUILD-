@@ -1,0 +1,29 @@
+---
+import AdLanding from '../components/AdLanding.astro';
+import ContentPage from '../components/ContentPage.astro';
+import AboutPage from '../components/AboutPage.astro';
+import LandingPage from '../components/LandingPage.astro';
+import ServicePage from '../components/ServicePage.astro';
+import PostPage from '../components/PostPage.astro';
+import EventPage from '../components/EventPage.astro';
+import StandardPage from '../components/StandardPage.astro';
+import IndustryPage from '../components/IndustryPage.astro';
+import Vacancy from '../pages/careers/[slug].astro';
+import Home from '../pages/index.astro';
+import { getVacancies } from '../lib/content';
+
+const p = Astro.locals.preview!;
+const others = p.kind === 'vacancy' ? (await getVacancies()).filter((v) => v.slug !== p.data.slug).slice(0, 4) : [];
+---
+
+{p.kind === 'ad' && <AdLanding path={p.data.path} />}
+{p.kind === 'page' && p.data.template === 'landing' && <LandingPage path={p.data.path} />}
+{p.kind === 'page' && p.data.template === 'about' && <AboutPage path={p.data.path} />}
+{p.kind === 'page' && p.data.template !== 'landing' && p.data.template !== 'about' && <ContentPage path={p.data.path} />}
+{p.kind === 'service' && <ServicePage path={p.data.path} />}
+{p.kind === 'post' && <PostPage post={p.data} />}
+{p.kind === 'event' && <EventPage slug={p.data.slug} />}
+{p.kind === 'standard' && <StandardPage path={p.data.path} />}
+{p.kind === 'industry' && <IndustryPage industry={p.data} />}
+{p.kind === 'vacancy' && <Vacancy vacancy={p.data} others={others} />}
+{p.kind === 'home' && <Home />}

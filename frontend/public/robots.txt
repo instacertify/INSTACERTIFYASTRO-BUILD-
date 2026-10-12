@@ -1,0 +1,51 @@
+# Every page is open to crawlers except the ones below, which add nothing to search results.
+# Legal and policy pages are not listed here: they carry a noindex tag, which Google can only read if it may crawl them.
+# Staging and other non-live hosts get "Disallow: /" from Caddy instead of this file.
+User-agent: *
+Allow: /
+
+# Lead-form confirmation, admin and draft previews (the admin and API host blocks all crawling itself)
+Disallow: /thank-you
+Disallow: /admin
+Disallow: /portal
+Disallow: /preview/
+Disallow: /_preview/
+
+# Internal site search results
+Disallow: /*?q=
+Disallow: /*&q=
+Disallow: /*?s=
+Disallow: /*&s=
+Disallow: /*?search=
+Disallow: /*&search=
+
+# Filtered and sorted listings, form pre-fills and session IDs: the same page under another URL
+Disallow: /*?service=
+Disallow: /*&service=
+Disallow: /*?cert=
+Disallow: /*&cert=
+Disallow: /*?type=
+Disallow: /*&type=
+Disallow: /*?industry=
+Disallow: /*&industry=
+Disallow: /*?for=
+Disallow: /*&for=
+Disallow: /*?from=
+Disallow: /*&from=
+Disallow: /*?sort=
+Disallow: /*&sort=
+Disallow: /*?order=
+Disallow: /*&order=
+Disallow: /*?filter
+Disallow: /*&filter
+Disallow: /*?view=
+Disallow: /*&view=
+Disallow: /*?sessionid=
+Disallow: /*&sessionid=
+Disallow: /*?sid=
+Disallow: /*&sid=
+Disallow: /*?PHPSESSID=
+Disallow: /*&PHPSESSID=
+Disallow: /*;jsessionid=
+
+Sitemap: https://instacertify.com/sitemap-index.xml

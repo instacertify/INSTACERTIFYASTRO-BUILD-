@@ -1,0 +1,1218 @@
+[
+ {
+  "sno": 1,
+  "product": "Mobile Phones",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8517",
+  "hsn8": "85171300",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 2,
+  "product": "Laptops / Notebooks",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84713010",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 3,
+  "product": "Tablets",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84713090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 4,
+  "product": "Servers",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84714190",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-III; effective 2018",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 5,
+  "product": "Wireless Keyboards",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84716060",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 6,
+  "product": "Point of Sale Terminals",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8470",
+  "hsn8": "84705010",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 7,
+  "product": "Printers & Plotters",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8443",
+  "hsn8": "84433210",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 8,
+  "product": "Scanners",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84716050",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 9,
+  "product": "Optical Disc Players",
+  "is": "IS 616",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8521",
+  "hsn8": "85219090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 10,
+  "product": "Set Top Boxes",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8528",
+  "hsn8": "85287100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 11,
+  "product": "Automatic Data Processing Machines",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84714900",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 12,
+  "product": "Microwave Ovens",
+  "is": "IS 302-2-25",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8516",
+  "hsn8": "85165000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 13,
+  "product": "Plasma / LCD / LED Televisions",
+  "is": "IS 616",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8528",
+  "hsn8": "85287217",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 14,
+  "product": "Amplifiers (2000W and above)",
+  "is": "IS 616",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8518",
+  "hsn8": "85184000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 15,
+  "product": "Electronic Musical Systems (>200W)",
+  "is": "IS 616",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8519",
+  "hsn8": "85198990",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 16,
+  "product": "Electronic Clocks with Mains Power",
+  "is": "IS 302-2-26",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "9105",
+  "hsn8": "91052100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 17,
+  "product": "Video Games (Mains operated)",
+  "is": "IS 616",
+  "broad": "Toys",
+  "hsn4": "9504",
+  "hsn8": "95045000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 18,
+  "product": "Visual Display Units / Monitors",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8528",
+  "hsn8": "85285900",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 19,
+  "product": "CCTV Cameras / CCTV Recorders",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8525",
+  "hsn8": "85258900",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 20,
+  "product": "Adapters for IT Equipment",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8504",
+  "hsn8": "85044030",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 21,
+  "product": "Adapters for Audio/Video Equipment",
+  "is": "IS 616",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8504",
+  "hsn8": "85044030",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 22,
+  "product": "UPS / Inverters (up to 5 kVA)",
+  "is": "IS 16242 (Part 1)",
+  "broad": "Batteries & Power",
+  "hsn4": "8504",
+  "hsn8": "85044010",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 23,
+  "product": "Electronic Control Gear for LED Modules",
+  "is": "IS 15885 (Part 2/Sec 13)",
+  "broad": "Lighting Products",
+  "hsn4": "8504",
+  "hsn8": "85044090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 24,
+  "product": "Sealed Secondary Cells / Li-ion Batteries",
+  "is": "IS 16046 (Parts 1 & 2)",
+  "broad": "Batteries & Power",
+  "hsn4": "8507",
+  "hsn8": "85076000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-III; effective 2018-19",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 25,
+  "product": "Power Banks for Portable Applications",
+  "is": "IS 13252 (Part 1) / IS 16046",
+  "broad": "Batteries & Power",
+  "hsn4": "8507",
+  "hsn8": "85076000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-III; effective 2018-19",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 26,
+  "product": "Self-Ballasted LED Lamps",
+  "is": "IS 16102 (Part 1)",
+  "broad": "Lighting Products",
+  "hsn4": "8539",
+  "hsn8": "85395000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 27,
+  "product": "Fixed General Purpose LED Luminaires",
+  "is": "IS 10322 (Part 5/Sec 1)",
+  "broad": "Lighting Products",
+  "hsn4": "9405",
+  "hsn8": "94051100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 28,
+  "product": "LED Luminaires for Road & Street Lighting",
+  "is": "IS 10322 (Part 5/Sec 3)",
+  "broad": "Lighting Products",
+  "hsn4": "9405",
+  "hsn8": "94054090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 29,
+  "product": "LED Flood Lights",
+  "is": "IS 10322 (Part 5/Sec 5)",
+  "broad": "Lighting Products",
+  "hsn4": "9405",
+  "hsn8": "94054090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 30,
+  "product": "LED Hand Lamps",
+  "is": "IS 10322 (Part 5/Sec 6)",
+  "broad": "Lighting Products",
+  "hsn4": "9405",
+  "hsn8": "94054090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 31,
+  "product": "LED Lighting Chains (Rope Lights)",
+  "is": "IS 10322 (Part 5/Sec 7)",
+  "broad": "Lighting Products",
+  "hsn4": "9405",
+  "hsn8": "94053100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 32,
+  "product": "LED Luminaires for Emergency Lighting",
+  "is": "IS 10322 (Part 5/Sec 8)",
+  "broad": "Lighting Products",
+  "hsn4": "9405",
+  "hsn8": "94054090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-III; effective 2018",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 33,
+  "product": "Recessed LED Luminaires",
+  "is": "IS 10322 (Part 5/Sec 2)",
+  "broad": "Lighting Products",
+  "hsn4": "9405",
+  "hsn8": "94051900",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 34,
+  "product": "Smart Watches / Wearable Devices",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8517",
+  "hsn8": "85176290",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-IV; effective 2021 onwards",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 35,
+  "product": "Smart Speakers",
+  "is": "IS 616 / IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8518",
+  "hsn8": "85182200",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-IV; effective 2021 onwards",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 36,
+  "product": "Dimmers for LED Products",
+  "is": "IS 60669-2-1",
+  "broad": "Lighting Products",
+  "hsn4": "8536",
+  "hsn8": "85365090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-III; effective 2018",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 37,
+  "product": "Bluetooth Speakers",
+  "is": "IS 616",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8518",
+  "hsn8": "85182100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-III; effective 2018",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 38,
+  "product": "USB External Hard Disk Drives / SSDs",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84717020",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 39,
+  "product": "Wireless Headphones & Earphones",
+  "is": "IS 616",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8518",
+  "hsn8": "85183000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-III; effective 2018",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 40,
+  "product": "Television - other than Plasma/LCD/LED",
+  "is": "IS 616",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8528",
+  "hsn8": "85287100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-I; effective 03-07-2013",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 41,
+  "product": "Keyboard (Wired)",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84716040",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 42,
+  "product": "Barcode Readers / POS peripherals",
+  "is": "IS 13252 (Part 1)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84719000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO Phase-II; effective 2014",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 43,
+  "product": "Electronic Toys (CRS coverage)",
+  "is": "IS 15644 / relevant IS",
+  "broad": "Toys",
+  "hsn4": "9503",
+  "hsn8": "95030090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Toys QCO 2020 (ISI route); effective 01-01-2021",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 44,
+  "product": "Solar PV Modules",
+  "is": "IS 14286 / IS 61730",
+  "broad": "Solar & Renewable",
+  "hsn4": "8541",
+  "hsn8": "85414300",
+  "status": "Mandatory (CRS Registration)",
+  "order": "MNRE Solar PV (Safety & Quality) Order, 2017; effective 2019",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 45,
+  "product": "Solar Inverters",
+  "is": "IS 16221 (Part 2)",
+  "broad": "Solar & Renewable",
+  "hsn4": "8504",
+  "hsn8": "85044090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "MNRE order / BIS CRS; effective 2019 onwards",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+ },
+ {
+  "sno": 46,
+  "product": "Digital Television Receiver for Satellite Broadcast Transmission (Free-to-Air Set Top Box)",
+  "is": "IS 18112:2022",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8528",
+  "hsn8": "85287100",
+  "status": "Upcoming Mandatory (CRS Registration)",
+  "order": "MeitY Order; enforcement due 26-07-2026 - BIS Upcoming QCO list (bis.gov.in, updated 10-07-2026)",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "Registration per model per factory; brand-new addition from BIS upcoming QCO list"
+ },
+ {
+  "sno": 47,
+  "product": "Electronic Games (Video)",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "9504",
+  "hsn8": "95045000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY (migrated to IS/IEC 62368-1 w.e.f. 04-11-2025)",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 48,
+  "product": "Telephone Answering Machines",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8519",
+  "hsn8": "85192000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 49,
+  "product": "Copying Machines / Duplicators",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8443",
+  "hsn8": "84433100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 50,
+  "product": "Smart Card Readers",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84719000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 51,
+  "product": "Mail Processing / Postage / Franking Machines",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8472",
+  "hsn8": "84729010",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 52,
+  "product": "Passport Reader",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84719000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 53,
+  "product": "Cash Registers",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8470",
+  "hsn8": "84705010",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 54,
+  "product": "Automatic Teller / Cash Dispensing Machines (ATM)",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8472",
+  "hsn8": "84729030",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 55,
+  "product": "Induction Stove",
+  "is": "IS 302 (Part 2/Sec 6)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8516",
+  "hsn8": "85166000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 56,
+  "product": "Rice Cooker",
+  "is": "IS 302 (Part 2/Sec 15)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8516",
+  "hsn8": "85167100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 57,
+  "product": "Wireless Microphone",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8518",
+  "hsn8": "85181000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021 - S.O.3429(E) 01-10-2020; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 58,
+  "product": "Digital Camera",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8525",
+  "hsn8": "85258100",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 59,
+  "product": "Video Camera",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8525",
+  "hsn8": "85258900",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 60,
+  "product": "Webcam (Finished Product)",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8525",
+  "hsn8": "85258030",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 61,
+  "product": "USB Type External Solid-State Storage Devices (>256 GB)",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8471",
+  "hsn8": "84717040",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021 - S.O.2204(E) 05-05-2026; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 62,
+  "product": "Standalone Switch Mode Power Supplies (SMPS, <=48V)",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8504",
+  "hsn8": "85044090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 63,
+  "product": "Standalone LED Modules for General Lighting",
+  "is": "IS 16103 (Part 1)",
+  "broad": "Lighting Products",
+  "hsn4": "8539",
+  "hsn8": "85395000",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021 - S.O.1236(E) eff 01-10-2020; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 64,
+  "product": "Extended Reality Products (AR/VR/MR)",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8517",
+  "hsn8": "85176290",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021 - S.O.4997(E) 04-11-2025; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 65,
+  "product": "Power Adaptors for Audio/Video & Similar Apparatus",
+  "is": "IS/IEC 62368-1:2023",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8504",
+  "hsn8": "85044030",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 66,
+  "product": "UPS / Inverters (up to 10 kVA)",
+  "is": "IS 16242 (Part 1)",
+  "broad": "Batteries & Power",
+  "hsn4": "8504",
+  "hsn8": "85044010",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 67,
+  "product": "Mobile Phones - Indian Language Support",
+  "is": "IS 16333 (Part 3)",
+  "broad": "Electronics & IT Goods",
+  "hsn4": "8517",
+  "hsn8": "85171300",
+  "status": "Mandatory (CRS Registration)",
+  "order": "CRO 2021 - SO 24-10-2016 eff 01-07-2017; MeitY",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 68,
+  "product": "Crystalline Silicon Terrestrial PV Modules (Si wafer)",
+  "is": "IS 14286 / IS/IEC 61730-1 / IS/IEC 61730-2",
+  "broad": "Solar & Renewable",
+  "hsn4": "8541",
+  "hsn8": "85414300",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Solar PV Goods CRO 2017 - S.O.2920(E) 30-08-2017; MNRE",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 69,
+  "product": "Thin-Film Terrestrial PV Modules (a-Si, CIGS, CdTe)",
+  "is": "IS 16077 / IS/IEC 61730-1 / IS/IEC 61730-2",
+  "broad": "Solar & Renewable",
+  "hsn4": "8541",
+  "hsn8": "85414300",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Solar PV Goods CRO 2017 - S.O.2920(E) 30-08-2017; MNRE",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 70,
+  "product": "PV Power Converters / Inverters",
+  "is": "IS 16221 (Part 2)",
+  "broad": "Solar & Renewable",
+  "hsn4": "8504",
+  "hsn8": "85044090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Solar PV Goods CRO 2017; MNRE",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 71,
+  "product": "PV Utility-Interconnected Inverters - Islanding",
+  "is": "IS 16169",
+  "broad": "Solar & Renewable",
+  "hsn4": "8504",
+  "hsn8": "85044090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Solar PV Goods CRO 2017; MNRE",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 72,
+  "product": "Utility-Interconnected PV Inverters (Islanding Prevention)",
+  "is": "IS 16270",
+  "broad": "Solar & Renewable",
+  "hsn4": "8504",
+  "hsn8": "85044090",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Solar PV Goods CRO 2017; MNRE",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 73,
+  "product": "Ortho Phosphoric Acid",
+  "is": "IS 798:2020",
+  "broad": "Chemicals",
+  "hsn4": "2809",
+  "hsn8": "28092010",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Ortho Phosphoric Acid QCO 2021 - S.O.2335(E) 15-06-2021; MoC&F",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 74,
+  "product": "Polyphosphoric Acid",
+  "is": "IS 17439:2020",
+  "broad": "Chemicals",
+  "hsn4": "2809",
+  "hsn8": "28092020",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Polyphosphoric Acid QCO 2021 - S.O.5388(E) 24-12-2021; MoC&F",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 75,
+  "product": "Trimethyl Phosphite - Technical Grade",
+  "is": "IS 17412:2020",
+  "broad": "Chemicals",
+  "hsn4": "2920",
+  "hsn8": "29209099",
+  "status": "Mandatory (CRS Registration)",
+  "order": "Trimethyl Phosphite QCO 2022 - S.O.1637(E) 05-04-2022; MoC&F",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+ },
+ {
+  "sno": 76,
+  "product": "Cotton Bales",
+  "is": "IS 12171:2019",
+  "broad": "Textiles",
+  "hsn4": "5201",
+  "hsn8": "52010020",
+  "status": "Voluntary (QCO rescinded)",
+  "order": "Cotton Bales QCO 2023 - S.O.948(E) 28-02-2023; RESCINDED by S.O.2956(E) 09-06-2026",
+  "fees": {
+   "micro": 7000,
+   "small": 14500,
+   "large": 27000
+  },
+  "remarks": "RESCINDED w.e.f. 09-06-2026 (Cotton Bales QCO rescind order). No longer mandatory - retained for record."
+ }
+]

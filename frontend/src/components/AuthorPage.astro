@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import PostCard from './PostCard.astro';
+import CtaBand from './CtaBand.astro';
+import { getAuthor, getSite } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+import { responsive } from '../lib/images';
+
+interface Props {
+  slug: string;
+}
+
+const [author, site] = await Promise.all([getAuthor(Astro.props.slug), getSite()]);
+if (!author) throw new Error(`Author not found: ${Astro.props.slug}`);
+const trail = [{ label: 'Resources', href: '/resources' }, { label: author.name }];
+const sameAs = Object.values(author.links ?? {}).filter(Boolean);
+const photo = await responsive(author.photo, [96, 192]);
+const heading = author.role ? `${author.name}, ${author.role}` : `${author.name}: certification guides & articles`;
+const customTitle = author.seo?.title && author.seo.title !== `${author.name} | Instacertify` ? author.seo.title : null;
+const title = customTitle ?? (/instacertify/i.test(heading) ? heading : `${heading} | Instacertify`);
+const description = [author.seo?.description, author.shortBio].find((d) => d && d.length >= 70)
+  ?? `${(author.shortBio ?? author.name).replace(/\.$/, '')}. Guides and regulatory updates on BIS, CRS, WPC and global product certification from Instacertify.`;
+
+const jsonLd = [
+  breadcrumbSchema(site.url, trail, `author/${author.slug}`),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    mainEntity: {
+      '@type': 'Person',
+      name: author.name,
+      jobTitle: author.role ?? undefined,
+      worksFor: { '@id': `${site.url}/#organization` },
+      description: author.shortBio ?? undefined,
+      image: author.photo ?? undefined,
+      knowsAbout: author.expertise?.length ? author.expertise : undefined,
+      sameAs: sameAs.length ? sameAs : undefined,
+    },
+  },
+];
+---
+
+<Layout title={title} description={description} image={author.seo?.image ?? undefined} canonical={author.seo?.canonical} seo={author.seo} jsonLd={jsonLd}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <div class="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center">
+        {photo
+          ? <img src={photo.src} srcset={photo.srcset} sizes="96px" alt="" width="96" height="96" class="size-24 rounded-full object-cover" />
+          : <span class="flex size-24 items-center justify-center rounded-full bg-brand-100 text-brand-700"><Icon name="user" class="size-10" /></span>}
+        <div>
+          <h1 class="text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{author.name}</h1>
+          {author.role && <p class="mt-1 text-lg text-slate-600">{author.role}{author.company && `, ${author.company}`}</p>}
+          {author.experienceYears && <p class="mt-1 text-sm text-slate-500">{author.experienceYears}+ years in certification & compliance</p>}
+        </div>
+      </div>
+      {(author.bio || author.shortBio) && <p class="mt-6 max-w-3xl leading-relaxed text-slate-700">{author.bio ?? author.shortBio}</p>}
+      {author.credentials && <p class="mt-3 max-w-3xl text-sm text-slate-600"><strong class="text-slate-800">Credentials:</strong> {author.credentials}</p>}
+      {!!author.expertise?.length && (
+        <ul class="mt-4 flex flex-wrap gap-2">{author.expertise.map((e) => <li class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">{e}</li>)}</ul>
+      )}
+    </div>
+  </section>
+
+  <div class="container-page py-10 sm:py-14">
+    <h2 class="text-2xl section-title">Articles by {author.name.split(' ')[0]}</h2>
+    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {author.posts.map((p) => <PostCard post={p} />)}
+    </div>
+  </div>
+
+  <CtaBand />
+</Layout>

@@ -1,0 +1,7 @@
+{
+    "IS 302 (Part 2/Sec 9)": [
+        {"lab": "Alpha Test House", "city": "Delhi", "state": "Delhi", "price": 40000, "scope": "Grills"},
+        {"lab": "Beta Labs", "city": "Pune", "state": "Maharashtra", "price": 15000, "scope": "Grills"},
+        {"lab": "Placeholder rate", "city": "Pune", "state": "Maharashtra", "price": 200, "scope": "Grills"}
+    ]
+}

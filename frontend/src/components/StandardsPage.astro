@@ -1,0 +1,352 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import CtaBand from './CtaBand.astro';
+import { getSite, getStandardCategories } from '../lib/content';
+import { fixHeadings } from '../lib/outline';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+import { GROUPS, GROUP_ORDER, ISI_OTHER_CHARGES, STATUS, isLabel, range, rupees, sinceLine, statusLine } from '../lib/standards';
+import type { RegulationStatus, Standard } from '../lib/types';
+
+interface Props {
+  /** Category slug; omit for the library index. */
+  category?: string;
+}
+
+const [categories, site] = await Promise.all([getStandardCategories(), getSite()]);
+const current = Astro.props.category ? categories.find((c) => c.slug === Astro.props.category) ?? null : null;
+const trail = current
+  ? [{ label: 'Resources', href: '/resources' }, { label: 'Standards library', href: '/resources/standards' }, { label: current.title }]
+  : [{ label: 'Resources', href: '/resources' }, { label: 'Standards library' }];
+const path = current ? current.url.slice(1) : 'resources/standards';
+const title = current ? (current.seo?.title ?? `${current.title} | Instacertify`) : 'Indian standards library – BIS ISI, CRS & BEE product list | Instacertify';
+const intro = 'Check if your product needs BIS or BEE certification in India. See since when it is mandatory, the BIS fee and the testing cost.';
+const description = current?.seo?.description ?? intro;
+const n = (x: number) => x.toLocaleString('en-IN');
+
+const statusOrder = Object.keys(STATUS) as RegulationStatus[];
+const countByStatus = (list: Standard[]) =>
+  statusOrder.map((s) => [s, list.filter((x) => x.regulationStatus === s).length] as const).filter(([, c]) => c > 0);
+const comingSoon = (list: Standard[]) => list.filter((s) => s.regulationStatus === 'upcoming' || s.regulationStatus === 'deferred').length;
+
+// Index page
+const all = categories.flatMap((c) => c.standards);
+const groups = GROUP_ORDER.map((g) => ({ key: g, ...GROUPS[g], categories: categories.filter((c) => c.group === g) })).filter((g) => g.categories.length);
+const today = new Date().toISOString().slice(0, 10);
+const recentCutoff = new Date(Date.now() - 180 * 864e5).toISOString().slice(0, 10);
+const perDate = new Map<string, number>();
+// Upcoming dates first (soonest first), then orders that started recently (newest first); one order can cover dozens of pages, so cap each date.
+const timeline = [
+  ...all.filter((s) => s.regulationStatus === 'upcoming' && s.mandatoryFrom).sort((a, b) => a.mandatoryFrom!.localeCompare(b.mandatoryFrom!)),
+  ...all.filter((s) => s.regulationStatus === 'mandatory' && s.mandatoryFrom && s.mandatoryFrom >= recentCutoff && s.mandatoryFrom <= today).sort((a, b) => b.mandatoryFrom!.localeCompare(a.mandatoryFrom!)),
+]
+  .filter((s) => {
+    const c = (perDate.get(s.mandatoryFrom!) ?? 0) + 1;
+    perDate.set(s.mandatoryFrom!, c);
+    return c <= 2;
+  })
+  .slice(0, 6);
+// Category page
+const scheme = current?.standards.find((s) => s.scheme)?.scheme ?? null;
+const sectorCounts = new Map<string, number>();
+current?.standards.forEach((s) => s.sector && sectorCounts.set(s.sector, (sectorCounts.get(s.sector) ?? 0) + 1));
+const sectors = [...sectorCounts.keys()].sort();
+const showFees = current?.standards.some((s) => s.feeMin) ?? false;
+const showTesting = current?.standards.some((s) => s.testMin) ?? false;
+const feeLabel = scheme === 'crs' ? 'BIS fee' : 'Minimum marking fee per year';
+const sameGroup = current ? categories.filter((c) => c.group === current.group && c.slug !== current.slug) : [];
+const otherSections = current ? [...sameGroup, ...categories.filter((c) => c.group !== current.group)] : [];
+// Header row and list rows share the column template; written out in full so Tailwind finds the classes.
+const [headCols, rowCols] = showFees && showTesting
+  ? ['md:grid-cols-[minmax(0,1fr)_11rem_10rem_7.5rem]', 'md:[&>li]:grid-cols-[minmax(0,1fr)_11rem_10rem_7.5rem]']
+  : showFees
+    ? ['md:grid-cols-[minmax(0,1fr)_11rem_10rem]', 'md:[&>li]:grid-cols-[minmax(0,1fr)_11rem_10rem]']
+    : showTesting
+      ? ['md:grid-cols-[minmax(0,1fr)_11rem_7.5rem]', 'md:[&>li]:grid-cols-[minmax(0,1fr)_11rem_7.5rem]']
+      : ['md:grid-cols-[minmax(0,1fr)_11rem]', 'md:[&>li]:grid-cols-[minmax(0,1fr)_11rem]'];
+
+const scope = current?.standards ?? all;
+const figures = [
+  [n(scope.length), 'products'],
+  [n(scope.filter((s) => s.regulationStatus === 'mandatory').length), 'mandatory now'],
+  [n(comingSoon(scope)), 'coming soon'],
+  current ? (sectors.length > 1 ? [n(sectors.length), 'sectors'] : null) : [n(categories.length), 'sections'],
+].filter(Boolean) as [string, string][];
+---
+
+<Layout title={title} description={description} image={current?.seo?.image ?? current?.image ?? undefined} canonical={current?.seo?.canonical} seo={current?.seo} jsonLd={[breadcrumbSchema(site.url, trail, path)]}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page grid gap-8 py-8 sm:py-12 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
+      <div class="min-w-0">
+        <Breadcrumbs items={trail} />
+        {current && <p class="eyebrow mt-6">{current.groupLabel ?? GROUPS[current.group]?.title}</p>}
+        <h1 class={`${current ? 'mt-2' : 'mt-5'} max-w-3xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]`}>{current?.title ?? 'Standards library'}</h1>
+        {current?.description
+          ? <div class="prose-body mt-4 max-w-3xl text-lg text-slate-600" set:html={fixHeadings(current.description)} />
+          : <p class="mt-4 max-w-2xl text-lg text-slate-600">{intro}</p>}
+
+        {!current && (
+          <div class="relative mt-6 max-w-2xl">
+            <label for="std-global" class="sr-only">Search all standards</label>
+            <Icon name="search" class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400" />
+            <input id="std-global" type="search" autocomplete="off" placeholder="Search by product or IS number, e.g. “helmet” or “IS 13252”" class="field h-12 pl-11 text-base" data-std-global />
+            <ul class="absolute inset-x-0 top-full z-20 mt-2 max-h-[28rem] divide-y divide-slate-100 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-lg empty:hidden" data-std-results aria-live="polite"></ul>
+          </div>
+        )}
+      </div>
+
+      <dl class:list={['grid gap-px overflow-hidden rounded-2xl bg-slate-200 ring-1 ring-slate-200 lg:w-[26rem]', figures.length === 4 ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-2' : 'grid-cols-3']}>
+        {figures.map(([value, label]) => (
+          <div class="flex flex-col bg-white px-5 py-4">
+            <dt class="text-sm text-slate-500">{label}</dt>
+            <dd class="order-first text-2xl font-bold text-brand-700">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  {current ? (
+    <div class:list={['container-page py-8 sm:py-12', (sectors.length > 1 || otherSections.length > 0) && 'lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10']}>
+      {(sectors.length > 1 || otherSections.length > 0) && (
+        <aside class="hidden lg:block lg:self-start tall:sticky tall:top-24">
+          {sectors.length > 1 && (
+            <nav aria-label="Filter by sector">
+              <p class="text-sm font-semibold text-slate-900">Sectors</p>
+              <ul class="mt-3 max-h-[calc(100vh-22rem)] space-y-0.5 overflow-y-auto border-l border-slate-200 text-sm">
+                <li><button type="button" class="-ml-px flex w-full items-center justify-between gap-2 border-l-2 border-transparent py-1.5 pr-1 pl-3 text-left text-slate-600 hover:text-brand-700 aria-pressed:border-brand-700 aria-pressed:font-semibold aria-pressed:text-brand-700" aria-pressed="true" data-std-sector-btn="">All sectors <span class="text-xs text-slate-500">{n(current.standards.length)}</span></button></li>
+                {sectors.map((s) => (
+                  <li><button type="button" class="-ml-px flex w-full items-center justify-between gap-2 border-l-2 border-transparent py-1.5 pr-1 pl-3 text-left text-slate-600 hover:text-brand-700 aria-pressed:border-brand-700 aria-pressed:font-semibold aria-pressed:text-brand-700" aria-pressed="false" data-std-sector-btn={s}>{s} <span class="text-xs text-slate-500">{n(sectorCounts.get(s)!)}</span></button></li>
+                ))}
+              </ul>
+            </nav>
+          )}
+          {otherSections.length > 0 && (
+            <nav aria-label="Other sections" class:list={[sectors.length > 1 && 'mt-8']}>
+              <p class="text-sm font-semibold text-slate-900">Other sections</p>
+              <ul class="mt-2 divide-y divide-slate-100 border-y border-slate-100 text-sm">
+                {otherSections.map((c) => (
+                  <li><a href={c.url} class="flex items-center justify-between gap-2 py-2 text-slate-700 hover:text-brand-700">{c.title} <span class="text-xs text-slate-500">{n(c.standards.length)}</span></a></li>
+                ))}
+                <li><a href="/resources/standards" class="flex items-center gap-1.5 py-2 font-semibold text-brand-700 hover:underline">All standards <Icon name="arrow-right" class="size-4" /></a></li>
+              </ul>
+            </nav>
+          )}
+        </aside>
+      )}
+
+      <div class="min-w-0">
+        <div class="space-y-3 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <div class="relative min-w-0 flex-1">
+              <label for="std-search" class="sr-only">Search {current.title}</label>
+              <Icon name="search" class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400" />
+              <input id="std-search" type="search" placeholder="Search by product or IS number" class="field pl-11" data-std-search />
+            </div>
+            {sectors.length > 1 && (
+              <div class="sm:w-64 lg:hidden">
+                <label for="std-sector" class="sr-only">Sector</label>
+                <select id="std-sector" class="field" data-std-sector>
+                  <option value="">All sectors</option>
+                  {sectors.map((s) => <option value={s}>{s} ({n(sectorCounts.get(s)!)})</option>)}
+                </select>
+              </div>
+            )}
+          </div>
+          {countByStatus(current.standards).length > 1 && (
+            <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 sm:flex-wrap" role="group" aria-label="Filter by status">
+              <button type="button" class="chip group shrink-0" aria-pressed="true" data-std-status="">All <span class="text-slate-500 group-aria-pressed:text-brand-100">{n(current.standards.length)}</span></button>
+              {countByStatus(current.standards).map(([s, c]) => (
+                <button type="button" class="chip group shrink-0" aria-pressed="false" data-std-status={s}>
+                  <span class={`size-2 rounded-full ${STATUS[s].dot}`} aria-hidden="true" />{STATUS[s].label} <span class="text-slate-500 group-aria-pressed:text-brand-100">{n(c)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <p class="mt-4 text-sm text-slate-500" aria-live="polite" data-std-count>{n(current.standards.length)} products</p>
+
+        <div class="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div class={`hidden gap-4 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 md:grid ${headCols}`} aria-hidden="true">
+            <span>Product</span><span>Status</span>{showFees && <span>{feeLabel}</span>}{showTesting && <span>Testing from</span>}
+          </div>
+          {/* Row styles live on the list, not on each of the (up to 1,000+) rows, to keep the page light. */}
+          <ul class={`divide-y divide-slate-100 text-sm [&_a]:tap [&_a]:font-medium [&_a]:text-slate-900 [&_a:hover]:text-brand-700 [&_a:hover]:underline [&_small]:text-xs [&_small]:text-slate-500 [&>li]:grid [&>li]:gap-x-4 [&>li]:gap-y-1.5 [&>li]:px-4 [&>li]:py-3 [&>li]:[contain-intrinsic-size:auto_4.5rem] [&>li]:[content-visibility:auto] [&>li:hover]:bg-brand-50/40 [&>li>span:first-child]:min-w-0 [&>li>span:first-child>small]:mt-0.5 [&>li>span:first-child>small]:block [&>li>span:nth-child(2)]:flex [&>li>span:nth-child(2)]:flex-wrap [&>li>span:nth-child(2)]:items-center [&>li>span:nth-child(2)]:gap-x-2 [&>li>span:nth-child(2)]:gap-y-1 md:[&>li>span:nth-child(2)]:block md:[&>li>span:nth-child(2)>small]:mt-1 md:[&>li>span:nth-child(2)>small]:block md:[&>li>span:nth-child(n+3)]:whitespace-nowrap md:[&>li>span:nth-child(n+3)>small]:sr-only max-md:[&>li>span[data-empty]]:hidden ${rowCols}`}>
+            {current.standards.map((s) => {
+              const isLine = s.isNumbers.slice(0, 3).map(isLabel).join(' · ');
+              const when = s.mandatorySince ? sinceLine(s.regulationStatus, s.mandatorySince) : null;
+              const fee = showFees ? range(s.feeMin, s.feeMax) : null;
+              return (
+                <li data-std-item data-status={s.regulationStatus ?? ''} data-sector={s.sector ?? ''}>
+                  <span>
+                    <a href={s.url}>{s.title}</a>
+                    {isLine && !s.title.includes(s.isNumbers[0]) && <small>{isLine}{s.productCount > 3 ? ` +${s.productCount - 3} more` : ''}</small>}
+                  </span>
+                  <span>
+                    {s.regulationStatus && <span class={`badge ${STATUS[s.regulationStatus].badge}`}>{STATUS[s.regulationStatus].label}</span>}
+                    {when && <small>{when}</small>}
+                  </span>
+                  {showFees && <span data-empty={fee ? undefined : ''}><small>{feeLabel}: </small>{fee ?? '—'}</span>}
+                  {showTesting && <span data-empty={s.testMin ? undefined : ''}><small>Testing from: </small>{s.testMin ? rupees(s.testMin) : '—'}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <p data-std-empty hidden class="mt-6 text-center text-slate-500">No product found. <a href="/contact" class="font-semibold text-brand-700">Ask our team</a> and we will tell you which standard applies, within one day.</p>
+
+        {(showFees || showTesting) && (
+          <p class="mt-4 max-w-2xl text-xs leading-relaxed text-slate-500">
+            {scheme === 'crs'
+              ? 'BIS fee: the fee for each application, from micro to large firms.'
+              : `Minimum marking fee per year, from micro to large firms. Other BIS charges for every ISI mark product: application charge ${rupees(ISI_OTHER_CHARGES.application)}, licence fee ${rupees(ISI_OTHER_CHARGES.licence)} and audit charges ${rupees(ISI_OTHER_CHARGES.audit)}. Foreign manufacturers get a detailed quote.`}
+            {showTesting && ' Testing from: the lowest lab price we found.'} All prices are a guide only and do not include GST.
+          </p>
+        )}
+
+        {sameGroup.length > 0 && (
+          <nav aria-label="Related sections" class="mt-10 flex flex-wrap items-center gap-2 text-sm lg:hidden">
+            <span class="text-slate-500">Also see:</span>
+            {sameGroup.map((c) => <a href={c.url} class="chip">{c.title} <span class="text-slate-500">{n(c.standards.length)}</span></a>)}
+            <a href="/resources/standards" class="chip">All standards</a>
+          </nav>
+        )}
+      </div>
+    </div>
+  ) : (
+    <div class="container-page space-y-14 py-10 sm:py-14">
+      <section aria-labelledby="groups-h">
+        <h2 id="groups-h" class="text-2xl section-title">Choose a type</h2>
+        <div class="mt-6 grid gap-5 md:grid-cols-2">
+          {groups.map((g) => (
+            <article class="card flex flex-col p-5 sm:p-6">
+              <div class="flex items-start gap-4">
+                <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700"><Icon name={g.icon} class="size-6" /></span>
+                <div>
+                  <h3 class="text-xl font-semibold">{g.title}</h3>
+                  <p class="mt-1 text-sm text-slate-600">{g.blurb}</p>
+                </div>
+              </div>
+              <ul class="mt-5 divide-y divide-slate-100 border-t border-slate-200">
+                {g.categories.map((c) => (
+                  <li>
+                    <a href={c.url} class="group -mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-3 hover:bg-brand-50/50">
+                      <span class="min-w-0">
+                        <span class="block font-semibold text-slate-900 group-hover:text-brand-700">{c.title}</span>
+                        <span class="mt-0.5 block text-sm text-slate-500">
+                          {n(c.standards.length)} products
+                          {comingSoon(c.standards) > 0 && <span class="text-amber-700"> · {comingSoon(c.standards)} coming soon</span>}
+                        </span>
+                      </span>
+                      <Icon name="arrow-right" class="size-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-700 motion-reduce:transition-none" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {timeline.length > 0 && (
+        <section aria-labelledby="timeline-h">
+          <h2 id="timeline-h" class="text-2xl section-title">New and upcoming rules</h2>
+          <p class="mt-1 text-slate-600">Products that became mandatory in the last six months, or will soon.</p>
+          <ul class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {timeline.map((s) => (
+              <li>
+                <a href={s.url} class="card-hover flex h-full gap-4 p-4">
+                  <span class={`flex w-16 shrink-0 flex-col items-center justify-center rounded-lg px-2 py-2 text-center ${s.regulationStatus === 'upcoming' ? 'bg-amber-50 text-amber-800' : 'bg-rose-50 text-rose-700'}`}>
+                    <span class="text-xs font-semibold uppercase">{new Date(s.mandatoryFrom!).toLocaleDateString('en-US', { month: 'short' })}</span>
+                    <span class="text-lg leading-none font-bold">{new Date(s.mandatoryFrom!).getFullYear()}</span>
+                  </span>
+                  <span class="min-w-0">
+                    <span class="line-clamp-2 font-medium text-slate-900">{s.title}</span>
+                    <span class="mt-1 block text-xs text-slate-500">{statusLine(s.regulationStatus, s.mandatorySince)}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  )}
+
+  <CtaBand />
+</Layout>
+
+<script>
+  import { STATUS } from '../lib/standards';
+  import type { RegulationStatus } from '../lib/types';
+
+  // Category page: search, status chips and sector filter (dropdown on small screens, sidebar on large ones).
+  const search = document.querySelector<HTMLInputElement>('[data-std-search]');
+  const sector = document.querySelector<HTMLSelectElement>('[data-std-sector]');
+  const sectorButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-std-sector-btn]')];
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-std-status]')];
+  let status = '';
+  let sec = '';
+
+  function filter() {
+    const q = search?.value.trim().toLowerCase() ?? '';
+    const rows = document.querySelectorAll<HTMLElement>('[data-std-item]');
+    let visible = 0;
+    rows.forEach((row) => {
+      row.dataset.search ??= `${row.textContent} ${row.dataset.sector}`.toLowerCase();
+      row.hidden = (q !== '' && !row.dataset.search.includes(q)) || (status !== '' && row.dataset.status !== status) || (sec !== '' && row.dataset.sector !== sec);
+      if (!row.hidden) visible++;
+    });
+    const count = document.querySelector<HTMLElement>('[data-std-count]');
+    if (count) count.textContent = visible === rows.length ? `${rows.length.toLocaleString('en-IN')} products` : `Showing ${visible.toLocaleString('en-IN')} of ${rows.length.toLocaleString('en-IN')} products`;
+    document.querySelector<HTMLElement>('[data-std-empty]')!.hidden = visible > 0;
+  }
+
+  function setSector(value: string) {
+    sec = value;
+    if (sector) sector.value = value;
+    sectorButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.stdSectorBtn === value)));
+    filter();
+  }
+
+  search?.addEventListener('input', filter);
+  sector?.addEventListener('change', () => setSector(sector.value));
+  sectorButtons.forEach((b) => b.addEventListener('click', () => setSector(b.dataset.stdSectorBtn ?? '')));
+  chips.forEach((chip) =>
+    chip.addEventListener('click', () => {
+      status = chip.dataset.stdStatus ?? '';
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      filter();
+    }),
+  );
+
+  // Index page: search across every standard, loading the index on first use.
+  type Entry = { t: string; u: string; i: string; s: RegulationStatus | null; c: string };
+  const global = document.querySelector<HTMLInputElement>('[data-std-global]');
+  const results = document.querySelector<HTMLUListElement>('[data-std-results]');
+  let entries: Promise<Entry[]> | null = null;
+  const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
+
+  const load = () => (entries ??= fetch('/resources/standards/search.json').then((r) => r.json() as Promise<Entry[]>));
+  global?.addEventListener('focus', load, { once: true });
+  global?.addEventListener('input', async () => {
+    const query = global.value;
+    const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (!results) return;
+    if (!words.length) return void (results.innerHTML = '');
+    const list = await load();
+    if (global.value !== query) return;
+    const hits = list.filter((e) => words.every((w) => `${e.t} ${e.i}`.toLowerCase().includes(w)));
+    results.innerHTML = hits.length
+      ? hits.slice(0, 20).map((e) => `<li><a href="${e.u}" class="flex items-start justify-between gap-3 px-4 py-3 hover:bg-brand-50/50"><span class="min-w-0"><span class="block font-medium text-slate-900">${esc(e.t)}</span><span class="block text-xs text-slate-500">${esc(e.c)}${e.i ? ` · ${esc(e.i)}` : ''}</span></span>${e.s ? `<span class="badge shrink-0 ${STATUS[e.s].badge}">${STATUS[e.s].label}</span>` : ''}</a></li>`).join('')
+        + (hits.length > 20 ? `<li class="px-4 py-2 text-xs text-slate-500">${hits.length - 20} more. Type more words to narrow the list.</li>` : '')
+      : '<li class="px-4 py-3 text-sm text-slate-500">No product found. <a href="/contact" class="font-semibold text-brand-700">Ask our team</a> and we will tell you which standard applies.</li>';
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && results && global) {
+      results.innerHTML = '';
+      global.blur();
+    }
+  });
+</script>

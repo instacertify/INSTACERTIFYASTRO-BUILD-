@@ -1,0 +1,366 @@
+@import "tailwindcss";
+
+/*
+ * Inter, Latin subsets only (the site is in English). ₹ (U+20B9) is left out of latin-ext on purpose: it is the only
+ * extended character most pages use, and every phone's system font draws it, so the 83 KB file is not fetched for it.
+ */
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20B8, U+20BA-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Arial resized to Inter's metrics, so text doesn't re-wrap when the web font swaps in. */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial"), local("ArialMT"), local("Helvetica Neue"), local("Helvetica");
+  size-adjust: 107.12%;
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+}
+
+/* Desktop screens tall enough to keep a full lead form in view; shorter ones scroll it with the page. */
+@custom-variant tall (@media (width >= 64rem) and (height >= 50rem));
+
+@theme {
+  --font-sans: "Inter Variable", "Inter Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-brand-50: #eef7fb;
+  --color-brand-100: #d5ebf5;
+  --color-brand-200: #acd6ea;
+  --color-brand-300: #77b9d8;
+  --color-brand-400: #3e94bf;
+  --color-brand-500: #1c76a3;
+  /* The one dark blue: buttons, links, headings, icons and dark sections. 800 is its hover state only. */
+  --color-brand-700: #225175;
+  --color-brand-800: #1b415e;
+
+  --color-accent-50: #fff4ed;
+  --color-accent-100: #ffe5d3;
+  --color-accent-200: #fec6a5;
+  --color-accent-400: #f68a4e;
+  --color-accent-500: #ef6a24;
+  --color-accent-600: #c8490f;
+  --color-accent-700: #a63b0b;
+
+  /* Call-to-action buttons and white-numbered badges site-wide; deep enough for white text at WCAG AA (4.6:1). */
+  --color-cta: #bf5519;
+  --color-cta-hover: #a3470f;
+
+  /* Light blue section background (see surface-tint). */
+  --color-tint: #eaf1f6;
+
+  --container-page: 76rem;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scrollbar-gutter: stable;
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    @apply bg-white text-slate-700 antialiased;
+    font-feature-settings: "cv11", "ss01";
+    overflow-wrap: break-word;
+  }
+
+  /* Long unbreakable runs in titles and file names ("Laptop/Notebook/Tablets") would otherwise set the
+     min-content width of flex and grid parents, and phones zoom the whole page out to fit them. */
+  h1, h2, h3, h4, h5, h6, p, li, dt, dd, figcaption, blockquote {
+    overflow-wrap: anywhere;
+  }
+  /* Tables scroll sideways instead of squeezing columns into broken words. */
+  :is(td, th) :is(p, li, dt, dd) {
+    overflow-wrap: inherit;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-slate-900 text-balance;
+  }
+  h1, h2 {
+    @apply text-brand-700 tracking-[-0.02em];
+  }
+  h3, h4 {
+    @apply tracking-tight;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+}
+
+@utility container-page {
+  @apply mx-auto w-full max-w-(--container-page);
+  /* Phones in landscape: keep text clear of the notch and rounded corners. */
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  @variant sm {
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+  }
+  @variant lg {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Small text links: a larger invisible touch area, without changing the layout. */
+@utility tap {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -0.625rem -0.375rem;
+  }
+}
+
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-base font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primary {
+  @apply btn bg-cta text-white shadow-sm hover:bg-cta-hover;
+}
+@utility btn-secondary {
+  @apply btn bg-brand-700 text-white hover:bg-brand-800;
+}
+@utility btn-ghost {
+  @apply btn border border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50;
+}
+@utility btn-whatsapp {
+  @apply btn bg-[#0f7d43] text-white hover:bg-[#0b6636];
+}
+
+/* Context line above a page title (category, department, group). Plain text, not a badge. */
+@utility eyebrow {
+  @apply text-sm font-semibold text-brand-700;
+}
+
+/* Section heading (H2): the largest text after the page title; size and weight set it apart, not decoration. */
+@utility section-title {
+  @apply font-bold;
+}
+
+@utility section {
+  @apply py-14 sm:py-20;
+}
+@utility section-tight {
+  @apply py-10 sm:py-14;
+}
+
+/* Below-the-fold blocks: the browser skips laying them out until they come near the screen. */
+/* Light sections only: contrast checkers (Lighthouse, PageSpeed) assume a white background for unrendered content. */
+@utility defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 40rem;
+}
+
+/* Light blue section background that deepens towards the right edge. */
+@utility surface-tint {
+  background-color: var(--color-tint);
+  background-image: linear-gradient(90deg, transparent 40%, rgb(34 81 117 / 0.08));
+}
+
+/* Home sections can be switched off in the admin, so two tinted ones can end up next to each other. */
+@layer components {
+  .surface-tint + .surface-tint {
+    border-top: 1px solid var(--color-slate-200);
+  }
+}
+
+/* Faint dotted world map for large dark blue panels; the markets we certify for are marked in orange. */
+@utility panel-map {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: url("../assets/world-dots.svg") no-repeat right center / auto clamp(22rem, 100%, 36rem);
+    /* Fades out towards the left, where panel text usually sits. */
+    mask-image: linear-gradient(90deg, rgb(0 0 0 / 0.25), #000 65%);
+  }
+}
+/* Large faint logo mark running off the bottom-right corner of a dark blue panel (the footer). */
+@utility panel-logo {
+  background-image: url("../assets/logo-mark.svg");
+  background-repeat: no-repeat;
+  background-position: right -7rem bottom -6rem;
+  background-size: 28rem;
+  @media (width >= 64rem) {
+    background-position: right -3rem bottom -11rem;
+    background-size: 40rem;
+  }
+}
+
+@utility card {
+  @apply rounded-2xl border border-slate-200 bg-white;
+}
+@utility card-hover {
+  @apply card transition-colors hover:border-brand-300;
+}
+
+@utility chip {
+  @apply inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 text-sm text-slate-700 transition hover:border-brand-300 aria-pressed:border-brand-700 aria-pressed:bg-brand-700 aria-pressed:text-white;
+}
+
+@utility badge {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset;
+}
+
+@utility field {
+  @apply block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-base text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none aria-invalid:border-red-500;
+}
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-slate-800;
+}
+
+/* One section of a long page (service pages): a plain panel, never nested inside another card. */
+@utility content-card {
+  @apply scroll-mt-36 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7;
+}
+/* Heading at the top of a content card. */
+@utility card-title {
+  @apply text-xl leading-tight font-bold tracking-[-0.01em] text-slate-950 sm:text-2xl;
+}
+
+/* Long-form reading text: 16px on phones, 18px on desktop. */
+@utility prose-body {
+  @apply text-base text-slate-800 lg:text-lg;
+  & p {
+    @apply mb-[0.9em] leading-[1.65] last:mb-0;
+  }
+  /* Each level differs in size, weight and colour; a hairline above each H2 marks where a new topic starts. */
+  & :where(h2) {
+    @apply section-title mt-10 mb-3 scroll-mt-36 border-t border-slate-200 pt-8 text-xl leading-tight sm:text-2xl first:mt-0 first:border-t-0 first:pt-0;
+  }
+  & :where(h3) {
+    @apply mt-7 mb-2.5 scroll-mt-36 text-lg leading-snug font-bold text-slate-900 lg:text-xl first:mt-0;
+  }
+  & :where(h4) {
+    @apply mt-7 mb-2 text-[1.0625rem] leading-snug font-bold text-brand-700 lg:text-lg;
+  }
+  & :where(h5) {
+    @apply mt-6 mb-2 text-base leading-snug font-bold text-slate-800;
+  }
+  & :where(h6) {
+    @apply mt-5 mb-1.5 text-base leading-snug font-semibold text-slate-700;
+  }
+  & :where(h2, h3, h4, h5, h6) + :where(h3, h4, h5, h6) {
+    @apply mt-3;
+  }
+  & :where(ul, ol) {
+    @apply mb-5 space-y-2.5;
+  }
+  & :where(ol) {
+    @apply list-decimal pl-6 marker:font-semibold marker:text-slate-500;
+  }
+  & :where(ol > li) {
+    @apply pl-1;
+  }
+  & :where(li) {
+    @apply leading-[1.6];
+  }
+  /* Bullets are green check circles. */
+  & :where(ul > li) {
+    @apply relative list-none pl-9;
+    &::before {
+      content: "";
+      @apply absolute top-px left-0 size-[1.375rem] rounded-full bg-emerald-500 bg-center bg-no-repeat;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+      background-size: 0.8125rem;
+    }
+  }
+  & :where(li > p) {
+    @apply mb-1;
+  }
+  & :where(a) {
+    @apply font-medium text-brand-700 underline decoration-brand-300 underline-offset-2 hover:decoration-brand-700;
+  }
+  & :where(strong) {
+    @apply font-semibold text-slate-900;
+  }
+  & :where(blockquote) {
+    @apply my-6 border-l-4 border-brand-200 pl-4 text-slate-600 italic;
+  }
+  & :where(img) {
+    @apply my-6 h-auto max-w-full rounded-xl;
+  }
+  & :where(figcaption) {
+    @apply -mt-3 mb-6 text-center text-sm text-slate-500;
+  }
+  & :where(table) {
+    @apply my-6 block w-full overflow-x-auto rounded-xl border border-slate-200 text-left text-sm md:table;
+  }
+  & :where(th) {
+    @apply bg-slate-50 px-4 py-3 font-semibold text-slate-900;
+  }
+  & :where(td) {
+    @apply border-t border-slate-100 px-4 py-3 align-top;
+  }
+  & :where(iframe) {
+    @apply my-6 aspect-video h-auto w-full rounded-xl;
+  }
+  /* Video, image and table blocks from the admin editor, at the size the editor picked. Phones always get full width. */
+  & :where(.embed) {
+    @apply mx-auto my-7 w-full;
+  }
+  & :where(.embed.size-medium) {
+    @apply sm:w-2/3;
+  }
+  & :where(.embed.size-small) {
+    @apply sm:w-1/2;
+  }
+  & :where(.embed.align-left) {
+    @apply sm:float-left sm:mt-1 sm:mr-7 sm:mb-4;
+  }
+  & :where(.embed.align-right) {
+    @apply sm:float-right sm:mt-1 sm:mb-4 sm:ml-7;
+  }
+  & :where(.embed img, .embed iframe, .embed table) {
+    @apply my-0;
+  }
+  & :where(.embed img) {
+    @apply w-full;
+  }
+  & :where(.embed figcaption) {
+    @apply mt-2.5 mb-0;
+  }
+  & :where(.embed.is-portrait) {
+    @apply max-w-sm;
+  }
+  & :where(.embed.is-portrait iframe) {
+    @apply aspect-[9/16];
+  }
+  & :where(h2, h3) {
+    clear: both;
+  }
+  &::after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+}
+

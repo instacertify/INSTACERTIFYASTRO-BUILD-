@@ -1,0 +1,10 @@
+**/node_modules
+**/.astro
+frontend/dist
+frontend/dist-preview
+backend/vendor
+backend/.env
+frontend/.env
+backend/storage/logs
+backend/database/*.sqlite
+.git

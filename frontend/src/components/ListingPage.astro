@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import ServiceCard from './ServiceCard.astro';
+import CtaBand from './CtaBand.astro';
+import { GROUPS, REGIONS, getServices, getSite, listings } from '../lib/content';
+import { breadcrumbSchema, segmentLabel, trailFor } from '../lib/breadcrumbs';
+import type { Service } from '../lib/types';
+
+interface Props {
+  path: string;
+}
+
+const { path } = Astro.props;
+const listing = listings().find((l) => l.path === path)!;
+const [all, site] = await Promise.all([getServices(), getSite()]);
+const items = all.filter(listing.filter);
+
+const labels: Record<string, string> =
+  listing.groupBy === 'region'
+    ? Object.fromEntries(Object.entries(REGIONS).map(([k, r]) => [k, r.label]))
+    : Object.fromEntries(Object.entries(GROUPS).map(([k, g]) => [k, g.label]));
+
+const groups: [string, Service[]][] = listing.groupBy
+  ? Object.keys(labels)
+      .map((key) => [key, items.filter((s) => s[listing.groupBy!] === key)] as [string, Service[]])
+      .filter(([, list]) => list.length > 0)
+  : [['', items]];
+
+const trail = trailFor(path, segmentLabel(path.split('/').pop()!));
+
+const jsonLd = [
+  breadcrumbSchema(site.url, trail, path),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: listing.title,
+    itemListElement: items.map((s, i) => ({ '@type': 'ListItem', position: i + 1, url: `${site.url}${s.url}`, name: s.title })),
+  },
+];
+---
+
+<Layout title={`${listing.title} | Instacertify`} description={`${listing.description} ${items.length} services with free expert assessment.`} jsonLd={jsonLd}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 max-w-3xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{listing.title}</h1>
+      <p class="mt-4 max-w-2xl text-lg text-slate-600">{listing.description}</p>
+      {listing.groupBy && (
+        <ul class="mt-6 flex flex-wrap gap-2">
+          {groups.map(([key, list]) => (
+            <li><a href={`#${key}`} class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 text-sm text-slate-700 hover:border-brand-300">{labels[key]} <span class="text-slate-500">{list.length}</span></a></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+
+  <div class="container-page space-y-12 py-10 sm:py-14">
+    {groups.map(([key, list]) => (
+      <section id={key || undefined} aria-label={labels[key] ?? listing.title} class="scroll-mt-24">
+        {key && <h2 class="mb-5 text-xl section-title sm:text-2xl">{labels[key]}</h2>}
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((s) => <ServiceCard service={s} level={key ? 3 : 2} />)}
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <CtaBand />
+</Layout>

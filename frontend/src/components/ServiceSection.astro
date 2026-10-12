@@ -1,0 +1,21 @@
+---
+import { responsiveHtml } from '../lib/images';
+import { fixHeadings } from '../lib/outline';
+
+/** One free-form section of a service page (imported or written in the admin). */
+interface Props {
+  label?: string;
+  heading: string;
+  html: string;
+  index: number;
+}
+
+const { label, heading, index } = Astro.props;
+const html = await responsiveHtml(fixHeadings(Astro.props.html, 2), '(min-width: 1024px) 720px, 100vw');
+---
+
+<article class="content-card" aria-labelledby={`sec-${index}-h`}>
+  {label && <p class="text-sm font-semibold text-brand-700">{label}</p>}
+  <h2 id={`sec-${index}-h`} class:list={['card-title', label && 'mt-1.5']}>{heading}</h2>
+  <div class="prose-body mt-4" set:html={html} />
+</article>

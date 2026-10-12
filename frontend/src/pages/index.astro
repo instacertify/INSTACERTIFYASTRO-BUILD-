@@ -1,0 +1,757 @@
+---
+import { Image, getImage, inferRemoteSize } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import MaterialIcon from '../components/MaterialIcon.astro';
+import LeadForm from '../components/LeadForm.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import LogoMarquee from '../components/LogoMarquee.astro';
+import HeroGlobe, { type GlobeMarket } from '../components/HeroGlobe.astro';
+import { KINDS, REGIONS, eventPlace, formatDate, getEvents, getHome, getIndustries, getLatestPosts, getServices, getSite, getTestimonials, serviceIcon } from '../lib/content';
+import { responsive } from '../lib/images';
+import { stepIcon } from '../lib/stepIcons';
+import { boxClass, iconAlign, rowClass, selfClass, stackClass, textClass } from '../lib/iconAlign';
+import type { Service } from '../lib/types';
+
+import crs from '../assets/marks/crs.png';
+import isi from '../assets/marks/isi.png';
+import fmcs from '../assets/marks/fmcs.png';
+import wpc from '../assets/marks/wpc.webp';
+import tec from '../assets/marks/tec.png';
+import bee from '../assets/marks/bee.png';
+import cdsco from '../assets/marks/cdsco.webp';
+import peso from '../assets/marks/peso.webp';
+import stqc from '../assets/marks/stqc.webp';
+import imei from '../assets/marks/imei.webp';
+import schemeX from '../assets/marks/scheme-x.webp';
+import electronica from '../assets/events/electronica-2026.webp';
+import audit from '../assets/audits/thailand-washing-machine.jpeg';
+
+const industryImages = import.meta.glob<{ default: ImageMetadata }>('../assets/industries/*.webp', { eager: true });
+
+const [site, home, services, industries, testimonials] = await Promise.all([getSite(), getHome(), getServices(), getIndustries(), getTestimonials()]);
+
+const { hero, stats, marks: marksSection, popular, explore, whatWeDo, process, whyUs, promos, faq } = home;
+
+let heroImage: Awaited<ReturnType<typeof getImage>> | null = null;
+if (hero.image) {
+  try {
+    const { width, height } = await inferRemoteSize(hero.image);
+    const widths = [640, 960, 1280, 1920, 2400].filter((w) => w < width).concat(Math.min(width, 2400));
+    heroImage = await getImage({ src: hero.image, width: Math.min(width, 2400), height: Math.round((Math.min(width, 2400) / width) * height), widths, format: 'webp', quality: 70 });
+  } catch (error) {
+    console.warn(`Hero image skipped (${hero.image}): ${error}`);
+  }
+}
+const dark = !!heroImage && hero.overlay === 'dark';
+const heroForm = hero.showForm === true;
+// Markets on the hero globe; each shows only while its certification service is on the site.
+const globeSpots: (GlobeMarket & { path: string })[] = [
+  { path: 'certification/india/bis-crs-mark-certification', mark: 'BIS', country: 'India', lat: 22, lng: 79, home: true, side: 'bottom' },
+  { path: 'certification/emea/ce-certification', mark: 'CE', country: 'European Union', lat: 49, lng: 10, side: 'right' },
+  { path: 'certification/emea/ukca-certification', mark: 'UKCA', country: 'United Kingdom', lat: 53, lng: -2, side: 'left' },
+  { path: 'certification/emea/saber-certification', mark: 'SABER', country: 'Saudi Arabia', lat: 24, lng: 45 },
+  { path: 'certification/emea/soncap-certificate', mark: 'SONCAP', country: 'Nigeria', lat: 9, lng: 8, side: 'bottom' },
+  { path: 'certification/asia/ccc', mark: 'CCC', country: 'China', lat: 35, lng: 104 },
+  { path: 'certification/asia/pse-mark-certificate', mark: 'PSE', country: 'Japan', lat: 36, lng: 138, side: 'right' },
+  { path: 'certification/asia/sni', mark: 'SNI', country: 'Indonesia', lat: -2, lng: 118, side: 'bottom' },
+  { path: 'certification/americas/fcc-certification', mark: 'FCC', country: 'United States', lat: 39, lng: -98 },
+  { path: 'certification/americas/nom-certificate', mark: 'NOM', country: 'Mexico', lat: 23, lng: -102, side: 'bottom' },
+  { path: 'certification/americas/anatel', mark: 'Anatel', country: 'Brazil', lat: -10, lng: -52, side: 'bottom' },
+];
+const servicePaths = new Set(services.map((s) => s.path));
+const globeMarkets = globeSpots.filter((m) => servicePaths.has(m.path));
+// Testing keywords that orbit the globe; each shows only while the testing page behind it is on the site.
+const globeTests = [
+  { path: 'services/testing/rohs-testing', name: 'RoHS' },
+  { path: 'services/testing/electronics-electricals-testing', name: 'Electrical' },
+  { path: 'environmental-testing-iso-16750-03-2012-road-vehicles-mechanical-loads', name: 'Mechanical' },
+  { path: 'emi-emc-standards-cispr-32', name: 'EMC / EMI' },
+  { path: 'services/testing/wireless-testing', name: 'Wireless & RF' },
+  { path: 'un38-3-testing-and-certification', name: 'Battery' },
+  { path: 'safety-testing-is-13252-1-2010-it-equipments', name: 'Product safety' },
+  { path: 'ip-testing', name: 'IP rating' },
+  { path: 'power-consumption-testing-bee-schedule-11-led-tv', name: 'Energy efficiency' },
+  { path: 'rf-conformance-3gpp-ts-38-521-1-5g-rct', name: '5G conformance' },
+  { path: 'services/testing/environmental-testing', name: 'Environmental' },
+  { path: 'environmental-testing-astm-b117-2019-salt-spray', name: 'Salt spray' },
+  { path: 'services/testing/lm79', name: 'LM-79 lighting' },
+  { path: 'services/testing/reach-testing', name: 'REACH' },
+  { path: 'services/testing/chemicals-product-testing', name: 'Chemical' },
+  { path: 'services/testing/toys', name: 'Toys' },
+  { path: 'services/testing/cosmetics-testing', name: 'Cosmetics' },
+  { path: 'services/testing/food-beverages-testing', name: 'Food' },
+  { path: 'services/testing/plastics-polymers-testing', name: 'Plastics' },
+  { path: 'services/testing/metal-alloys', name: 'Metals' },
+  { path: 'services/testing/construction-material-testing', name: 'Construction' },
+]
+  .filter((t) => servicePaths.has(t.path))
+  .map((t) => t.name);
+// "Be tested. Be certified." → one line per sentence.
+const titleLines = hero.title.split(/(?<=[.!?])\s+/).filter(Boolean);
+// With the hero form off, "#quote" links open the enquiry pop-up instead.
+const quoteLink = heroForm ? { href: '#quote' } : { href: '/contact', 'data-open-lead': '' };
+const objectPosition = { center: 'object-center', top: 'object-top', bottom: 'object-bottom', left: 'object-left', right: 'object-right' }[hero.position ?? 'center'];
+
+const marks = [
+  { src: crs, label: 'BIS CRS', href: '/certification/india/bis-crs-mark-certification' },
+  { src: isi, label: 'BIS ISI', href: '/certification/india/bis-isi-mark-domestic-manufacturers' },
+  { src: fmcs, label: 'BIS FMCS', href: '/certification/india/bis-isi-mark-fmcs' },
+  { src: wpc, label: 'WPC ETA', href: '/certification/india/wpc-eta-approval' },
+  { src: tec, label: 'TEC', href: '/certification/india/tec-approval' },
+  { src: bee, label: 'BEE', href: '/certification/india/bee-certification-services' },
+  { src: cdsco, label: 'CDSCO', href: '/certification/india/cdsco-medical-device' },
+  { src: peso, label: 'PESO', href: '/certification/india/peso-certification' },
+  { src: stqc, label: 'STQC', href: '/certification/india/stqc-certification' },
+  { src: imei, label: 'IMEI', href: '/certification/india/imei-icdr-registration' },
+  { src: schemeX, label: 'Scheme X', href: '/certification/india/scheme-x' },
+];
+
+// Admin-picked services keep their order; with none picked, the services marked "featured" are shown.
+type PopularCard = { service: Service; icon: string; iconImage?: string | null };
+const popularCards: PopularCard[] = (
+  popular.items?.length
+    ? popular.items.map((item) => ({ service: services.find((s) => s.path === item.path), icon: item.icon, iconImage: item.iconImage }))
+    : services.filter((s) => s.featured).slice(0, 8).map((service) => ({ service, icon: null, iconImage: null }))
+)
+  .filter((c): c is { service: Service; icon: string | null | undefined; iconImage: string | null | undefined } => Boolean(c.service))
+  .map((c) => ({ service: c.service, icon: c.icon || serviceIcon(c.service), iconImage: c.iconImage }));
+const lead = popularCards[0];
+const tag = (s: Service) => (s.region ? REGIONS[s.region]?.label : KINDS[s.kind]?.short) ?? null;
+
+// Each explorer tab lists the services under its link, featured ones first.
+const exploreTabs = (explore.items ?? []).filter((e) => e.title).map((e, i) => {
+  const prefix = e.href ? `${e.href.replace(/\/$/, '')}/` : null;
+  const matches = prefix ? services.filter((s) => s.url.startsWith(prefix)) : [];
+  return {
+    ...e,
+    id: `explore-${i}`,
+    count: matches.length,
+    services: [...matches.filter((s) => s.featured), ...matches.filter((s) => !s.featured)].slice(0, 8),
+  };
+});
+
+const stepColumns = `repeat(${process.items?.length || 1}, minmax(0, 1fr))`;
+
+const align = {
+  stats: iconAlign(stats.iconAlign),
+  whatWeDo: iconAlign(whatWeDo?.iconAlign, 'center'),
+  process: iconAlign(process.iconAlign, 'center'),
+  popular: iconAlign(popular.iconAlign),
+  whyUs: iconAlign(whyUs.iconAlign),
+};
+/* From tablets up the steps sit in a row; the line between two icons starts and ends beside them. */
+const stepAlign = {
+  left: { li: 'sm:text-left', box: 'sm:mr-auto', line: 'lg:left-[5.25rem] lg:right-[-0.75rem]' },
+  center: { li: 'sm:text-center', box: 'sm:mx-auto', line: 'lg:left-[calc(50%+2.25rem)] lg:right-[calc(-50%+2.25rem)]' },
+  right: { li: 'sm:text-right', box: 'sm:ml-auto', line: 'lg:left-[calc(100%-0.75rem)] lg:right-[calc(-100%+5.25rem)]' },
+}[align.process];
+
+// Promo slots 1 and 2 fall back to the bundled photos; any other slot without an upload shows its icon.
+const bundledPromos = [electronica, audit];
+const promoCards = await Promise.all(
+  (promos.items ?? []).map(async (p, i) => {
+    let remote: Awaited<ReturnType<typeof getImage>> | null = null;
+    if (p.image) {
+      try {
+        remote = await getImage({ src: p.image, inferSize: true, width: 320, format: 'webp', quality: 75 });
+      } catch (error) {
+        console.warn(`Promo image skipped (${p.image}): ${error}`);
+      }
+    }
+    return { ...p, remote, bundled: !p.image ? bundledPromos[i] : undefined };
+  }),
+);
+
+const faqSchema = faq.items?.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faq.items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    }
+  : null;
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.name,
+  url: site.url,
+};
+const shown = (section: { visible?: boolean } | undefined) => section?.visible !== false;
+const showLogos = home.clientLogosEnabled !== false && (home.clientLogos ?? []).some((l) => l.image);
+const showStats = shown(stats) && (stats.items?.length ?? 0) > 0;
+
+const fieldwork = home.fieldwork;
+const [audits, events] = shown(fieldwork) ? await Promise.all([getLatestPosts('audit', 3), getEvents()]) : [[], []];
+const [leadAudit, ...moreAudits] = audits;
+const [leadAuditImage, moreAuditImages, industryPhotos] = await Promise.all([
+  responsive(leadAudit?.image, [480, 720, 960]),
+  Promise.all(moreAudits.map((p) => responsive(p.image, [112, 224]))),
+  Promise.all(industries.map((ind) => responsive(ind.image, [400, 640, 800]))),
+]);
+const today = new Date().toISOString().slice(0, 10);
+const upcomingEvents = events
+  .filter((e) => (e.endsAt ?? e.startsAt).slice(0, 10) >= today)
+  .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
+  .slice(0, 4);
+/** "Electronica 2026 | Global Electronics Trade Fair Munich" → name and tagline. */
+const eventName = (title: string) => {
+  const [name, ...rest] = title.split(' | ');
+  return { name, tagline: rest.join(' | ') };
+};
+---
+
+<Layout title={home.seo.title} description={home.seo.description} seo={home.seo} jsonLd={faq.visible !== false && faqSchema ? [websiteSchema, faqSchema] : [websiteSchema]}>
+  <!-- Hero -->
+  <section class:list={['relative isolate overflow-hidden', heroImage ? (dark ? 'panel-map bg-brand-700' : 'bg-white') : 'border-b border-slate-200 bg-white']}>
+    {heroImage && (
+      <>
+        <img
+          src={heroImage.src}
+          srcset={heroImage.srcSet.attribute}
+          sizes="100vw"
+          alt={hero.imageAlt ?? ''}
+          width={heroImage.attributes.width}
+          height={heroImage.attributes.height}
+          fetchpriority="high"
+          decoding="async"
+          class:list={['absolute inset-0 -z-20 size-full object-cover', objectPosition]}
+        />
+        <div
+          aria-hidden="true"
+          class:list={[
+            'absolute inset-0 -z-10',
+            dark
+              ? 'bg-brand-700/80 lg:bg-gradient-to-r lg:from-brand-700/95 lg:via-brand-700/75 lg:to-brand-700/30'
+              : 'bg-white/85 lg:bg-gradient-to-r lg:from-white/95 lg:via-white/80 lg:to-white/20',
+          ]}
+        ></div>
+      </>
+    )}
+    <div class:list={['container-page relative grid items-center gap-10 py-8 sm:py-10 lg:gap-14', heroForm ? 'lg:grid-cols-[1.15fr_1fr] lg:py-12' : 'lg:grid-cols-[1.3fr_1fr] lg:py-8']}>
+      <div>
+        <h1 class:list={['font-bold tracking-[-0.025em]', dark && 'text-white']}>
+          {hero.badge && <span class:list={['mb-5 block text-base leading-snug font-semibold tracking-normal sm:text-lg', dark ? 'text-brand-100' : 'text-brand-700']}>{hero.badge}</span>}
+          <span class="block text-4xl leading-[1.1] lg:text-5xl">
+            {titleLines.map((line) => <span class="block">{line}</span>)}
+            {hero.highlight && (
+              <span class:list={['relative inline-block pb-2', dark ? 'text-accent-400' : 'text-brand-700']}>
+                {hero.highlight}
+                <span aria-hidden="true" class:list={['hero-underline absolute bottom-0 left-0 h-1.5 w-full origin-left rounded-full sm:h-2', dark ? 'bg-accent-400' : 'bg-brand-700']}></span>
+              </span>
+            )}
+          </span>
+        </h1>
+        {hero.intro && <p class:list={['mt-6 max-w-xl text-lg leading-relaxed', dark ? 'text-brand-100' : 'text-slate-700']}>{hero.intro}</p>}
+
+        <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+          {hero.buttonLabel && (
+            <a href={hero.buttonLink || '/contact'} class="btn-primary h-12 px-6 text-base" data-track="quote" data-open-lead={heroForm ? undefined : ''}>
+              {hero.buttonLabel} <Icon name="arrow-right" class="size-4" />
+            </a>
+          )}
+          {hero.showPhone !== false && <a href={`tel:${site.contact.phoneE164}`} class="btn-ghost h-12 px-6 text-base" data-track="call"><Icon name="phone" class="size-4" />{site.contact.phone}</a>}
+        </div>
+
+      </div>
+
+      {heroForm ? (
+        <div id="quote">
+          <LeadForm id="hero" title={hero.formTitle || 'Get a free certification assessment'} subtitle={hero.formSubtitle ?? undefined} />
+        </div>
+      ) : globeMarkets.length > 0 && (
+        <HeroGlobe
+          markets={globeMarkets}
+          tests={globeTests}
+          dark={dark}
+          label={`Globe showing the markets we certify products for: ${globeMarkets.map((m) => `${m.mark} for ${m.country}`).join(', ')}${globeTests.length ? `, circled by the testing we run: ${globeTests.join(', ')}` : ''}.`}
+        />
+      )}
+    </div>
+  </section>
+
+  <style>
+    @media (prefers-reduced-motion: no-preference) {
+      .hero-underline {
+        animation: hero-underline 0.7s 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      }
+    }
+    @keyframes hero-underline {
+      from {
+        transform: scaleX(0);
+      }
+    }
+  </style>
+
+  {(showLogos || showStats) && (
+    <section class="border-b border-slate-200 bg-white py-8 sm:py-10" aria-label="Our clients and track record">
+      {showLogos && <LogoMarquee logos={home.clientLogos ?? []} title={home.clientLogosTitle || 'Trusted by Leading Brands Across the Globe'} />}
+      {showStats && (
+        <div class:list={['container-page', showLogos && 'mt-8 sm:mt-10']}>
+          <ul class:list={['grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 lg:grid-cols-4']}>
+            {stats.items.map((s) => (
+              <li class:list={['flex gap-4 bg-slate-50 p-4 sm:p-5', rowClass[align.stats], align.stats !== 'center' && 'items-start']}>
+                {(s.icon || s.iconImage) && (
+                  <span class="hidden size-11 shrink-0 items-center justify-center rounded-xl bg-white text-brand-700 ring-1 ring-slate-200 sm:flex">
+                    <MaterialIcon name={s.icon} src={s.iconImage} class="size-6" />
+                  </span>
+                )}
+                <div class="flex min-w-0 flex-col">
+                  <p class="order-2 text-sm leading-snug text-slate-600">{s.label}</p>
+                  <p class="text-2xl font-bold tracking-tight text-brand-700 sm:text-3xl"><span data-count class="inline-block tabular-nums">{s.value}</span></p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  )}
+
+  {whatWeDo && shown(whatWeDo) && whatWeDo.items?.length > 0 && (
+    <section class="section surface-tint" aria-labelledby="what-we-do-h">
+      <div class="container-page">
+        <div class="mx-auto max-w-2xl text-center">
+          {whatWeDo.eyebrow && <p class="eyebrow mb-2">{whatWeDo.eyebrow}</p>}
+          <h2 id="what-we-do-h" class="text-2xl section-title sm:text-3xl">{whatWeDo.heading}</h2>
+          {whatWeDo.intro && <p class="mt-3 text-lg text-slate-600">{whatWeDo.intro}</p>}
+        </div>
+        <ul class="mt-10 grid grid-cols-2 gap-x-4 gap-y-10 sm:mt-12 sm:gap-x-8 lg:grid-cols-4">
+          {whatWeDo.items.map((item, i) => (
+            <li>
+              <a href={item.href || undefined} class:list={['group flex h-full flex-col', stackClass[align.whatWeDo]]}>
+                <span class:list={[
+                  'flex size-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none sm:size-24',
+                  ['bg-cta text-white', 'bg-brand-700 text-white', 'bg-brand-200 text-brand-800', 'bg-white text-brand-700 ring-1 ring-slate-200'][i % 4],
+                ]}>
+                  <MaterialIcon name={item.icon} src={item.iconImage} fallback="verified" class="size-8 sm:size-11" />
+                </span>
+                <h3 class="mt-4 font-bold text-slate-950 group-hover:text-brand-700 sm:mt-5 sm:text-lg">{item.title}</h3>
+                {item.text && <p class="mt-1.5 max-w-xs text-sm leading-relaxed text-slate-600 sm:mt-2 sm:text-base">{item.text}</p>}
+                {item.href && (
+                  <span class="mt-auto pt-5" aria-hidden="true">
+                    <span class="flex size-9 items-center justify-center rounded-full border border-brand-700/30 text-brand-700 transition-colors group-hover:border-brand-700 group-hover:bg-brand-700 group-hover:text-white">
+                      <Icon name="arrow-right" class="size-4" />
+                    </span>
+                  </span>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {shown(process) && process.items?.length > 0 && (
+    <section id="how-it-works" class="section scroll-mt-16 panel-map bg-brand-700 text-brand-100" style={`--steps: ${stepColumns}`} aria-labelledby="how-it-works-h">
+      <div class="container-page">
+        <div class="mx-auto max-w-2xl sm:text-center">
+          {process.eyebrow && <p class="eyebrow mb-2 text-accent-200">{process.eyebrow}</p>}
+          <h2 id="how-it-works-h" class="text-2xl section-title text-white sm:text-3xl">{process.heading}</h2>
+          {process.intro && <p class="mt-3 leading-relaxed text-balance text-brand-200 sm:text-lg">{process.intro}</p>}
+        </div>
+
+        <ol class="mt-10 grid sm:mt-12 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-(--steps) lg:gap-0">
+          {process.items.map((step, i) => (
+            <li class:list={['relative flex gap-4 pb-8 last:pb-0 sm:block sm:pb-0 lg:px-5', stepAlign.li]}>
+              {i < process.items.length - 1 && (
+                <span class:list={['absolute top-16 bottom-0 left-7 w-px bg-white/25 sm:hidden lg:top-7 lg:bottom-auto lg:block lg:h-px lg:w-auto', stepAlign.line]} aria-hidden="true"></span>
+              )}
+              <span class:list={['flex size-14 shrink-0 items-center justify-center rounded-full bg-white text-brand-700', stepAlign.box]}>
+                <MaterialIcon name={step.icon || stepIcon(step.title)} src={step.iconImage} class="size-7" />
+              </span>
+              <div class="pt-1 sm:pt-5">
+                <p class="text-xs font-semibold tracking-wider text-accent-200 uppercase">Step {i + 1}</p>
+                <h3 class="mt-1 text-lg leading-snug font-bold text-white">{step.title}</h3>
+                <p class:list={['mt-1.5 text-[0.9375rem] leading-relaxed text-brand-200 sm:max-w-64', stepAlign.box]}>{step.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        {hero.buttonLabel && (
+          <div class="mt-10 sm:mt-12 sm:text-center">
+            <a {...quoteLink} class="btn-primary h-11 px-6" data-track="quote">{hero.buttonLabel} <Icon name="arrow-right" class="size-4" /></a>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {shown(home.industries) && industries.length > 0 && (
+    <section class="section defer-render">
+      <div class="container-page">
+        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div class="max-w-2xl">
+            {home.industries.eyebrow && <p class="eyebrow mb-2">{home.industries.eyebrow}</p>}
+            <h2 class="text-2xl section-title sm:text-3xl">{home.industries.heading}</h2>
+          </div>
+          {home.industries.linkLabel && <a href={home.industries.linkUrl || '/industries'} class="tap inline-flex items-center gap-1 text-sm font-semibold text-brand-700">{home.industries.linkLabel} <Icon name="arrow-right" class="size-4" /></a>}
+        </div>
+        <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {industries.map((ind, i) => {
+            const img = industryImages[`../assets/industries/${ind.slug}.webp`]?.default;
+            const photo = industryPhotos[i];
+            return (
+              <a href={ind.url} class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-colors hover:border-brand-300">
+                <div class="aspect-[2/1] overflow-hidden bg-brand-700 max-sm:hidden">
+                  {photo ? (
+                    <img src={photo.src} srcset={photo.srcset} sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="" loading="lazy" decoding="async" class="size-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none" />
+                  ) : img && <Image src={img} alt="" widths={[400, 640]} sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" class="size-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none" />}
+                </div>
+                <div class="flex flex-1 items-start justify-between gap-4 p-5">
+                  <div class="min-w-0">
+                    <h3 class="text-lg leading-snug font-bold text-slate-950 group-hover:text-brand-700">{ind.name}</h3>
+                    <p class="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-600">{ind.summary}</p>
+                  </div>
+                  <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-700 text-white transition-colors group-hover:bg-cta" aria-hidden="true">
+                    <Icon name="arrow-right" class="size-4" />
+                  </span>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {fieldwork && shown(fieldwork) && (leadAudit || upcomingEvents.length > 0) && (
+    <section class="section defer-render surface-tint" aria-labelledby="fieldwork-h">
+      <div class="container-page">
+        <div class="max-w-2xl">
+          {fieldwork.eyebrow && <p class="eyebrow mb-2">{fieldwork.eyebrow}</p>}
+          <h2 id="fieldwork-h" class="text-2xl section-title sm:text-3xl">{fieldwork.heading}</h2>
+          {fieldwork.intro && <p class="mt-3 text-lg text-slate-600">{fieldwork.intro}</p>}
+        </div>
+        <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-14 [&>*+*]:border-slate-300/80 max-lg:[&>*+*]:border-t max-lg:[&>*+*]:pt-10 lg:[&>*+*]:border-l lg:[&>*+*]:pl-14">
+          {leadAudit && (
+            <div>
+              <div class="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
+                <h3 class="flex items-center gap-2 text-lg font-bold text-slate-950"><MaterialIcon name="factory" class="size-5 text-brand-700" />Recent audits & inspections</h3>
+                <a href="/resources/audits" class="tap inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">All audits <Icon name="arrow-right" class="size-4" /></a>
+              </div>
+              <a href={leadAudit.url} class="group mt-6 grid gap-5 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] sm:items-center">
+                {leadAuditImage && (
+                  <img src={leadAuditImage.src} srcset={leadAuditImage.srcset} sizes="(min-width: 1024px) 440px, (min-width: 640px) 50vw, 100vw" alt={leadAudit.imageAlt || ''} width={leadAudit.imageWidth ?? 880} height={leadAudit.imageHeight ?? 400} loading="lazy" decoding="async" class="aspect-[2.2/1] w-full rounded-xl bg-white object-cover" />
+                )}
+                <span class="min-w-0">
+                  <span class="text-sm text-slate-500">{formatDate(leadAudit.publishedAt)}</span>
+                  <span class="mt-1 block line-clamp-3 text-xl leading-snug font-bold text-slate-950 group-hover:text-brand-700">{leadAudit.title}</span>
+                  {leadAudit.excerpt && <span class="mt-2 block line-clamp-3 text-base leading-relaxed text-slate-600">{leadAudit.excerpt}</span>}
+                </span>
+              </a>
+              {moreAudits.length > 0 && (
+                <ul class="mt-6 divide-y divide-slate-200 border-t border-slate-200">
+                  {moreAudits.map((p, i) => (
+                    <li>
+                      <a href={p.url} class="group flex items-center gap-4 py-4">
+                        {moreAuditImages[i] && <img src={moreAuditImages[i].src} srcset={moreAuditImages[i].srcset} sizes="112px" alt="" width="112" height="51" loading="lazy" decoding="async" class="aspect-[2.2/1] w-28 shrink-0 rounded-lg bg-white object-cover" />}
+                        <span class="min-w-0">
+                          <span class="block line-clamp-2 font-semibold text-slate-900 group-hover:text-brand-700">{p.title}</span>
+                          <span class="mt-0.5 block text-sm text-slate-500">{formatDate(p.publishedAt)}</span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+          {upcomingEvents.length > 0 && (
+            <div>
+              <div class="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
+                <h3 class="flex items-center gap-2 text-lg font-bold text-slate-950"><MaterialIcon name="event" class="size-5 text-brand-700" />Upcoming trade fairs</h3>
+                <a href="/resources/events" class="-my-3 inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">All events <Icon name="arrow-right" class="size-4" /></a>
+              </div>
+              <ul class="divide-y divide-slate-200">
+                {upcomingEvents.map((e) => {
+                  const { name, tagline } = eventName(e.title);
+                  return (
+                    <li>
+                      <a href={e.url} class="group flex items-start gap-4 py-4">
+                        <span class="flex w-14 shrink-0 flex-col items-center rounded-lg border border-slate-200 bg-white py-2 text-brand-700">
+                          <span class="text-xs font-semibold uppercase">{formatDate(e.startsAt, { month: 'short' })}</span>
+                          <span class="text-xl leading-none font-bold">{formatDate(e.startsAt, { day: 'numeric' })}</span>
+                        </span>
+                        <span class="min-w-0 pt-0.5">
+                          <span class="block font-semibold text-slate-900 group-hover:text-brand-700">{name}</span>
+                          {tagline && <span class="mt-0.5 block line-clamp-1 text-sm text-slate-600">{tagline}</span>}
+                          {eventPlace(e) && <span class="mt-0.5 flex items-center gap-1 text-sm text-slate-500"><Icon name="map-pin" class="size-3.5 shrink-0" /><span class="truncate">{eventPlace(e)}</span></span>}
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p class="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-600">
+                Exhibiting abroad or launching at a fair? <a {...quoteLink} class="font-semibold text-brand-700 hover:underline" data-track="quote">Ask which approvals your product needs first</a>.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {((shown(popular) && lead) || shown(marksSection)) && (
+    <section class="section defer-render">
+      <div class="container-page">
+        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            {shown(popular) && lead && popular.eyebrow && <p class="eyebrow mb-2">{popular.eyebrow}</p>}
+            <h2 class="text-2xl section-title sm:text-3xl">{shown(popular) && lead ? popular.heading : marksSection.title || 'Approvals we file most often'}</h2>
+          </div>
+          {shown(popular) && lead && popular.linkLabel && <a href={popular.linkUrl || '/services'} class="tap inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">{popular.linkLabel} <Icon name="arrow-right" class="size-4" /></a>}
+        </div>
+
+        {shown(marksSection) && (
+          <ul aria-label={marksSection.title || 'Approvals we file most often'} class="-mx-4 mt-8 flex snap-x gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:thin] sm:mx-0 sm:px-0">
+            {marks.map((m) => (
+              <li class="min-w-23 flex-1 shrink-0 snap-start">
+                <a href={m.href} class="group flex h-full flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 pt-3 pb-2.5 text-center transition-colors hover:border-brand-300 hover:bg-brand-50">
+                  <Image src={m.src} alt="" width={48} height={48} densities={[1, 2]} class="size-12 object-contain" />
+                  <span class="text-sm font-semibold text-slate-700 group-hover:text-brand-700">{m.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {shown(popular) && lead && (
+        <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {popularCards.map((c) => (
+            <li>
+              <a href={c.service.url} class:list={['card-hover group flex h-full flex-col p-5', textClass[align.popular]]}>
+                <span class:list={['flex justify-between gap-3', rowClass[align.popular], align.popular !== 'center' && 'items-start']}>
+                  <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                    <MaterialIcon name={c.icon} src={c.iconImage} class="size-6" />
+                  </span>
+                  {tag(c.service) && <span class="pt-0.5 text-sm font-medium text-slate-500">{tag(c.service)}</span>}
+                </span>
+                <h3 class="mt-4 text-lg leading-snug font-bold text-slate-950 group-hover:text-brand-700">{c.service.title}</h3>
+                {c.service.summary && <p class="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600">{c.service.summary}</p>}
+                <span class:list={['mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold text-brand-700', selfClass[align.popular]]}>
+                  View details <Icon name="arrow-right" class="size-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        )}
+      </div>
+    </section>
+  )}
+
+  {shown(explore) && exploreTabs.length > 0 && (
+    <section class="section defer-render surface-tint" aria-labelledby="explore-h">
+      <div class="container-page">
+        <div class="max-w-2xl">
+          {explore.eyebrow && <p class="eyebrow mb-2">{explore.eyebrow}</p>}
+          <h2 id="explore-h" class="text-2xl section-title sm:text-3xl">{explore.heading}</h2>
+          <p class="mt-3 text-lg text-slate-600">Pick a market or a service to see the approvals we handle for it.</p>
+        </div>
+        <div data-explore class="mt-8 grid gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-6">
+          <div role="tablist" aria-label={explore.heading} class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 lg:flex-col lg:overflow-visible lg:pb-0">
+            {exploreTabs.map((t, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`${t.id}-tab`}
+                aria-controls={t.id}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                tabindex={i === 0 ? 0 : -1}
+                class="group flex min-h-12 shrink-0 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 text-left text-base font-semibold whitespace-nowrap text-slate-800 transition-colors hover:border-brand-300 aria-selected:border-brand-700 aria-selected:bg-brand-700 aria-selected:text-white lg:whitespace-normal"
+              >
+                <MaterialIcon name={t.icon} src={t.iconImage} fallback="public" class="size-5 shrink-0 text-brand-700 group-aria-selected:text-white" />
+                <span class="flex-1">{t.title}</span>
+                {t.count > 0 && <span class="text-sm font-medium text-slate-500 tabular-nums group-aria-selected:text-brand-100">{t.count}</span>}
+              </button>
+            ))}
+          </div>
+          {exploreTabs.map((t, i) => (
+            <div role="tabpanel" id={t.id} aria-labelledby={`${t.id}-tab`} hidden={i !== 0} class="card p-5 sm:p-8">
+              <h3 class="flex items-center gap-2.5 text-xl font-bold text-slate-950 sm:text-2xl">
+                <MaterialIcon name={t.icon} src={t.iconImage} fallback="public" class="size-6 shrink-0 text-brand-700" />{t.title}
+              </h3>
+              {t.text && <p class="mt-2 max-w-2xl leading-relaxed text-slate-600">{t.text}</p>}
+              {t.services.length > 0 && (
+                <ul class="mt-6 grid gap-x-8 border-t border-slate-200 sm:grid-cols-2">
+                  {t.services.map((s) => (
+                    <li class="border-b border-slate-200">
+                      <a href={s.url} class="group flex min-h-12 items-center justify-between gap-3 py-2.5 font-semibold text-slate-900 hover:text-brand-700">
+                        {s.title}
+                        <Icon name="arrow-right" class="size-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-700" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {t.href && (
+                <a href={t.href} class="btn-secondary mt-6">
+                  {t.count > t.services.length ? `See all ${t.count} in ${t.title}` : `More about ${t.title}`} <Icon name="arrow-right" class="size-4" />
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {shown(whyUs) && (
+    <section class="section defer-render border-t border-slate-200" aria-labelledby="why-h">
+      <div class="container-page grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
+        <div>
+          {whyUs.eyebrow && <p class="eyebrow mb-2">{whyUs.eyebrow}</p>}
+          <h2 id="why-h" class="text-2xl section-title sm:text-3xl">{whyUs.heading}</h2>
+          {whyUs.intro && <p class="mt-4 leading-relaxed text-slate-700">{whyUs.intro}</p>}
+          {whyUs.linkLabel && <a href={whyUs.linkUrl || '/about'} class="tap mt-6 inline-flex items-center gap-1 font-semibold text-brand-700">{whyUs.linkLabel} <Icon name="arrow-right" class="size-4" /></a>}
+        </div>
+        <ul class="grid gap-x-8 gap-y-8 sm:grid-cols-2">
+          {whyUs.items?.map((w) => (
+            <li class:list={['border-t-2 border-brand-700 pt-5', textClass[align.whyUs]]}>
+              <span class:list={['flex size-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700', boxClass[align.whyUs]]}>
+                <MaterialIcon name={w.icon} src={w.iconImage} fallback="check_circle" class="size-6" />
+              </span>
+              <h3 class="mt-4 text-lg font-bold">{w.title}</h3>
+              <p class="mt-1.5 leading-relaxed text-slate-600">{w.text}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {shown(home.testimonials) && testimonials.length > 0 && (
+    <section class="section defer-render surface-tint">
+      <div class="container-page">
+        <div class="max-w-2xl">
+          {home.testimonials.eyebrow && <p class="eyebrow mb-2">{home.testimonials.eyebrow}</p>}
+          <h2 class="text-2xl section-title sm:text-3xl">{home.testimonials.heading}</h2>
+        </div>
+        <div class="mt-8"><Testimonials items={testimonials} /></div>
+      </div>
+    </section>
+  )}
+
+  {shown(promos) && promoCards.length > 0 && (
+    <section class="section defer-render">
+      <div class="container-page grid gap-4 md:grid-cols-2">
+        {promoCards.map((p) => (
+          <a href={p.href || undefined} class="card-hover group flex gap-5 overflow-hidden p-4">
+            {p.remote ? (
+              <img src={p.remote.src} alt={p.imageAlt ?? ''} width={144} height={112} loading="lazy" decoding="async" class="h-28 w-36 shrink-0 rounded-xl object-cover" />
+            ) : p.bundled ? (
+              <Image src={p.bundled} alt={p.imageAlt ?? ''} width={160} height={120} class="h-28 w-36 shrink-0 rounded-xl object-cover" />
+            ) : (
+              <span class="flex h-28 w-36 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-brand-700">
+                <MaterialIcon name={p.icon} src={p.iconImage} fallback="campaign" class="size-12" />
+              </span>
+            )}
+            <div class="py-1">
+              {p.eyebrow && <p class="text-sm font-semibold text-slate-500">{p.eyebrow}</p>}
+              <h3 class="mt-1 font-bold group-hover:text-brand-700">{p.title}</h3>
+              {p.text && <p class="mt-1 text-sm text-slate-600">{p.text}</p>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {shown(faq) && faq.items?.length > 0 && (
+    <section class="section defer-render">
+      <div class="container-page">
+        {faq.eyebrow && <p class="eyebrow mb-2">{faq.eyebrow}</p>}
+        <h2 class="text-2xl section-title sm:text-3xl">{faq.heading}</h2>
+        <div class="mt-8 grid items-start lg:grid-cols-2 lg:gap-6">
+          <div class:list={[faq.items.length > 1 && 'max-lg:[&>div]:rounded-b-none max-lg:[&>div]:border-b-0']}><Faq items={faq.items.slice(0, Math.ceil(faq.items.length / 2))} openFirst={false} /></div>
+          <div class="max-lg:[&>div]:rounded-t-none">
+            {faq.items.length > 1 && <Faq items={faq.items.slice(Math.ceil(faq.items.length / 2))} openFirst={false} />}
+            {faq.intro && <p class="mt-5 px-5 text-slate-700">{faq.intro} <a href="/contact" class="font-semibold text-brand-700 underline-offset-2 hover:underline">Ask a specialist</a>.</p>}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+
+  <div data-subscribe-notice hidden role="status" class="fixed inset-x-4 top-4 z-50 mx-auto flex max-w-md items-start gap-3 rounded-xl border border-emerald-200 bg-white p-4 text-sm text-slate-800 shadow-lg">
+    <Icon name="check-circle" class="mt-px size-5 shrink-0 text-emerald-600" />
+    <p data-subscribe-text class="flex-1 font-medium"></p>
+    <button type="button" data-subscribe-close class="-m-2 flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100" aria-label="Close"><Icon name="x" class="size-4" /></button>
+  </div>
+</Layout>
+
+<script>
+  // Newsletter confirm and unsubscribe links from emails land here with ?subscribed=1 or ?unsubscribed=1.
+  const notice = document.querySelector<HTMLElement>('[data-subscribe-notice]');
+  const params = new URLSearchParams(location.search);
+  const subscription = params.has('subscribed') ? 'subscribed' : params.has('unsubscribed') ? 'unsubscribed' : null;
+  if (notice && subscription) {
+    notice.querySelector('[data-subscribe-text]')!.textContent =
+      subscription === 'subscribed' ? 'You’re subscribed. Thanks for confirming your email.' : 'You’ve been unsubscribed. We won’t send you any more updates.';
+    notice.hidden = false;
+    notice.querySelector('[data-subscribe-close]')!.addEventListener('click', () => (notice.hidden = true));
+    setTimeout(() => (notice.hidden = true), 10_000);
+    params.delete(subscription);
+    history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}${location.hash}`);
+  }
+
+  // Explorer tabs: click or arrow keys switch the panel.
+  document.querySelectorAll<HTMLElement>('[data-explore]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const select = (tab: HTMLButtonElement, focus = false) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
+      });
+      if (focus) tab.focus();
+      tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (e) => {
+        const keys: Record<string, number> = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: tabs.length - 1 };
+        const next = keys[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        select(tabs[(next + tabs.length) % tabs.length], true);
+      });
+    });
+  });
+
+  // Numbers count up once when they scroll into view.
+  const counters = [...document.querySelectorAll<HTMLElement>('[data-count]')];
+  if (counters.length && 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        const el = entry.target as HTMLElement;
+        const final = el.textContent ?? '';
+        const match = final.match(/^(\D*)(\d[\d,]*)(.*)$/);
+        if (!match) return;
+        const [, before, digits, after] = match;
+        const target = Number(digits.replace(/,/g, ''));
+        el.style.minWidth = `${final.length}ch`;
+        const start = performance.now();
+        const tick = (now: number) => {
+          const progress = Math.min((now - start) / 1200, 1);
+          const value = Math.round(target * (1 - (1 - progress) ** 3));
+          el.textContent = `${before}${value.toLocaleString('en-IN')}${after}`;
+          if (progress < 1) requestAnimationFrame(tick);
+          else el.textContent = final;
+        };
+        requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.6 });
+    counters.forEach((el) => observer.observe(el));
+  }
+</script>

@@ -1,0 +1,62 @@
+---
+import Icon from './Icon.astro';
+import { cookieCatalog } from '../lib/cookies';
+import type { Site } from '../lib/types';
+
+interface Props {
+  site: Site;
+}
+
+const { site } = Astro.props;
+const categories = cookieCatalog(site, !!import.meta.env.PUBLIC_MATOMO_URL);
+const privacy = site.privacy;
+---
+
+<section class="mt-12 max-w-4xl" aria-labelledby="cookie-table-title">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h2 id="cookie-table-title" class="text-2xl section-title">Cookies on this website</h2>
+      <p class="mt-1 text-sm text-slate-600">Policy version {privacy?.version ?? '—'} · consent is kept for 12 months</p>
+    </div>
+    <button type="button" data-cookie-settings class="btn-secondary"><Icon name="shield" class="size-4" />Change cookie settings</button>
+  </div>
+
+  {categories.map((cat) => (
+    <div class="mt-8">
+      <h3 class="flex items-center gap-2 text-lg font-semibold text-slate-900">
+        {cat.title.en}
+        <span class:list={['rounded-full px-2 py-0.5 text-xs font-semibold', cat.required ? 'bg-slate-100 text-slate-600' : 'bg-brand-50 text-brand-700']}>
+          {cat.required ? 'Always on' : 'Needs your consent'}
+        </span>
+      </h3>
+      <p class="mt-1 text-sm text-slate-600">{cat.description.en}</p>
+      <div class="mt-3 overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full min-w-[40rem] text-left text-sm">
+          <thead class="bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
+            <tr><th class="px-4 py-2.5">Name</th><th class="px-4 py-2.5">Purpose</th><th class="px-4 py-2.5">Provider</th><th class="px-4 py-2.5">Type</th><th class="px-4 py-2.5">Expires</th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {cat.items.map((c) => (
+              <tr class="align-top">
+                <td class="px-4 py-3 font-mono text-xs font-semibold whitespace-nowrap text-slate-800">{c.name}</td>
+                <td class="px-4 py-3 text-slate-600">{c.purpose}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-slate-600">{c.provider}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-slate-600">{c.storage}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-slate-600">{c.duration}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ))}
+
+  {privacy && (
+    <div class="mt-10 rounded-2xl bg-brand-50/60 p-5 text-sm text-slate-700">
+      <p class="font-semibold text-slate-900">Grievance Officer</p>
+      <p class="mt-1">{privacy.grievanceOfficer}, Instacertify Labs Private Limited, {site.contact.address}</p>
+      <p class="mt-1">Email: <a href={`mailto:${privacy.grievanceEmail}`} class="font-semibold text-brand-700 underline">{privacy.grievanceEmail}</a> · Phone: <a href={`tel:${site.contact.phoneE164}`} class="font-semibold text-brand-700 underline">{site.contact.phone}</a></p>
+      <p class="mt-2 text-slate-600">We acknowledge requests promptly and aim to resolve them within 30 days.</p>
+    </div>
+  )}
+</section>

@@ -1,0 +1,120 @@
+---
+import type { GetStaticPaths } from 'astro';
+import ServicePage from '../components/ServicePage.astro';
+import ListingPage from '../components/ListingPage.astro';
+import PostPage from '../components/PostPage.astro';
+import PostList from '../components/PostList.astro';
+import EventList from '../components/EventList.astro';
+import EventPage from '../components/EventPage.astro';
+import StandardsPage from '../components/StandardsPage.astro';
+import StandardPage from '../components/StandardPage.astro';
+import ContentPage from '../components/ContentPage.astro';
+import AboutPage from '../components/AboutPage.astro';
+import LandingPage from '../components/LandingPage.astro';
+import AuthorPage from '../components/AuthorPage.astro';
+import ResourcesHub from '../components/ResourcesHub.astro';
+import TestingPage from '../components/TestingPage.astro';
+import AdLanding from '../components/AdLanding.astro';
+import IndustryPage from '../components/IndustryPage.astro';
+import { POSTS_PER_PAGE as PER_PAGE, POST_TYPES, getEvents, getIndustries, getLandingPages, getPages, getPosts, getServices, getStandardCategories, getTestCategories, industriesOf, listings } from '../lib/content';
+import type { Industry, Post, PostType } from '../lib/types';
+
+type Route =
+  | { kind: 'service' | 'listing' | 'standard' | 'page' | 'about' | 'landing' | 'ad'; path: string }
+  | { kind: 'post'; post: Post }
+  | { kind: 'industry'; industry: Industry }
+  | { kind: 'posts'; type: PostType; page: number; category?: string }
+  | { kind: 'event' | 'author'; slug: string }
+  | { kind: 'standards'; category?: string }
+  | { kind: 'testing'; category?: string }
+  | { kind: 'events' | 'resources' };
+
+export const getStaticPaths = (async () => {
+  const [services, events, standardCategories, pages, testCategories, landingPages, industries, ...postLists] = await Promise.all([
+    getServices(),
+    getEvents(),
+    getStandardCategories(),
+    getPages(),
+    getTestCategories(),
+    getLandingPages(),
+    getIndustries(),
+    ...(Object.keys(POST_TYPES) as PostType[]).map(getPosts),
+  ]);
+
+  // Paths served by dedicated files in src/pages.
+  const reserved = new Set(['contact', 'services', 'industries', 'faq', 'html-sitemap', 'sitemap', 'careers', 'thank-you']);
+  const routes = new Map<string, Route>();
+  const add = (path: string, route: Route) => {
+    if (path && !reserved.has(path) && !/^(industries|careers)\//.test(path) && !routes.has(path)) routes.set(path, route);
+  };
+
+  // Ad landing pages own their URL (the admin refuses paths already in use), so they go first.
+  landingPages.forEach((p) => add(p.path, { kind: 'ad', path: p.path }));
+
+  // First match wins: testing industries, curated listings, then rich service pages, then CMS pages, then everything else.
+  if (testCategories.length) {
+    add('services/testing', { kind: 'testing' });
+    testCategories.forEach((c) => add(`services/testing/${c.slug}`, { kind: 'testing', category: c.slug }));
+  }
+  listings().forEach((l) => add(l.path, { kind: 'listing', path: l.path }));
+  services.filter((s) => s.detail && Object.keys(s.detail).length).forEach((s) => add(s.path, { kind: 'service', path: s.path }));
+  pages.forEach((p) => add(p.path, { kind: p.template === 'landing' || p.template === 'about' ? p.template : 'page', path: p.path }));
+  services.forEach((s) => add(s.path, { kind: 'service', path: s.path }));
+
+  const authors = new Set<string>();
+  postLists.flat().forEach((post) => {
+    add(post.url.slice(1), { kind: 'post', post });
+    if (post.author) authors.add(post.author.slug);
+  });
+  (Object.keys(POST_TYPES) as PostType[]).forEach((type, i) => {
+    if (!postLists[i].length) return;
+    const addPages = (base: string, count: number, category?: string) => {
+      for (let page = 1; page <= Math.ceil(count / PER_PAGE); page++) {
+        add(page === 1 ? base : `${base}/page/${page}`, { kind: 'posts', type, page, category });
+      }
+    };
+    addPages(POST_TYPES[type].listPath, postLists[i].length);
+    industriesOf(postLists[i]).forEach((c) => addPages(`${POST_TYPES[type].listPath}/category/${c.slug}`, c.count, c.slug));
+  });
+  authors.forEach((slug) => add(`author/${slug}`, { kind: 'author', slug }));
+
+  if (events.length) {
+    add('resources/events', { kind: 'events' });
+    events.forEach((e) => add(e.url.slice(1), { kind: 'event', slug: e.slug }));
+  }
+
+  if (standardCategories.length) {
+    add('resources/standards', { kind: 'standards' });
+    standardCategories.forEach((c) => {
+      add(c.url.slice(1), { kind: 'standards', category: c.slug });
+      c.standards.forEach((s) => add(s.path, { kind: 'standard', path: s.path }));
+    });
+  }
+
+  if (postLists.some((l) => l.length)) add('resources', { kind: 'resources' });
+
+  // The old site served industries at the root (/toys-industry) and those URLs are still in Google's index.
+  industries.forEach((industry) => add(industry.slug, { kind: 'industry', industry }));
+
+  return [...routes].map(([path, route]) => ({ params: { path }, props: { route } }));
+}) satisfies GetStaticPaths;
+
+const { route } = Astro.props as { route: Route };
+---
+
+{route.kind === 'service' && <ServicePage path={route.path} />}
+{route.kind === 'listing' && <ListingPage path={route.path} />}
+{route.kind === 'post' && <PostPage post={route.post} />}
+{route.kind === 'posts' && <PostList type={route.type} page={route.page} perPage={PER_PAGE} category={route.category} />}
+{route.kind === 'events' && <EventList />}
+{route.kind === 'event' && <EventPage slug={route.slug} />}
+{route.kind === 'standards' && <StandardsPage category={route.category} />}
+{route.kind === 'standard' && <StandardPage path={route.path} />}
+{route.kind === 'page' && <ContentPage path={route.path} />}
+{route.kind === 'about' && <AboutPage path={route.path} />}
+{route.kind === 'landing' && <LandingPage path={route.path} />}
+{route.kind === 'ad' && <AdLanding path={route.path} />}
+{route.kind === 'author' && <AuthorPage slug={route.slug} />}
+{route.kind === 'resources' && <ResourcesHub />}
+{route.kind === 'testing' && <TestingPage category={route.category} />}
+{route.kind === 'industry' && <IndustryPage industry={route.industry} />}

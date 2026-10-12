@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  items: { label: string; href?: string }[];
+  dark?: boolean;
+}
+
+const { items, dark = false } = Astro.props;
+const trail = [{ label: 'Home', href: '/' }, ...items];
+---
+
+<nav aria-label="Breadcrumb" class:list={['text-sm', dark ? 'text-brand-200' : 'text-slate-500']}>
+  <ol class="flex flex-wrap items-center gap-1">
+    {trail.map((item, i) => (
+      <li class="flex items-center gap-1">
+        {i > 0 && <Icon name="chevron-right" class="size-3.5 opacity-50" />}
+        {item.href && i < trail.length - 1 ? (
+          <a href={item.href} class:list={['tap', dark ? 'hover:text-white' : 'hover:text-brand-700']}>{item.label}</a>
+        ) : (
+          <span aria-current="page" class:list={[dark ? 'text-white' : 'text-slate-800']}>{item.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>

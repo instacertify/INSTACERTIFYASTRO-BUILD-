@@ -1,0 +1,160 @@
+---
+import { Image } from 'astro:assets';
+import wordmark from '../assets/brand/logo-wordmark-white.png';
+import Icon from './Icon.astro';
+import NewsletterForm from './NewsletterForm.astro';
+import type { Site } from '../lib/types';
+import { socialLinks } from '../lib/social';
+
+interface Props {
+  site: Site;
+}
+
+const { site } = Astro.props;
+const social = socialLinks(site);
+const year = new Date().getFullYear();
+const newsletter = site.footer.newsletter === undefined
+  ? { title: 'Regulatory updates', text: 'New QCOs, BIS deadlines and standard revisions — one short email a month.' }
+  : site.footer.newsletter;
+const copyright = (site.footer.copyright || '© {year} Instacertify. All rights reserved.').replaceAll('{year}', String(year));
+// Each page is linked once: the contact column and "Contact us" button already cover /contact.
+const seen = new Set(['/contact']);
+const unseen = (l: { href: string }) => !seen.has(l.href) && !!seen.add(l.href);
+const columns = (site.footer.columns ?? [])
+  .slice(0, 4)
+  .map((c) => ({ ...c, links: c.links.filter(unseen) }))
+  .filter((c) => c.links.length > 0);
+const bottomLinks = (site.footer.bottomLinks ?? [{ label: 'Privacy', href: '/privacy-policy' }, { label: 'Sitemap', href: '/html-sitemap' }]).filter(unseen);
+const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.contact.address)}`;
+---
+
+<footer class="panel-logo border-t border-white/15 bg-brand-700 text-brand-100">
+  <div class="border-b border-white/10 bg-brand-800/60">
+    <div class="container-page relative">
+      <button type="button" data-back-to-top class="absolute top-0 right-4 inline-flex cursor-pointer items-center gap-1.5 rounded-b-lg border border-t-0 border-white/15 bg-brand-700 px-3 py-2.5 text-xs sm:py-1.5 font-medium text-brand-100 hover:text-white sm:right-6 lg:right-8">
+        <Icon name="chevron-up" class="size-3.5" />Back to top
+      </button>
+
+      <div class:list={['grid gap-5 pt-14 pb-10 lg:items-center lg:gap-0', newsletter && 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)]']}>
+        {newsletter && (
+          <>
+            <div class="lg:pr-10">
+              <p class="flex items-center gap-2 text-lg font-semibold text-white"><Icon name="mail" class="size-5 text-accent-400" />{newsletter.title}</p>
+              <p class="mt-1.5 text-sm leading-relaxed text-brand-200">{newsletter.text}</p>
+            </div>
+            <NewsletterForm class="lg:pr-10" />
+          </>
+        )}
+        <div class:list={['flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between', newsletter && 'mt-3 border-t border-white/15 pt-8 lg:mt-0 lg:flex-col lg:items-start lg:gap-3 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10']}>
+          <p class="text-sm leading-relaxed text-brand-200">Find our office or meet us at a trade fair near you.</p>
+          <a href={mapUrl} target="_blank" rel="noopener" class="inline-flex h-10 shrink-0 items-center gap-2 self-start rounded-full border border-white/40 px-5 text-sm font-semibold text-white transition-colors hover:border-white hover:bg-white hover:text-brand-700 sm:self-auto lg:self-start">
+            <Icon name="map-pin" class="size-4" />View location
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-page">
+    <div class="grid gap-10 pt-12 pb-12 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-0">
+      <div class="lg:border-r lg:border-white/15 lg:pr-10">
+        {site.logo ? (
+          <a href="/" aria-label={`${site.name} home`} class="inline-flex rounded-xl bg-white px-4 py-3 ring-4 ring-white/15 transition hover:ring-white/30 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-400">
+            <img src={site.logo} alt={site.name} loading="eager" class="h-8 w-auto max-w-56 object-contain sm:h-9" />
+          </a>
+        ) : (
+          <a href="/" aria-label={`${site.name} home`} class="inline-flex rounded-md transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-400">
+            <Image src={wordmark} alt={site.name} width={231} height={40} densities={[1, 2]} loading="eager" class="h-10 w-auto" />
+          </a>
+        )}
+        <p class="mt-5 text-sm leading-relaxed text-brand-200">{site.description}</p>
+      </div>
+
+      <div class="flex flex-col lg:pl-10">
+        <div class:list={[
+          'grid grid-cols-2 gap-x-8 gap-y-10',
+          [
+            'sm:grid-cols-2',
+            'sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]',
+            'sm:grid-cols-[repeat(2,minmax(0,1fr))_minmax(0,1.4fr)]',
+            'sm:grid-cols-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,1.4fr)]',
+            'sm:grid-cols-3 xl:grid-cols-[repeat(4,minmax(0,1fr))_minmax(0,1.4fr)]',
+          ][columns.length],
+        ]}>
+          {columns.map((col) => (
+            <div>
+              <p class="text-base font-semibold text-white">{col.title}</p>
+              <ul class="mt-2 text-sm lg:mt-4 lg:space-y-2.5">
+                {col.links.map((l) => <li><a href={l.href} class="inline-flex min-h-10 items-center text-brand-200 hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">{l.label}</a></li>)}
+              </ul>
+            </div>
+          ))}
+
+          <div class="col-span-2 sm:col-span-1">
+            <p class="text-base font-semibold text-white">Contact {site.name}</p>
+            <ul class="mt-4 space-y-3 text-sm">
+              <li class="font-semibold text-white">Instacertify Labs Private Limited</li>
+              <li class="flex gap-2.5"><Icon name="map-pin" class="mt-0.5 size-4 shrink-0 text-accent-400" />{site.contact.address}</li>
+              <li><a href={`tel:${site.contact.phoneE164}`} class="-my-2 inline-flex items-center gap-2.5 py-2 hover:text-white"><Icon name="phone" class="size-4 text-accent-400" />{site.contact.phone}</a></li>
+              <li><a href={`mailto:${site.contact.email}`} class="-my-2 inline-flex items-center gap-2.5 py-2 hover:text-white"><Icon name="mail" class="size-4 shrink-0 text-accent-400" />{site.contact.email}</a></li>
+              <li class="flex gap-2.5"><Icon name="clock" class="mt-0.5 size-4 shrink-0 text-accent-400" />{site.contact.hours}</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-10 flex flex-col gap-5 border-t border-white/15 pt-8 sm:flex-row sm:items-center lg:mt-auto">
+          {social.length > 0 && (
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+              <p class="text-base font-semibold text-white">Connect with {site.name}</p>
+              <ul class="flex flex-wrap gap-2">
+                {social.map((s) => (
+                  <li>
+                    <a
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener me"
+                      aria-label={`${site.name} on ${s.label} (opens in a new tab)`}
+                      title={s.label}
+                      class="flex size-10 items-center justify-center rounded-full text-brand-100 ring-1 ring-white/25 transition hover:bg-white hover:text-brand-700 hover:ring-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
+                    >
+                      <Icon name={s.key} class="size-[1.125rem]" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <a href="/contact" class="btn-primary h-11 self-start rounded-full px-6 sm:ml-auto sm:self-auto">Contact us <Icon name="arrow-right" class="size-4" /></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-white/10">
+    <div class="container-page flex flex-col gap-4 py-6 text-sm text-brand-200 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p>{copyright}</p>
+        <p class="mt-1 text-xs">A private certification consultancy, not a government body. Government fees and lab testing are billed separately, against receipts.</p>
+      </div>
+      <ul class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        {(site.footer.portals ?? []).map((p) => (
+          <li>
+            <a href={p.href} class="inline-flex items-center gap-1.5 hover:text-white" rel={p.href.startsWith('http') ? 'noopener' : undefined}>
+              <Icon name="login" class="size-3.5" />{p.label}
+            </a>
+          </li>
+        ))}
+        {bottomLinks.slice(0, 1).map((l) => <li><a href={l.href} class="tap hover:text-white">{l.label}</a></li>)}
+        <li><button type="button" data-cookie-settings class="tap cursor-pointer hover:text-white">Cookie settings</button></li>
+        {bottomLinks.slice(1).map((l) => <li><a href={l.href} class="tap hover:text-white">{l.label}</a></li>)}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.querySelector('[data-back-to-top]')?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    document.querySelector<HTMLElement>('#main, main')?.focus({ preventScroll: true });
+  });
+</script>

@@ -1,0 +1,67 @@
+---
+import Icon from './Icon.astro';
+import { atHeight } from '../lib/images';
+import type { Site, Testimonial } from '../lib/types';
+
+interface Props {
+  site: Site;
+  testimonials: Testimonial[];
+  class?: string;
+}
+
+const { site, testimonials, class: className } = Astro.props;
+
+/* The company rating from Site settings; without one, the average of the testimonials on the website. */
+const rated = testimonials.filter((t) => t.rating > 0);
+const siteValue = Number(site.rating?.value) || 0;
+const value = siteValue || (rated.length ? rated.reduce((sum, t) => sum + t.rating, 0) / rated.length : 0);
+const count = siteValue ? Number(site.rating?.count) || 0 : rated.length;
+const url = site.rating?.url || null;
+const google = !!url && /(^|\.)(google\.[a-z.]+|g\.page|goo\.gl)\//i.test(url.replace(/^https?:\/\//, ''));
+
+const faces = await Promise.all(
+  testimonials.slice(0, 4).map(async (t) => ({
+    initials: t.name.split(' ').map((n) => n[0]).join('').slice(0, 2),
+    photo: t.photo ? await atHeight(t.photo, 36) : null,
+  })),
+);
+---
+
+{value > 0 && count > 0 && (
+  <a
+    href={url ?? '#reviews'}
+    target={url ? '_blank' : undefined}
+    rel={url ? 'noopener' : undefined}
+    class:list={['group flex w-fit items-center gap-3', className]}
+    data-track="reviews"
+  >
+    {faces.length > 0 && (
+      <span class="flex -space-x-2.5" aria-hidden="true">
+        {faces.map((f) =>
+          f.photo ? (
+            <img src={f.photo.src} alt="" width="36" height="36" loading="lazy" decoding="async" class="size-9 rounded-full object-cover ring-2 ring-brand-700" />
+          ) : (
+            <span class="flex size-9 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700 ring-2 ring-brand-700">{f.initials}</span>
+          ),
+        )}
+      </span>
+    )}
+    <span class="leading-tight">
+      <span class="flex items-center gap-1.5">
+        <span class="flex gap-0.5 text-amber-400" aria-hidden="true">{Array.from({ length: Math.round(value) }).map(() => <Icon name="star" class="size-4" />)}</span>
+        <strong class="font-bold text-white">{value.toFixed(1)}/5</strong>
+      </span>
+      <span class="mt-1 flex items-center gap-1.5 text-sm text-brand-100 group-hover:text-white">
+        {google && (
+          <svg viewBox="0 0 24 24" class="size-4 shrink-0 rounded-full bg-white p-px" aria-hidden="true">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23" />
+            <path fill="#FBBC05" d="M5.84 14.11a6.6 6.6 0 0 1 0-4.22V7.05H2.18a11 11 0 0 0 0 9.9z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A10.6 10.6 0 0 0 12 1a11 11 0 0 0-9.82 6.05l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38" />
+          </svg>
+        )}
+        <span>Rated by {count.toLocaleString('en-IN')} {google ? 'clients on Google' : 'clients'}</span>
+      </span>
+    </span>
+  </a>
+)}

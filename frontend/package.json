@@ -1,0 +1,36 @@
+{
+  "name": "frontend",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/inline-landing-css.mjs && node scripts/precompress.mjs",
+    "preview": "astro preview",
+    "build:preview": "astro build --config astro.preview.config.mjs",
+    "serve:preview": "node dist-preview/server/entry.mjs",
+    "audit:seo": "node scripts/seo-audit.mjs",
+    "audit:links": "node scripts/link-check.mjs --external",
+    "audit:compliance": "node scripts/compliance-check.mjs",
+    "astro": "astro",
+    "audit:schema": "node scripts/schema-check.mjs"
+  },
+  "dependencies": {
+    "@astrojs/node": "^11.1.7",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@material-symbols/svg-400": "^0.47.6",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.7",
+    "d3-geo": "^3.1.1",
+    "tailwindcss": "^4.3.3"
+  },
+  "allowScripts": {
+    "esbuild": true
+  },
+  "devDependencies": {
+    "@types/d3-geo": "^3.1.1"
+  }
+}

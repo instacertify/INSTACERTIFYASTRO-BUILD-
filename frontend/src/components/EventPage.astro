@@ -1,0 +1,119 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import LeadForm from './LeadForm.astro';
+import CtaBand from './CtaBand.astro';
+import { formatDate, getEvent, getEvents, getSite } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+import { createAutolinker } from '../lib/autolink';
+import { fixHeadings } from '../lib/outline';
+import { responsive, responsiveHtml } from '../lib/images';
+
+interface Props {
+  slug: string;
+}
+
+const [event, site, events] = await Promise.all([getEvent(Astro.props.slug), getSite(), getEvents()]);
+if (!event) throw new Error(`Event not found: ${Astro.props.slug}`);
+const today = new Date().toISOString().slice(0, 10);
+const isPast = (event.endsAt ?? event.startsAt).slice(0, 10) < today;
+const next = events
+  .filter((e) => e.slug !== event.slug && (e.endsAt ?? e.startsAt).slice(0, 10) >= today)
+  .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
+  .slice(0, 4);
+const place = (location: string | null) => (location ?? '').split('/').map((p) => p.trim()).filter(Boolean).slice(0, 2).join(', ');
+const seo = event.seo ?? {};
+const trail = [{ label: 'Resources', href: '/resources' }, { label: 'Events', href: '/resources/events' }, { label: event.title }];
+const when = event.endsAt && event.endsAt.slice(0, 10) !== event.startsAt.slice(0, 10)
+  ? `${formatDate(event.startsAt, { day: 'numeric', month: 'long' })} – ${formatDate(event.endsAt, { day: 'numeric', month: 'long', year: 'numeric' })}`
+  : formatDate(event.startsAt, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+const [hero, content] = await Promise.all([
+  responsive(event.image, [480, 760, 1140], 66),
+  responsiveHtml(fixHeadings(createAutolinker(site, event.url)(event.content)), '(min-width: 1024px) 760px, 100vw'),
+]);
+const imageWidth = event.imageWidth ?? null;
+const imageHeight = event.imageHeight ?? null;
+const imageObject = event.image
+  ? { '@type': 'ImageObject', url: event.image, width: imageWidth ?? undefined, height: imageHeight ?? undefined, caption: event.imageAlt ?? undefined }
+  : undefined;
+
+const online = event.type === 'webinar';
+// Locations are typed freely: "Berlin / Germany / Europe–CIS" or a full venue address.
+const parts = (event.location ?? '').split('/').map((p) => p.trim()).filter(Boolean);
+const venue = parts.length > 1
+  ? { '@type': 'Place', name: parts.slice(0, 2).join(', '), address: { '@type': 'PostalAddress', addressLocality: parts[0], addressCountry: parts[1] } }
+  : event.location
+    ? { '@type': 'Place', name: event.location.split(',')[0].trim(), address: { '@type': 'PostalAddress', streetAddress: event.location.trim() } }
+    : null;
+const location = online ? (event.externalUrl ? { '@type': 'VirtualLocation', url: event.externalUrl } : null) : venue;
+
+const jsonLd = [
+  breadcrumbSchema(site.url, trail, event.url.slice(1)),
+  // Google rejects an event without a place (or a link, for webinars), so those pages carry only the breadcrumb.
+  location && {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    startDate: event.startsAt,
+    endDate: event.endsAt ?? undefined,
+    eventAttendanceMode: online ? 'https://schema.org/OnlineEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+    location,
+    image: imageObject,
+    description: seo.description ?? event.excerpt,
+    url: event.externalUrl ?? `${site.url}${event.url}`,
+  },
+].filter(Boolean) as Record<string, unknown>[];
+---
+
+<Layout title={seo.title ?? `${event.title} | Instacertify`} description={seo.description ?? event.excerpt ?? event.title} image={seo.image ?? event.image ?? undefined} canonical={seo.canonical} seo={seo} modified={event.updatedAt} jsonLd={jsonLd} ogTitle={seo.ogTitle ?? event.title} ogDescription={seo.ogDescription} imageWidth={seo.image ? null : imageWidth} imageHeight={seo.image ? null : imageHeight} imageAlt={event.image ? event.imageAlt : null} autoPopup={false}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12"><div class="max-w-4xl">
+      <Breadcrumbs items={trail} />
+      <p class="eyebrow mt-6">{isPast ? 'Past event' : 'Upcoming event'}</p>
+      <h1 class="mt-2 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{event.title}</h1>
+      <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-3">
+        <div class="flex items-start gap-2"><Icon name="calendar" class="mt-0.5 size-4 text-brand-700" /><div><dt class="sr-only">Date</dt><dd class="font-medium text-slate-800">{when}</dd></div></div>
+        {event.location && <div class="flex items-start gap-2"><Icon name="map-pin" class="mt-0.5 size-4 text-brand-700" /><div><dt class="sr-only">Location</dt><dd class="text-slate-700">{place(event.location) || event.location}</dd></div></div>}
+        {event.price && <div class="flex items-start gap-2"><Icon name="rupee" class="mt-0.5 size-4 text-brand-700" /><div><dt class="sr-only">Price</dt><dd class="text-slate-700">{event.price}</dd></div></div>}
+      </dl>
+      {event.externalUrl && <a href={event.externalUrl} target="_blank" rel="noopener" class="btn-ghost mt-6">Official event website <Icon name="arrow-right" class="size-4" /></a>}
+    </div></div>
+  </section>
+
+  <div class="container-page grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-14 lg:py-14">
+    <div class="min-w-0">
+      {hero && <img src={hero.src} srcset={hero.srcset} alt={event.imageAlt ?? ''} width={imageWidth ?? 1200} height={imageHeight ?? 675} sizes={imageWidth && imageWidth < 760 ? `min(${imageWidth}px, 100vw)` : '(min-width: 1024px) 760px, 100vw'} loading="eager" fetchpriority="high" decoding="async" class:list={['mb-8 rounded-2xl bg-slate-100 object-cover', imageWidth && imageWidth < 760 ? 'h-auto w-auto max-w-full' : 'w-full']} />}
+      <div class="prose-body max-w-3xl text-slate-700" set:html={content} />
+    </div>
+    <aside class="lg:self-start tall:sticky tall:top-24">
+      <LeadForm id={`event-${event.slug}`} title="Exhibiting or importing to India?" subtitle="Ask which certifications your products need — free assessment." />
+    </aside>
+  </div>
+
+  {next.length > 0 && (
+    <section aria-labelledby="next-h" class="section-tight border-t border-slate-200 surface-tint">
+      <div class="container-page">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <h2 id="next-h" class="text-2xl section-title">More upcoming events</h2>
+          <a href="/resources/events" class="tap inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline">All events <Icon name="arrow-right" class="size-4" /></a>
+        </div>
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {next.map((e) => (
+            <li>
+              <a href={e.url} class="card-hover group flex h-full flex-col p-4">
+                <span class="text-xs font-semibold text-brand-700">{formatDate(e.startsAt)}</span>
+                <span class="mt-1.5 line-clamp-2 font-semibold text-slate-900 group-hover:text-brand-700">{e.title}</span>
+                {place(e.location) && <span class="mt-auto flex items-center gap-1 pt-2 text-sm text-slate-500"><Icon name="map-pin" class="size-3.5 shrink-0" /><span class="truncate">{place(e.location)}</span></span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</Layout>

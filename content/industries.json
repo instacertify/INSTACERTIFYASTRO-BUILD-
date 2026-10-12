@@ -1,0 +1,93 @@
+[
+  {
+    "slug": "electronic-industry",
+    "name": "Electronics & Electricals",
+    "icon": "memory",
+    "summary": "Electrical and electronic product approvals with streamlined lab coordination.",
+    "intro": "From power banks to smart TVs, every electronic product sold in India needs the right mark before it reaches customs or a marketplace. We map your product to the correct IS standard and run testing, BIS, WPC and BEE in parallel.",
+    "highlights": ["CRS registration for 70+ notified products", "WPC ETA for Wi-Fi & Bluetooth", "BEE star labelling", "EMI/EMC & safety testing"],
+    "services": [
+      "certification/india/bis-crs-mark-certification",
+      "certification/india/wpc-eta-approval",
+      "certification/india/bee-certification-services",
+      "certification/india/tec-approval",
+      "services/testing/electronics-electricals-testing",
+      "services/indian-registration-compliances/environment-compliance/epr-for-e-waste"
+    ]
+  },
+  {
+    "slug": "toys-industry",
+    "name": "Toys",
+    "icon": "extension",
+    "summary": "Safety-first testing and certification for children's products across global standards.",
+    "intro": "Toys sold in India need BIS ISI certification under IS 9873 and IS 15644, and export markets ask for EN 71, ASTM F963 or GCC G-Mark. We handle chemical, mechanical and flammability testing in one plan.",
+    "highlights": ["BIS ISI under the Toys QCO", "EN 71 & ASTM F963 testing", "G-Mark for GCC markets", "Phthalate & heavy-metal screening"],
+    "services": [
+      "certification/india/bis-isi-mark-domestic-manufacturers",
+      "certification/india/bis-isi-mark-fmcs",
+      "services/testing/toys",
+      "certification/emea/g-mark-toys",
+      "certification/emea/ce-certification"
+    ]
+  },
+  {
+    "slug": "polymers-plastics-industry",
+    "name": "Polymers & Plastics",
+    "icon": "layers",
+    "summary": "Material validation and compliance for polymers, plastics, and advanced composites.",
+    "intro": "Plastic raw materials, pipes and packaging face BIS QCOs, EPR obligations and REACH/RoHS restrictions. We combine material testing with registration so your product is compliant from resin to retail.",
+    "highlights": ["BIS QCO for polymers", "EPR for plastic packaging", "REACH & RoHS screening", "Mechanical & thermal testing"],
+    "services": [
+      "services/testing/plastics-polymers-testing",
+      "services/indian-registration-compliances/environment-compliance/epr-for-plastic-waste",
+      "services/testing/reach-testing",
+      "services/testing/rohs-testing",
+      "certification/india/bis-isi-mark-domestic-manufacturers"
+    ]
+  },
+  {
+    "slug": "cosmetics-industry",
+    "name": "Cosmetics & Personal Care",
+    "icon": "spa",
+    "summary": "Regulatory pathways and safety dossiers for cosmetics and personal care launches.",
+    "intro": "Importing or manufacturing cosmetics in India needs CDSCO registration, a compliant label and safety data. For the Gulf we manage SFDA listings. One dossier, reused across markets.",
+    "highlights": ["CDSCO import registration", "Label & claims review", "Microbial & stability testing", "SFDA cosmetics listing"],
+    "services": [
+      "certification/india/cdsco-cosmetics",
+      "services/testing/cosmetics-testing",
+      "certification/emea/sfda-cosmetics",
+      "certification/global-certifications/halal-certification",
+      "certification/global-certifications/msds-authoring"
+    ]
+  },
+  {
+    "slug": "food-industry",
+    "name": "Food & Beverages",
+    "icon": "restaurant",
+    "summary": "Quality, safety, and labeling compliance for food and beverage brands.",
+    "intro": "FSSAI licensing, import clearance, lab testing and food-safety systems like HACCP and ISO 22000 — we take you from kitchen or factory to shelf and export.",
+    "highlights": ["FSSAI basic, state & central licences", "FSSAI import clearance", "HACCP & ISO 22000", "Nutritional & contaminant testing"],
+    "services": [
+      "services/indian-registration-compliances/business-licenses/fssai-central-license",
+      "services/indian-registration-compliances/business-licenses/fssai-for-import",
+      "services/testing/food-beverages-testing",
+      "certification/global-certifications/haccp",
+      "certification/global-certifications/halal-certification"
+    ]
+  },
+  {
+    "slug": "software-industry",
+    "name": "Software & Connected Devices",
+    "icon": "shield",
+    "summary": "Secure software compliance, cybersecurity, and market readiness for digital products.",
+    "intro": "Connected products now need cybersecurity evidence: TEC's MTCTE security requirements, STQC audits and the EU Cyber Resilience Act. We plan testing and documentation for hardware and firmware together.",
+    "highlights": ["TEC MTCTE & security testing", "STQC certification", "EU cybersecurity (RED / CRA)", "IMEI & MAC registration"],
+    "services": [
+      "certification/india/tec-approval",
+      "certification/india/stqc-certification",
+      "certification/emea/eu-cybersecurity-compliance",
+      "certification/global-certifications/imei-registration",
+      "certification/global-certifications/iso-certification"
+    ]
+  }
+]

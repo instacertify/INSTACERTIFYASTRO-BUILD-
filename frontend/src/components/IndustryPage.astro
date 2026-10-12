@@ -1,0 +1,132 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import Icon from './Icon.astro';
+import MaterialIcon from './MaterialIcon.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import LeadForm from './LeadForm.astro';
+import ServiceCard from './ServiceCard.astro';
+import CtaBand from './CtaBand.astro';
+import TilePager from './TilePager.astro';
+import { getSite } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+import { responsive } from '../lib/images';
+import type { Industry } from '../lib/types';
+
+/** Also served at the legacy root URL (/toys-industry), which points search engines here via the canonical. */
+interface Props {
+  industry: Industry;
+}
+
+const { industry } = Astro.props;
+const [site, photo] = await Promise.all([getSite(), responsive(industry.image, [768, 1280, 1920], 60)]);
+const images = import.meta.glob<{ default: ImageMetadata }>('../assets/industries/*.webp', { eager: true });
+const img = images[`../assets/industries/${industry.slug}.webp`]?.default;
+const trail = [{ label: 'Industries', href: '/industries' }, { label: industry.name }];
+const fullTitle = `${industry.name} Certification & Compliance in India`;
+const seo = industry.seo ?? {};
+/** The API fills the title with "{name} testing & certification | Instacertify" when the admin field is blank. */
+const customTitle = seo.title && seo.title !== `${industry.name} testing & certification | Instacertify` ? seo.title : null;
+const { certification, testing } = industry;
+const hasTesting = testing.services.length > 0 || testing.categories.length > 0;
+/** "Chemicals" → "Chemicals testing", but "Environmental & Water Testing" stays as it is. */
+const named = (label: string) => (/testing$/i.test(label) ? label : `${label} testing`);
+const PER_PAGE = 6;
+---
+
+<Layout
+  title={customTitle ?? `${fullTitle.length <= 60 ? fullTitle : `${industry.name} Certification in India`} | Instacertify`}
+  description={seo.description ?? `${industry.summary} ${industry.highlights.join(', ')}.`}
+  image={seo.image ?? industry.image ?? undefined}
+  canonical={seo.canonical ?? `/industries/${industry.slug}`}
+  seo={seo}
+  jsonLd={[breadcrumbSchema(site.url, trail, `industries/${industry.slug}`)]}
+>
+  <section class="relative isolate overflow-hidden bg-brand-700">
+    {photo ? (
+      <img src={photo.src} srcset={photo.srcset} sizes="100vw" alt="" loading="eager" decoding="async" class="absolute inset-0 -z-10 size-full object-cover opacity-30" />
+    ) : img && <Image src={img} alt="" widths={[768, 1280, 1920]} sizes="100vw" loading="eager" class="absolute inset-0 -z-10 size-full object-cover opacity-30" />}
+    <div class="container-page py-12 sm:py-16">
+      <Breadcrumbs items={trail} dark />
+      <h1 class="mt-5 max-w-3xl text-[2rem] leading-tight font-bold text-white sm:text-[2.5rem]">{industry.name} certification & compliance</h1>
+      <p class="mt-4 max-w-2xl text-lg text-brand-100">{industry.intro}</p>
+      <ul class="mt-6 flex flex-wrap gap-2">
+        {industry.highlights.map((h) => (
+          <li class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm text-white"><Icon name="check" class="size-4 text-emerald-300" />{h}</li>
+        ))}
+      </ul>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        {certification.services.length > 0 && (
+          <a href="#certification" class="btn-primary">
+            <MaterialIcon name="verified" class="size-5" />Certification for {industry.name}
+          </a>
+        )}
+        {hasTesting && (
+          <a href="#testing" class="btn bg-white text-brand-700 hover:bg-brand-50">
+            <MaterialIcon name="science" class="size-5" />Testing for {industry.name}
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <div class="container-page grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:py-14">
+    <div class="min-w-0 space-y-14">
+      {certification.services.length > 0 && (
+        <section id="certification" aria-labelledby="cert-h">
+          <h2 id="cert-h" class="flex items-center gap-2.5 text-2xl section-title sm:text-3xl">
+            <MaterialIcon name="verified" class="size-8 shrink-0 text-brand-700" />Certification for {industry.name}
+          </h2>
+          <p class="mt-3 max-w-2xl text-slate-600">
+            {certification.text || `The marks, approvals and registrations ${industry.name.toLowerCase()} products need.`} Listed in the order most of our clients complete them.
+          </p>
+          <div id="cert-tiles" class="mt-6 grid gap-4 sm:grid-cols-2">
+            {certification.services.map((s, i) => <div data-tile hidden={i >= PER_PAGE}><ServiceCard service={s} /></div>)}
+          </div>
+          <TilePager controls="cert-tiles" count={certification.services.length} perPage={PER_PAGE} label="Certification pages" />
+        </section>
+      )}
+
+      {hasTesting && (
+        <section id="testing" aria-labelledby="test-h" class:list={[certification.services.length > 0 && 'border-t border-slate-200 pt-12']}>
+          <h2 id="test-h" class="flex items-center gap-2.5 text-2xl section-title sm:text-3xl">
+            <MaterialIcon name="science" class="size-8 shrink-0 text-brand-700" />Testing for {industry.name}
+          </h2>
+          <p class="mt-3 max-w-2xl text-slate-600">
+            {testing.text || `Lab tests for ${industry.name.toLowerCase()} products at NABL-accredited and BIS-recognised partner labs.`}
+          </p>
+          {testing.services.length > 0 && (
+            <>
+              <div id="test-tiles" class="mt-6 grid gap-4 sm:grid-cols-2">
+                {testing.services.map((s, i) => <div data-tile hidden={i >= PER_PAGE}><ServiceCard service={s} /></div>)}
+              </div>
+              <TilePager controls="test-tiles" count={testing.services.length} perPage={PER_PAGE} label="Testing pages" />
+            </>
+          )}
+          {testing.categories.length > 0 && (
+            <>
+              <h3 class="mt-8 text-base font-bold text-slate-900">Every test, by product type</h3>
+              <ul class="mt-2 divide-y divide-slate-200 border-y border-slate-200">
+                {testing.categories.map((c) => (
+                  <li>
+                    <a href={c.url} class="group flex items-center justify-between gap-4 py-3 text-base text-slate-700 hover:text-brand-700">
+                      <span class="font-semibold">{named(c.label)}</span>
+                      <span class="inline-flex shrink-0 items-center gap-1 text-sm text-slate-500 group-hover:text-brand-700">
+                        {c.count > 0 ? `${c.count} ${c.count === 1 ? 'test' : 'tests'}` : 'On request'}<Icon name="arrow-right" class="size-4" />
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
+      )}
+    </div>
+    <aside class="lg:self-start tall:sticky tall:top-24">
+      <LeadForm id={`ind-${industry.slug}`} title={`Plan your ${industry.name.split(' ')[0].toLowerCase()} compliance`} subtitle="Get a product-specific roadmap with cost and timeline." />
+    </aside>
+  </div>
+
+  <CtaBand />
+</Layout>

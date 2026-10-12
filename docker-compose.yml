@@ -1,0 +1,326 @@
+# Core stack:        docker compose up -d
+# With extras:       docker compose --profile analytics --profile monitoring --profile automation up -d
+# Variables come from ./.env (copy .env.example).
+
+x-laravel-env: &laravel-env
+  APP_NAME: Instacertify
+  APP_ENV: production
+  APP_DEBUG: "false"
+  SESSION_SECURE_COOKIE: "true"
+  APP_KEY: ${APP_KEY:?set APP_KEY in .env}
+  APP_URL: https://${API_DOMAIN:-api.localhost}
+  FRONTEND_URL: https://${SITE_DOMAIN:-localhost}
+  CORS_ALLOWED_ORIGINS: https://${SITE_DOMAIN:-localhost}
+  # The app is only reachable through Caddy on the private compose network; trusting it gives Laravel HTTPS URLs and real visitor IPs.
+  TRUSTED_PROXIES: ${TRUSTED_PROXIES:-10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
+  DB_CONNECTION: pgsql
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_DATABASE: instacertify
+  DB_USERNAME: instacertify
+  DB_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  REDIS_CLIENT: phpredis
+  REDIS_HOST: redis
+  CACHE_STORE: redis
+  QUEUE_CONNECTION: redis
+  SESSION_DRIVER: redis
+  MAIL_MAILER: smtp
+  MAIL_HOST: ${MAIL_HOST:-mailpit}
+  MAIL_PORT: ${MAIL_PORT:-1025}
+  MAIL_USERNAME: ${MAIL_USERNAME:-}
+  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+  MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-no-reply@instacertify.com}
+  LEAD_NOTIFY_EMAIL: ${LEAD_NOTIFY_EMAIL:-contact@instacertify.com}
+  LEAD_WEBHOOK_URL: ${LEAD_WEBHOOK_URL:-}
+  LEAD_WEBHOOK_SECRET: ${LEAD_WEBHOOK_SECRET:-}
+  ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@instacertify.com}
+  ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+  AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-instacertify}
+  AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_BUCKET: instacertify
+  AWS_ENDPOINT: http://minio:9000
+  AWS_USE_PATH_STYLE_ENDPOINT: "true"
+  MEILISEARCH_HOST: http://meilisearch:7700
+  MEILISEARCH_KEY: ${MEILI_MASTER_KEY:?set MEILI_MASTER_KEY in .env}
+  # Admin edits go live through the builder service.
+  FRONTEND_REBUILD_HOOK: http://builder:8787
+  SITE_PUBLISH_TOKEN: ${SITE_PUBLISH_TOKEN:?set SITE_PUBLISH_TOKEN in .env (32+ random characters)}
+
+services:
+  # ---------- Core ----------
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-localhost}
+      LIVE_DOMAIN: ${LIVE_DOMAIN:-instacertify.com}
+      API_DOMAIN: ${API_DOMAIN:-api.localhost}
+      ANALYTICS_DOMAIN: ${ANALYTICS_DOMAIN:-analytics.localhost}
+      AUTOMATION_DOMAIN: ${AUTOMATION_DOMAIN:-n8n.localhost}
+      ERRORS_DOMAIN: ${ERRORS_DOMAIN:-errors.localhost}
+      GRAFANA_DOMAIN: ${GRAFANA_DOMAIN:-grafana.localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@instacertify.com}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - site:/srv/site:ro
+    networks:
+      default:
+        # The builder downloads uploaded images from the API's public address; this keeps that inside the server.
+        aliases: ["${API_DOMAIN:-api.localhost}"]
+    depends_on: [app, preview]
+    restart: unless-stopped
+
+  # Builds the static site from the admin's content and publishes it to the "site" volume: on every start (deploy),
+  # about a minute after content is saved, nightly, and from Admin → Settings → Publish website.
+  builder:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: builder
+    environment:
+      API_URL: http://app:80
+      PUBLIC_API_URL: https://${API_DOMAIN:-api.localhost}
+      PUBLIC_MATOMO_URL: ${PUBLIC_MATOMO_URL:-}
+      PUBLISH_TOKEN: ${SITE_PUBLISH_TOKEN:?set SITE_PUBLISH_TOKEN in .env (32+ random characters)}
+    volumes:
+      - site:/site
+    depends_on: [app]
+    restart: unless-stopped
+
+  # Admin "Preview" button: renders unsaved drafts with the site's templates. Caddy sends /preview/* on the site domain here.
+  preview:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: preview
+      args:
+        API_URL: http://app:80
+        PUBLIC_API_URL: https://${API_DOMAIN:-api.localhost}
+    depends_on: [app]
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment: *laravel-env
+    volumes:
+      - app_storage:/app/storage/app
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_started }
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: php artisan queue:work --tries=5 --max-time=3600
+    environment: *laravel-env
+    volumes:
+      - app_storage:/app/storage/app
+    depends_on: [app]
+    restart: unless-stopped
+
+  # Runs routes/console.php jobs, e.g. the nightly privacy:prune retention clean-up (which deletes old CVs, hence the volume).
+  scheduler:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: php artisan schedule:work
+    environment: *laravel-env
+    volumes:
+      - app_storage:/app/storage/app
+    depends_on: [app]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: instacertify
+      POSTGRES_USER: instacertify
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U instacertify"]
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes: [redis_data:/data]
+    restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.15
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_ENV: production
+    volumes: [meili_data:/meili_data]
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-instacertify}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    ports: ["127.0.0.1:9001:9001"]
+    volumes: [minio_data:/data]
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ["127.0.0.1:8025:8025"]
+    restart: unless-stopped
+
+  # ---------- Analytics (Matomo) ----------
+  matomo-db:
+    profiles: [analytics]
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: matomo
+      MARIADB_USER: matomo
+      MARIADB_PASSWORD: ${MATOMO_DB_PASSWORD:-matomo}
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    volumes: [matomo_db:/var/lib/mysql]
+    restart: unless-stopped
+
+  matomo:
+    profiles: [analytics]
+    image: matomo:5-apache
+    environment:
+      MATOMO_DATABASE_HOST: matomo-db
+      MATOMO_DATABASE_DBNAME: matomo
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: ${MATOMO_DB_PASSWORD:-matomo}
+    volumes: [matomo_data:/var/www/html]
+    depends_on: [matomo-db]
+    restart: unless-stopped
+
+  # ---------- Monitoring (GlitchTip, Prometheus, Grafana) ----------
+  glitchtip:
+    profiles: [monitoring]
+    image: glitchtip/glitchtip:latest
+    environment: &glitchtip-env
+      DATABASE_URL: postgres://instacertify:${POSTGRES_PASSWORD}@postgres:5432/glitchtip
+      REDIS_URL: redis://redis:6379/5
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:-change-me}
+      GLITCHTIP_DOMAIN: https://${ERRORS_DOMAIN:-errors.localhost}
+      DEFAULT_FROM_EMAIL: ${MAIL_FROM_ADDRESS:-no-reply@instacertify.com}
+      EMAIL_URL: smtp://mailpit:1025
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  glitchtip-worker:
+    profiles: [monitoring]
+    image: glitchtip/glitchtip:latest
+    command: ./bin/run-celery-with-beat.sh
+    environment: *glitchtip-env
+    depends_on: [glitchtip]
+    restart: unless-stopped
+
+  prometheus:
+    profiles: [monitoring]
+    image: prom/prometheus:latest
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+  postgres-exporter:
+    profiles: [monitoring]
+    image: prometheuscommunity/postgres-exporter:latest
+    environment:
+      DATA_SOURCE_NAME: postgresql://instacertify:${POSTGRES_PASSWORD}@postgres:5432/instacertify?sslmode=disable
+    restart: unless-stopped
+
+  redis-exporter:
+    profiles: [monitoring]
+    image: oliver006/redis_exporter:latest
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    restart: unless-stopped
+
+  grafana:
+    profiles: [monitoring]
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me}
+      GF_SERVER_ROOT_URL: https://${GRAFANA_DOMAIN:-grafana.localhost}
+    volumes: [grafana_data:/var/lib/grafana]
+    restart: unless-stopped
+
+  # ---------- Automation (n8n, WhatsApp, newsletters) ----------
+  n8n:
+    profiles: [automation]
+    image: n8nio/n8n:latest
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: instacertify
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_HOST: ${AUTOMATION_DOMAIN:-n8n.localhost}
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://${AUTOMATION_DOMAIN:-n8n.localhost}/
+      GENERIC_TIMEZONE: Asia/Kolkata
+    volumes: [n8n_data:/home/node/.n8n]
+    depends_on: [postgres]
+    restart: unless-stopped
+
+  evolution-api:
+    profiles: [automation]
+    image: evoapicloud/evolution-api:latest
+    environment:
+      SERVER_URL: http://evolution-api:8080
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-change-me}
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://instacertify:${POSTGRES_PASSWORD}@postgres:5432/evolution?schema=public
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://redis:6379/6
+    ports: ["127.0.0.1:8080:8080"]
+    volumes: [evolution_data:/evolution/instances]
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  listmonk:
+    profiles: [automation]
+    image: listmonk/listmonk:latest
+    command: sh -c "./listmonk --install --idempotent --yes && ./listmonk"
+    environment:
+      LISTMONK_app__address: 0.0.0.0:9000
+      LISTMONK_db__host: postgres
+      LISTMONK_db__port: 5432
+      LISTMONK_db__user: instacertify
+      LISTMONK_db__password: ${POSTGRES_PASSWORD}
+      LISTMONK_db__database: listmonk
+      LISTMONK_db__ssl_mode: disable
+    ports: ["127.0.0.1:9002:9000"]
+    depends_on: [postgres]
+    restart: unless-stopped
+
+volumes:
+  site:
+  caddy_data:
+  caddy_config:
+  app_storage:
+  pg_data:
+  redis_data:
+  meili_data:
+  minio_data:
+  matomo_db:
+  matomo_data:
+  prometheus_data:
+  grafana_data:
+  n8n_data:
+  evolution_data:

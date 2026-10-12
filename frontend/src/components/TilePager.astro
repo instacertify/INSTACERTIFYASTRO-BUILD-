@@ -1,0 +1,54 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  /** id of the element whose [data-tile] children are paged. */
+  controls: string;
+  count: number;
+  perPage: number;
+  label: string;
+}
+
+const { controls, count, perPage, label } = Astro.props;
+const pages = Math.ceil(count / perPage);
+---
+
+{pages > 1 && (
+  <nav aria-label={label} class="mt-6 flex flex-wrap items-center justify-center gap-1.5" data-tile-pager={controls} data-per-page={perPage}>
+    <button type="button" class="btn-ghost min-h-10 px-3 disabled:pointer-events-none disabled:opacity-40" data-tile-prev disabled>
+      <Icon name="chevron-right" class="size-4 rotate-180" /><span class="sr-only sm:not-sr-only">Previous</span>
+    </button>
+    {Array.from({ length: pages }, (_, i) => (
+      <button type="button" aria-label={`Page ${i + 1}`} aria-current={i === 0 ? 'page' : undefined} class="inline-flex size-10 cursor-pointer items-center justify-center rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 aria-[current=page]:bg-brand-700 aria-[current=page]:text-white" data-tile-page={i + 1}>{i + 1}</button>
+    ))}
+    <button type="button" class="btn-ghost min-h-10 px-3 disabled:pointer-events-none disabled:opacity-40" data-tile-next>
+      <span class="sr-only sm:not-sr-only">Next</span><Icon name="chevron-right" class="size-4" />
+    </button>
+  </nav>
+)}
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-tile-pager]').forEach((nav) => {
+    const list = document.getElementById(nav.dataset.tilePager!);
+    if (!list) return;
+    const tiles = [...list.querySelectorAll<HTMLElement>(':scope > [data-tile]')];
+    const per = Number(nav.dataset.perPage);
+    const pages = Math.ceil(tiles.length / per);
+    const numbers = [...nav.querySelectorAll<HTMLButtonElement>('[data-tile-page]')];
+    const prev = nav.querySelector<HTMLButtonElement>('[data-tile-prev]')!;
+    const next = nav.querySelector<HTMLButtonElement>('[data-tile-next]')!;
+    let page = 1;
+    const show = (n: number) => {
+      page = Math.min(Math.max(n, 1), pages);
+      tiles.forEach((t, i) => (t.hidden = Math.floor(i / per) + 1 !== page));
+      numbers.forEach((b) => (Number(b.dataset.tilePage) === page ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current')));
+      prev.disabled = page === 1;
+      next.disabled = page === pages;
+      const section = list.closest('section') ?? list;
+      if (section.getBoundingClientRect().top < 0) section.scrollIntoView({ block: 'start' });
+    };
+    numbers.forEach((b) => b.addEventListener('click', () => show(Number(b.dataset.tilePage))));
+    prev.addEventListener('click', () => show(page - 1));
+    next.addEventListener('click', () => show(page + 1));
+  });
+</script>

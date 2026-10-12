@@ -1,0 +1,129 @@
+---
+import Icon from './Icon.astro';
+import LeadForm from './LeadForm.astro';
+import { responsive } from '../lib/images';
+import type { Site } from '../lib/types';
+
+interface Props {
+  site: Site;
+  /** False keeps the popup closed unless a `data-open-lead` button is clicked. */
+  auto?: boolean;
+}
+
+const { site, auto: allowAuto = true } = Astro.props;
+const popup = site.popup ?? {};
+const auto = allowAuto && popup.enabled ? { delay: Math.max(5, Number(popup.delay) || 25) } : null;
+const side = await responsive(popup.image, [480, 720, 960, 1200]);
+const focus = { left: 'object-left', right: 'object-right' }[popup.imageFocus ?? ''] ?? 'object-center';
+// The panel is about 17-20rem wide and as tall as the form (~43rem), so a cropped photo is drawn wider than the panel.
+const ratio = side?.width && side.height ? side.width / side.height : 0.75;
+const drawn = (panel: number) => `${Math.round(Math.max(panel, 43 * ratio))}rem`;
+const sizes = `(min-width: 1024px) ${drawn(20)}, ${drawn(17)}`;
+---
+
+<dialog
+  id="lead-dialog"
+  data-auto={auto ? JSON.stringify(auto) : undefined}
+  aria-labelledby="lead-dialog-title"
+  class:list={[
+    'm-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-3xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60 backdrop:backdrop-blur-[2px] sm:m-auto sm:max-w-lg sm:rounded-3xl',
+    side && 'md:max-w-[46rem] lg:max-w-[52rem]',
+  ]}
+>
+  <div class:list={side && 'md:grid md:grid-cols-[17rem_minmax(0,1fr)] lg:grid-cols-[20rem_minmax(0,1fr)]'}>
+    {side && (
+      <div class="relative hidden overflow-hidden bg-brand-50 md:block">
+        <img
+          src={side.src}
+          srcset={side.srcset}
+          sizes={sizes}
+          alt={popup.imageAlt || ''}
+          loading="lazy"
+          decoding="async"
+          data-popup-image
+          class:list={['absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-300 data-loaded:opacity-100 motion-reduce:transition-none', focus]}
+        />
+      </div>
+    )}
+    <div data-nosnippet class="relative p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-7">
+      <button type="button" data-close class="absolute top-3 right-3 z-10 flex size-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900" aria-label="Close">
+        <Icon name="x" class="size-5" />
+      </button>
+      <p id="lead-dialog-title" class="sr-only">{popup.title || 'Get a free certification assessment'}</p>
+      <div>
+        <LeadForm
+          id="popup"
+          bare
+          title={popup.title || 'Which certifications does your product need?'}
+          subtitle={popup.subtitle || 'A specialist from our team will connect with you shortly.'}
+          button={popup.button || 'Get my free assessment'}
+        />
+      </div>
+      <p class="mt-4 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
+        Prefer to talk? <a href={`tel:${site.contact.phoneE164}`} class="font-semibold text-brand-700 hover:underline">{site.contact.phone}</a>
+        {' '}or{' '}
+        <a href={`https://wa.me/${site.contact.whatsapp}`} target="_blank" rel="noopener" class="font-semibold text-[#128C4B] hover:underline">WhatsApp</a>
+      </p>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { track } from '../scripts/leads';
+  import { prefStorage } from '../scripts/consent';
+
+  const dialog = document.querySelector<HTMLDialogElement>('#lead-dialog');
+  if (dialog) {
+    const DAY = 86_400_000;
+    const within = (key: string, days: number) => Number(prefStorage().getItem(key) ?? 0) > Date.now() - days * DAY;
+    const cookieBannerOpen = () => !!document.querySelector('[data-cookie-banner]:not([hidden])') || !!document.querySelector('#cookie-consent dialog[open]');
+
+    // The side image is hidden on phones; elsewhere it starts loading as soon as the popup is likely to open.
+    const image = dialog.querySelector<HTMLImageElement>('[data-popup-image]');
+    const shown = () => image?.setAttribute('data-loaded', '');
+    if (image?.complete && image.naturalWidth) shown();
+    else image?.addEventListener('load', shown, { once: true });
+    const warm = () => {
+      if (image && image.loading !== 'eager' && matchMedia('(min-width: 48rem)').matches) image.loading = 'eager';
+    };
+
+    const open = (source: string) => {
+      if (dialog.open) return;
+      warm();
+      dialog.showModal();
+      track('popup_open', `${source}:${location.pathname}`);
+    };
+
+    document.querySelectorAll<HTMLElement>('[data-open-lead]').forEach((el) => {
+      el.addEventListener('pointerenter', warm, { once: true });
+      el.addEventListener('focus', warm, { once: true });
+      el.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        e.preventDefault();
+        open('button');
+      });
+    });
+    dialog.querySelector('[data-close]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (e) => e.target === dialog && dialog.close());
+    dialog.addEventListener('close', () => prefStorage().setItem('ic_popup_dismissed', String(Date.now())));
+
+    const auto = dialog.dataset.auto ? (JSON.parse(dialog.dataset.auto) as { delay: number }) : null;
+    // Desktop only: full-screen popups on mobile count as intrusive interstitials for Google.
+    if (auto && matchMedia('(min-width: 1024px)').matches && !within('ic_lead_sent', 30) && !within('ic_popup_dismissed', 7)) {
+      let engaged = false;
+      const startedAt = Date.now();
+      document.addEventListener('focusin', (e) => {
+        if ((e.target as Element).closest?.('form[data-lead-form]') && !dialog.contains(e.target as Node)) engaged = true;
+      });
+      const trigger = (source: string) => {
+        if (engaged || cookieBannerOpen() || document.querySelector('dialog[open]') || within('ic_lead_sent', 30) || within('ic_popup_dismissed', 7)) return;
+        open(source);
+        document.documentElement.removeEventListener('mouseleave', onLeave);
+      };
+      const onLeave = (e: MouseEvent) => e.clientY <= 0 && Date.now() - startedAt > 8000 && trigger('exit');
+      document.documentElement.addEventListener('mouseleave', onLeave);
+      setTimeout(warm, 5000);
+      setTimeout(() => trigger('timer'), auto.delay * 1000);
+    }
+  }
+</script>

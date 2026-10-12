@@ -1,0 +1,98 @@
+---
+import ReviewCard from './ReviewCard.astro';
+import type { Testimonial } from '../lib/types';
+import { loopTrack, orderReviews, reviewsKey, scrollDuration } from '../lib/reviews';
+
+interface Props {
+  items: Testimonial[];
+  limit?: number;
+  /** Quote at the surrounding body size (landing pages) instead of 16px. */
+  large?: boolean;
+  /** A slow, endless sideways scroll that pauses on hover or focus, instead of a fixed row. */
+  scroll?: boolean;
+  /** Reviews mentioning one of these words (the page's service) come first. */
+  terms?: string[];
+}
+
+const { items, limit = 3, large = false, scroll = false, terms = [] } = Astro.props;
+const shown = orderReviews(items, terms).slice(0, limit);
+/* The track holds the cards twice and slides by half its width. */
+const track = scroll ? loopTrack(shown) : shown;
+const blank = { name: '', context: '', rating: 5, quote: '' };
+/* The built page carries the reviews for search engines; scripts/reviews.ts swaps in the admin's current list when it differs. */
+const live = { 'data-reviews': true, 'data-limit': limit, 'data-terms': terms.join(' ') || undefined, 'data-key': reviewsKey(shown) };
+---
+
+{scroll ? (
+  <div class="reviews-marquee" role="region" aria-label="Client reviews" style={`--reviews-duration: ${scrollDuration(track.length)}`} data-scroll {...live}>
+    {[0, 1].map((copy) => (
+      <ul class="reviews-track" aria-hidden={copy === 1 ? 'true' : undefined} data-reviews-list>
+        {track.map((t, i) => (
+          <li class="flex w-[18.5rem] shrink-0 sm:w-[22rem]" aria-hidden={copy === 0 && i >= shown.length ? 'true' : undefined}>
+            <ReviewCard t={t} large={large} class="w-full" />
+          </li>
+        ))}
+      </ul>
+    ))}
+    <template data-review-card>
+      <li class="flex w-[18.5rem] shrink-0 sm:w-[22rem]"><ReviewCard t={blank} large={large} class="w-full" /></li>
+    </template>
+  </div>
+) : (
+  <div {...live}>
+    <div class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3" data-reviews-list>
+      {shown.map((t) => <ReviewCard t={t} large={large} class="w-[85%] shrink-0 snap-start sm:w-auto" />)}
+    </div>
+    <template data-review-card>
+      <ReviewCard t={blank} large={large} class="w-[85%] shrink-0 snap-start sm:w-auto" />
+    </template>
+  </div>
+)}
+
+<script>
+  import '../scripts/reviews';
+</script>
+
+<style>
+  .reviews-marquee {
+    display: flex;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  }
+  .reviews-track {
+    display: flex;
+    flex-shrink: 0;
+    align-items: stretch;
+    gap: 1rem;
+    padding-right: 1rem;
+    animation: reviews-slide var(--reviews-duration) linear infinite;
+  }
+  @media (min-width: 640px) {
+    .reviews-track {
+      gap: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  .reviews-marquee:hover .reviews-track,
+  .reviews-marquee:focus-within .reviews-track,
+  .reviews-marquee:active .reviews-track {
+    animation-play-state: paused;
+  }
+  @keyframes reviews-slide {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reviews-marquee {
+      overflow-x: auto;
+      mask-image: none;
+    }
+    .reviews-track {
+      animation: none;
+    }
+    .reviews-track[aria-hidden] {
+      display: none;
+    }
+  }
+</style>

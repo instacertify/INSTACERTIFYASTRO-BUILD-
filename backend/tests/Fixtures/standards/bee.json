@@ -1,0 +1,30 @@
+{
+    "mandatory": [
+        {
+            "product": "Room AC (Inverter / Variable Speed)",
+            "regime": "Mandatory 2020; new types 1 Jan 2026",
+            "testStandard": "IS 1391 (Part 2); ISO 16358-1 (CSPF/ISEER)",
+            "ratingTable": "Revised table effective 1 Jan 2026",
+            "testingPrice": "1,75,000 - 3,00,000 / model",
+            "labs": "Intertek, SGS",
+            "labelFee": "Per-label fee as per product schedule",
+            "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+        }
+    ],
+    "voluntary": [
+        {
+            "product": "Air Compressor",
+            "regime": "Voluntary since 2020",
+            "testStandard": "IS 5456",
+            "ratingTable": "",
+            "testingPrice": "50,000 - 80,000 / model",
+            "labs": "CPRI",
+            "labelFee": "",
+            "registrationFee": ""
+        }
+    ],
+    "fees": [
+        {"head": "Brand / Company Registration", "msme": "Rs 50,000", "large": "Rs 3,00,000", "frequency": "One-time per brand", "remarks": ""}
+    ],
+    "notes": ["NOTES: (1) Test report must be < 1 year old at submission."]
+}

@@ -1,0 +1,124 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import MaterialIcon from './MaterialIcon.astro';
+import CtaBand from './CtaBand.astro';
+import { getPage, getSite } from '../lib/content';
+import { breadcrumbSchema, trailFor } from '../lib/breadcrumbs';
+import { createAutolinker } from '../lib/autolink';
+import { fixHeadings } from '../lib/outline';
+import { responsiveHtml } from '../lib/images';
+import { iconAlign, rowClass, stackClass } from '../lib/iconAlign';
+
+interface Props {
+  path: string;
+}
+
+const [page, site] = await Promise.all([getPage(Astro.props.path), getSite()]);
+if (!page) throw new Error(`Page not found: ${Astro.props.path}`);
+const seo = page.seo ?? {};
+const blocks = page.blocks ?? {};
+const story = await responsiveHtml(fixHeadings(createAutolinker(site, page.path)(page.content), 2), '(min-width: 1024px) 720px, 100vw');
+const trail = trailFor(page.path, page.title);
+const milestones = (blocks.milestones ?? []).filter((m) => m.year && m.text);
+const stats = (blocks.stats ?? []).filter((s) => s.value && s.label);
+const values = (blocks.values ?? []).filter((v) => v.title);
+const reasons = (blocks.reasons ?? []).filter((r) => r.title);
+const valuesAlign = iconAlign(blocks.values_icon_align);
+const reasonsAlign = iconAlign(blocks.reasons_icon_align);
+---
+
+<Layout title={seo.title ?? `${page.title} | Instacertify`} description={seo.description ?? page.excerpt ?? page.title} image={seo.image ?? page.image ?? undefined} canonical={seo.canonical} seo={seo} modified={page.updatedAt} jsonLd={[breadcrumbSchema(site.url, trail, page.path)]}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 max-w-3xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{page.title}</h1>
+      {page.excerpt && <p class="mt-4 max-w-3xl text-lg leading-relaxed text-slate-700">{page.excerpt}</p>}
+      <div class="mt-7 flex flex-wrap gap-3">
+        <a href="/contact" class="btn-primary">Get started <Icon name="arrow-right" class="size-4" /></a>
+        <a href="/services" class="btn-ghost">Our services</a>
+      </div>
+    </div>
+  </section>
+
+  {stats.length > 0 && (
+    <section class="section-tight border-b border-slate-200" aria-labelledby="about-stats-h">
+      <div class="container-page">
+        <h2 id="about-stats-h" class="text-2xl section-title sm:text-3xl">{blocks.stats_heading || 'Our impact in numbers'}</h2>
+        <dl class="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div class="flex flex-col bg-white p-5 sm:p-6">
+              <dt class="order-2 mt-1 text-sm text-slate-600 sm:text-base">{s.label}</dt>
+              <dd class="text-3xl font-bold tracking-tight text-brand-700 sm:text-4xl">{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+  )}
+
+  {story && (
+    <section class="section" aria-labelledby="about-story-h">
+      <div class="container-page grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-16">
+        <div>
+          <h2 id="about-story-h" class="text-2xl section-title sm:text-3xl">Our story</h2>
+          <div class="prose-body mt-5 max-w-3xl text-slate-700" set:html={story} />
+        </div>
+        {milestones.length > 0 && (
+          <aside aria-label="Milestones" class="lg:pt-14">
+            <ol class="relative space-y-8 border-l-2 border-slate-200 pl-7">
+              {milestones.map((m) => (
+                <li class="relative">
+                  <span class="absolute top-1.5 -left-[2.2rem] size-3.5 rounded-full border-2 border-white bg-brand-700 ring-2 ring-brand-700" aria-hidden="true"></span>
+                  <p class="text-xl font-bold text-brand-700">{m.year}</p>
+                  <p class="mt-1 leading-relaxed text-slate-700">{m.text}</p>
+                </li>
+              ))}
+            </ol>
+          </aside>
+        )}
+      </div>
+    </section>
+  )}
+
+  {values.length > 0 && (
+    <section class="section border-y border-slate-200 surface-tint" aria-labelledby="about-values-h">
+      <div class="container-page">
+        <h2 id="about-values-h" class="max-w-2xl text-2xl section-title sm:text-3xl">{blocks.values_heading || 'Our mission & values'}</h2>
+        {blocks.values_intro && <p class="mt-3 max-w-2xl text-lg text-slate-600">{blocks.values_intro}</p>}
+        <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {values.map((v) => (
+            <li class:list={['card flex flex-col p-6', stackClass[valuesAlign]]}>
+              <span class="flex size-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><MaterialIcon name={v.icon} src={v.iconImage} class="size-6" /></span>
+              <h3 class="mt-5 text-lg font-bold text-slate-950">{v.title}</h3>
+              <p class="mt-2 leading-relaxed text-slate-600">{v.text}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {reasons.length > 0 && (
+    <section class="section" aria-labelledby="about-reasons-h">
+      <div class="container-page">
+        <h2 id="about-reasons-h" class="max-w-2xl text-2xl section-title sm:text-3xl">{blocks.reasons_heading || 'Why businesses trust Instacertify'}</h2>
+        {blocks.reasons_intro && <p class="mt-3 max-w-2xl text-lg text-slate-600">{blocks.reasons_intro}</p>}
+        <ul class="mt-10 grid gap-x-12 gap-y-8 md:grid-cols-2">
+          {reasons.map((r) => (
+            <li class:list={['flex gap-4 border-t border-slate-200 pt-6 sm:gap-5', rowClass[reasonsAlign]]}>
+              <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-700 text-white"><MaterialIcon name={r.icon} src={r.iconImage} class="size-6" /></span>
+              <div>
+                <h3 class="text-lg font-bold text-slate-950">{r.title}</h3>
+                <p class="mt-1.5 leading-relaxed text-slate-600">{r.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</Layout>

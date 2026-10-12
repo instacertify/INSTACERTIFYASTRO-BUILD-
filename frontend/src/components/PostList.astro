@@ -1,0 +1,271 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import PostCard from './PostCard.astro';
+import Pagination from './Pagination.astro';
+import CtaBand from './CtaBand.astro';
+import { POST_TYPES, getPosts, getSite, industriesOf, schemesOf } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+import type { PostType } from '../lib/types';
+
+interface Props {
+  type: PostType;
+  page: number;
+  perPage: number;
+  /** Slug of the industry the list is narrowed to. */
+  category?: string;
+}
+
+const { type, page, perPage, category } = Astro.props;
+const meta = POST_TYPES[type];
+const [everything, site] = await Promise.all([getPosts(type), getSite()]);
+const industries = industriesOf(everything);
+const current = industries.find((c) => c.slug === category);
+const all = current ? everything.filter((p) => p.industry?.slug === current.slug) : everything;
+const base = current ? `${meta.listPath}/category/${current.slug}` : meta.listPath;
+const pages = Math.max(1, Math.ceil(all.length / perPage));
+const posts = all.slice((page - 1) * perPage, page * perPage);
+const path = page === 1 ? base : `${base}/page/${page}`;
+const heading = current ? `${meta.plural}: ${current.name}` : meta.plural;
+const trail = [{ label: 'Resources', href: '/resources' }, ...(current ? [{ label: meta.plural, href: `/${meta.listPath}` }, { label: current.name }] : [{ label: meta.plural }])];
+const title = `${current ? heading : meta.seoTitle}${page > 1 ? ` – page ${page}` : ''} | Instacertify`;
+const blurb = current ? `${all.length} ${meta.plural.toLowerCase()} on ${current.name}. ${meta.blurb}` : meta.blurb;
+/** Audit reports are short case records; a compact row keeps the first ones above the fold. */
+const rows = type === 'audit';
+/** Audits can also be narrowed by certification and type of work; both filter the search index, so they cover every page. */
+const schemes = rows ? schemesOf(all) : [];
+const workTypes = rows
+  ? [...new Map(all.filter((p) => p.workType).map((p) => [p.workType!, p.workTypeLabel ?? p.workType!])).entries()].map(([value, label]) => ({ value, label, count: all.filter((p) => p.workType === value).length }))
+  : [];
+
+const jsonLd = [
+  breadcrumbSchema(site.url, trail, path),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: heading,
+    url: `${site.url}/${path}`,
+    hasPart: posts.map((p) => ({ '@type': type === 'news' ? 'NewsArticle' : 'Article', headline: p.title, url: `${site.url}${p.url}` })),
+  },
+];
+---
+
+<Layout title={title} description={page > 1 ? `Page ${page} of ${pages}: ${blurb}` : blurb} jsonLd={jsonLd}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{heading}</h1>
+      <p class="mt-4 max-w-2xl text-lg text-slate-600">{meta.blurb}</p>
+
+      <div class="mt-7 flex max-w-3xl flex-col gap-2 sm:flex-row sm:gap-3">
+        <div class="relative min-w-0 flex-1">
+          <label for="post-search" class="sr-only">Search {meta.plural.toLowerCase()}</label>
+          <Icon name="search" class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400" />
+          <input
+            id="post-search"
+            type="search"
+            placeholder={current ? `Search ${current.name}` : `Search ${meta.plural.toLowerCase()}`}
+            autocomplete="off"
+            data-index={`/${meta.listPath}/search.json`}
+            data-category={current?.slug ?? ''}
+            class="field h-12 pl-11 text-base"
+          />
+        </div>
+        {industries.length > 1 && (
+          <div class="sm:w-64 sm:shrink-0">
+            <label for="post-industry" class="sr-only">Filter by industry</label>
+            <select id="post-industry" class="field h-12 truncate text-base" autocomplete="off" data-industry-nav>
+              <option value={`/${meta.listPath}`} selected={!current}>All industries ({everything.length})</option>
+              {industries.map((c) => (
+                <option value={`/${meta.listPath}/category/${c.slug}`} selected={current?.slug === c.slug}>{c.name} ({c.count})</option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+      {(schemes.length > 1 || workTypes.length > 1) && (
+        <div class="mt-2 flex max-w-3xl flex-col gap-2 sm:mt-3 sm:flex-row sm:gap-3">
+          {schemes.length > 1 && (
+            <div class="min-w-0 flex-1">
+              <label for="post-scheme" class="sr-only">Filter by certification</label>
+              <select id="post-scheme" class="field h-12 truncate text-base" autocomplete="off" data-post-filter="cert">
+                <option value="">All certifications</option>
+                {schemes.map((s) => <option value={s.slug}>{s.name} ({s.count})</option>)}
+              </select>
+            </div>
+          )}
+          {workTypes.length > 1 && (
+            <div class="sm:w-64 sm:shrink-0">
+              <label for="post-work" class="sr-only">Filter by type of work</label>
+              <select id="post-work" class="field h-12 truncate text-base" autocomplete="off" data-post-filter="type">
+                <option value="">All types of work</option>
+                {workTypes.map((w) => <option value={w.value}>{w.label} ({w.count})</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
+      {current && (
+        <p class="mt-3 text-sm text-slate-600">
+          Showing {all.length} of {everything.length} {meta.plural.toLowerCase()} for {current.name}. <a href={`/${meta.listPath}`} class="tap font-semibold text-brand-700 hover:underline">Show all</a>
+        </p>
+      )}
+    </div>
+  </section>
+
+  <div class="container-page py-10 sm:py-14">
+    <div id="post-search-results" hidden>
+      <p id="post-search-status" class="text-slate-600" aria-live="polite"></p>
+      <ul id="post-search-list" class="mt-5 grid gap-x-8 md:grid-cols-2"></ul>
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <button type="button" id="post-search-more" class="btn-ghost" hidden>Show more results</button>
+        <button type="button" id="post-search-clear" class="font-semibold text-brand-700 hover:underline">Clear search and filters</button>
+      </div>
+    </div>
+
+    <div id="post-list">
+      {page > 1 && <p class="mb-5 text-sm text-slate-500">Page {page} of {pages}</p>}
+      {rows ? (
+        <div class="grid gap-4 lg:grid-cols-2">
+          {posts.map((post, i) => <PostCard post={post} eager={i < 2} layout="row" level={2} />)}
+        </div>
+      ) : (
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post, i) => <PostCard post={post} eager={i < 1} level={2} />)}
+        </div>
+      )}
+      <Pagination base={base} page={page} pages={pages} />
+    </div>
+  </div>
+
+  <CtaBand />
+</Layout>
+
+<script>
+  type Entry = { t: string; u: string; e: string; c: string; s: string; d: string; k?: string[]; w?: string; i?: string };
+  const BATCH = 24;
+
+  const input = document.querySelector<HTMLInputElement>('#post-search');
+  const results = document.querySelector<HTMLElement>('#post-search-results');
+  const status = document.querySelector<HTMLElement>('#post-search-status');
+  const list = document.querySelector<HTMLUListElement>('#post-search-list');
+  const more = document.querySelector<HTMLButtonElement>('#post-search-more');
+  const listing = document.querySelector<HTMLElement>('#post-list');
+  /** Certification ("cert") and type-of-work ("type") selects on the Audits list, kept in the URL. */
+  const filters = [...document.querySelectorAll<HTMLSelectElement>('[data-post-filter]')];
+  const filterValue = (key: string) => filters.find((f) => f.dataset.postFilter === key)?.value ?? '';
+
+  // Each industry has its own paginated list; carry the search words and filters across.
+  document.querySelector<HTMLSelectElement>('[data-industry-nav]')?.addEventListener('change', (e) => {
+    const url = new URL((e.currentTarget as HTMLSelectElement).value, location.origin);
+    const q = input?.value.trim();
+    if (q) url.searchParams.set('q', q);
+    filters.forEach((f) => f.value && url.searchParams.set(f.dataset.postFilter!, f.value));
+    location.assign(url);
+  });
+
+  if (input && results && status && list && more && listing) {
+    let index: Promise<Entry[]> | undefined;
+    const load = () => (index ??= fetch(input.dataset.index!).then((r) => r.json() as Promise<Entry[]>).catch(() => []));
+    let matches: Entry[] = [];
+    let shown = 0;
+
+    const item = (entry: Entry) => {
+      const li = document.createElement('li');
+      li.className = 'border-b border-slate-200';
+      const a = document.createElement('a');
+      a.href = entry.u;
+      a.className = 'group flex items-start gap-4 py-4';
+      const text = document.createElement('span');
+      text.className = 'block min-w-0 flex-1';
+      const info = document.createElement('span');
+      info.className = 'block text-xs text-slate-500';
+      info.textContent = [entry.c, entry.d].filter(Boolean).join(' · ');
+      const title = document.createElement('span');
+      title.className = 'mt-1 block font-semibold text-slate-900 group-hover:text-brand-700';
+      title.textContent = entry.t;
+      const excerpt = document.createElement('span');
+      excerpt.className = 'mt-1 block line-clamp-2 text-sm text-slate-600';
+      excerpt.textContent = entry.e;
+      text.append(info, title, excerpt);
+      if (entry.i) {
+        const img = document.createElement('img');
+        Object.assign(img, { src: entry.i, alt: '', width: 112, height: 84, loading: 'lazy', decoding: 'async' });
+        img.className = 'h-21 w-28 shrink-0 rounded-md bg-slate-100 object-cover';
+        a.append(img);
+      }
+      a.append(text);
+      li.append(a);
+      return li;
+    };
+
+    const showMore = () => {
+      list.append(...matches.slice(shown, shown + BATCH).map(item));
+      shown = Math.min(matches.length, shown + BATCH);
+      more.hidden = shown >= matches.length;
+    };
+
+    const run = async () => {
+      const query = input.value.trim();
+      const cert = filterValue('cert');
+      const work = filterValue('type');
+      const url = new URL(location.href);
+      for (const [key, value] of [['q', query], ['cert', cert], ['type', work]]) {
+        if (value) url.searchParams.set(key, value);
+        else url.searchParams.delete(key);
+      }
+      history.replaceState(null, '', url);
+
+      const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length && !cert && !work) {
+        results.hidden = true;
+        listing.hidden = false;
+        return;
+      }
+      const entries = await load();
+      if (input.value.trim() !== query || filterValue('cert') !== cert || filterValue('type') !== work) return;
+      const scope = input.dataset.category;
+      matches = entries.filter((e) =>
+        (!scope || e.s === scope) &&
+        (!cert || !!e.k?.includes(cert)) &&
+        (!work || e.w === work) &&
+        words.every((w) => `${e.t} ${e.e} ${e.c}`.toLowerCase().includes(w)));
+      list.replaceChildren();
+      shown = 0;
+      showMore();
+      const picked = filters.filter((f) => f.value).map((f) => f.selectedOptions[0].text.replace(/\s*\(\d+\)$/, ''));
+      const what = [query && `“${query}”`, ...picked].filter(Boolean).join(', ');
+      if (matches.length) {
+        status.textContent = `${matches.length} ${matches.length === 1 ? 'result' : 'results'} for ${what}`;
+      } else {
+        const ask = document.createElement('a');
+        ask.href = '/contact';
+        ask.className = 'font-semibold text-brand-700 hover:underline';
+        ask.textContent = 'ask a specialist';
+        status.replaceChildren(`Nothing matches ${what}. Try another word or filter, or `, ask, '.');
+      }
+      results.hidden = false;
+      listing.hidden = true;
+    };
+
+    input.addEventListener('focus', load, { once: true });
+    input.addEventListener('input', run);
+    filters.forEach((f) => f.addEventListener('change', run));
+    more.addEventListener('click', showMore);
+    document.querySelector('#post-search-clear')?.addEventListener('click', () => {
+      input.value = '';
+      filters.forEach((f) => (f.value = ''));
+      run();
+      input.focus();
+    });
+
+    const params = new URLSearchParams(location.search);
+    filters.forEach((f) => {
+      const preset = params.get(f.dataset.postFilter!);
+      if (preset && [...f.options].some((o) => o.value === preset)) f.value = preset;
+    });
+    input.value = params.get('q') ?? '';
+    if (input.value || filters.some((f) => f.value)) run();
+  }
+</script>

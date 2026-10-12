@@ -1,0 +1,124 @@
+{
+  "path": "certification/india/bis-crs-mark-certification",
+  "seoTitle": "BIS CRS Registration 2026 – Process, Documents, Cost & Timeline | Instacertify",
+  "seoDescription": "Get BIS CRS (Compulsory Registration Scheme) certification for electronics & IT products in 4–8 weeks. Lab testing, AIR for foreign manufacturers, documents and R-number — end to end.",
+  "eyebrow": "BIS · Compulsory Registration Scheme",
+  "headline": "BIS CRS registration for electronics & IT products",
+  "lead": "Mandatory before you manufacture, import or sell any notified electronic product in India. We identify your IS standard, book a BIS-recognised lab, file on Manak Online and deliver your R-number — typically in 4 to 8 weeks.",
+  "keyFacts": [
+    { "label": "Typical timeline", "value": "4–8 weeks" },
+    { "label": "Validity", "value": "2 years, renewable up to 5" },
+    { "label": "Regulator", "value": "BIS under MeitY" },
+    { "label": "Factory inspection", "value": "Not required" }
+  ],
+  "includes": [
+    "Product classification and correct IS standard identification",
+    "Test coordination with BIS-recognised, NABL-accredited labs",
+    "Authorised Indian Representative (AIR) for foreign manufacturers",
+    "Complete technical file and Manak Online filing",
+    "BIS query handling until the R-number is granted",
+    "Renewal tracking so your registration never lapses"
+  ],
+  "overview": [
+    "The Compulsory Registration Scheme (CRS) was introduced in 2012 by the Ministry of Electronics and Information Technology (MeitY) and is run by the Bureau of Indian Standards (BIS). It ensures that notified electronic and IT goods sold in India meet the applicable Indian Standard for safety.",
+    "CRS works on self-declaration of conformity backed by testing at a BIS-recognised laboratory. Unlike the ISI mark, there is no mandatory factory inspection. Once registered, your product carries the BIS Standard Mark with a unique R-number (R-XXXXXXXX).",
+    "The scheme has two goals: protect consumers from unsafe and substandard electronics, and give genuine, high-quality products — imported or made in India — straightforward market access."
+  ],
+  "documents": [
+    {
+      "title": "Manufacturer documents",
+      "items": [
+        "Manufacturing licence or business registration certificate",
+        "ISO 9001 or equivalent quality-management certificate",
+        "Manufacturing process flowchart",
+        "List of machinery and test equipment",
+        "Authorisation letter for the authorised signatory"
+      ]
+    },
+    {
+      "title": "Product documents",
+      "items": [
+        "Test report from a BIS-recognised lab (not older than 90 days)",
+        "Critical Components List (CCL) or Bill of Materials",
+        "Technical specifications, drawings and circuit diagrams",
+        "User manual / operating instructions",
+        "Declaration of Conformity in the prescribed format"
+      ]
+    },
+    {
+      "title": "Foreign manufacturers also need",
+      "items": [
+        "Nomination of an Authorised Indian Representative (AIR)",
+        "Power of Attorney from the manufacturer to the AIR"
+      ]
+    }
+  ],
+  "steps": [
+    { "title": "Classification & document prep", "duration": "3–7 days", "text": "We confirm the product category and exact IS standard, then compile the manufacturer, product and AIR documents." },
+    { "title": "Testing at a BIS-recognised lab", "duration": "10–30 days", "text": "Samples are tested against the relevant IS code — e.g. IS 13252 (Part 1) for IT equipment. The test report must be under 90 days old when filed." },
+    { "title": "Online application", "duration": "1–2 days", "text": "We file Form I on the Manak Online CRS portal with the test report, Declaration of Conformity and all supporting documents." },
+    { "title": "BIS scrutiny & grant", "duration": "15–25 days", "text": "BIS reviews the application. We respond to any queries quickly; on approval you receive the certificate and R-number." },
+    { "title": "Product marking", "duration": "Same day", "text": "Apply the Standard Mark with your R-number on the product, packaging and manual as per BIS marking guidelines." }
+  ],
+  "consequences": {
+    "title": "Why CRS is mandatory",
+    "text": "The Compulsory Registration Order prohibits manufacturing, storing for sale, importing, selling or distributing notified goods without a valid registration.",
+    "items": [
+      { "title": "Customs rejection", "text": "Shipments without a valid CRS mark are held or denied clearance at the port." },
+      { "title": "Seizure & penalties", "text": "Non-compliant stock in the market can be seized, with fines and legal action against the brand." },
+      { "title": "Marketplace delisting", "text": "Amazon, Flipkart and other platforms require a valid R-number to list notified products." }
+    ]
+  },
+  "table": {
+    "title": "Common CRS products and their Indian Standards",
+    "note": "Representative, not exhaustive — MeitY updates the notified list regularly. Ask us to confirm the standard for your exact model.",
+    "columns": ["Category", "Products", "Indian Standard"],
+    "rows": [
+      ["IT equipment", "Laptops, notebooks, tablets", "IS 13252 (Part 1) / IEC 62368-1"],
+      ["IT equipment", "Printers, plotters, scanners", "IS 13252 (Part 1) / IEC 62368-1"],
+      ["IT equipment", "Set-top boxes, monitors (32\" and above)", "IS 13252 (Part 1) / IEC 62368-1"],
+      ["Audio-video", "LCD/LED televisions (32\" and above)", "IS 616 / IEC 62368-1"],
+      ["Audio-video", "Wireless earphones, Bluetooth & smart speakers", "IS 616 / IEC 62368-1"],
+      ["Power", "Power banks", "IS 13252 (Part 1)"],
+      ["Power", "Adaptors for IT, AV and household appliances", "IS 13252 (Part 1) / IS 616 / IS 302 (Part 1)"],
+      ["Lighting", "Self-ballasted LED lamps", "IS 16102 (Part 1) / IEC 62560"],
+      ["Lighting", "Fixed and recessed LED luminaires", "IS 10322 (Part 5 / Sec 1 & 2)"],
+      ["Batteries", "Sealed secondary cells — nickel & lithium", "IS 16046 (Part 1 & 2) / IEC 62133"],
+      ["Appliances", "Microwave ovens, induction stoves, rice cookers", "IS 302 (Part 2-25 / 2-6 / 2-15)"],
+      ["Other", "CCTV cameras & recorders, musical systems < 200 W", "IS 13252 (Part 1) / IS 616"]
+    ]
+  },
+  "tip": {
+    "title": "The #1 cause of CRS delays: the wrong standard",
+    "text": "A smart TV may need separate registrations for the display and its adaptor. Thresholds like 32\" screens or 200 W amplifiers change the requirement. Every engagement starts with a technical review so you are tested once, against the right standard."
+  },
+  "costs": [
+    { "title": "BIS government fees", "text": "Application fee, registration fee and renewal fee paid directly to BIS. Fixed and published by BIS." },
+    { "title": "Lab testing fees", "text": "Varies by product type, complexity and number of models or series. The largest variable cost." },
+    { "title": "Instacertify professional fee", "text": "Technical review, documentation, lab liaison, filing, query handling and AIR support — quoted as a fixed fee." }
+  ],
+  "validity": [
+    "Initial registration is granted for 2 years.",
+    "Renewal can be filed up to 90 days before expiry, for 2–5 years.",
+    "A fresh test report may be needed if the standard has been revised.",
+    "A lapsed registration means sales must stop until a new one is granted — we track every deadline for you."
+  ],
+  "faqs": [
+    { "q": "What is BIS CRS?", "a": "CRS is the Compulsory Registration Scheme run by BIS under MeitY. It requires notified electronic and IT products — mobiles, laptops, chargers, LED lights and more — to be tested in India and registered before they are sold." },
+    { "q": "How long does CRS registration take?", "a": "Usually 4 to 8 weeks from sample submission to grant, depending on lab slot availability, product complexity and how quickly BIS queries are answered." },
+    { "q": "What does the BIS Standard Mark look like?", "a": "For CRS products it is the BIS logo with the registration number (R-XXXXXXXX) printed below it. You can verify any R-number in the BIS Care app." },
+    { "q": "Who can apply — importer or manufacturer?", "a": "Only the manufacturer can hold the registration. Foreign manufacturers must appoint an Authorised Indian Representative (AIR), which we can provide. Importers and traders cannot apply on their own." },
+    { "q": "Can I import notified products without CRS?", "a": "No. Customs will hold or reject commercial shipments of notified products without a valid registration. Limited exemptions exist for R&D samples, which need a separate approval." },
+    { "q": "Do I need to retest every year?", "a": "No. If the design and components stay the same, retesting is not normally required. BIS may still draw market samples, and a revised standard can require a fresh report at renewal." },
+    { "q": "Does CRS apply to components or spare parts?", "a": "CRS applies to finished products in the notified list, not individual components or spares, unless BIS specifically notifies them." },
+    { "q": "Can one registration cover multiple models?", "a": "Yes, models in the same series that share critical components can often be grouped under one registration, which reduces testing cost. We plan the series structure up front." }
+  ],
+  "related": [
+    "certification/india/wpc-eta-approval",
+    "certification/india/bee-certification-services",
+    "certification/india/bis-isi-mark-fmcs",
+    "services/indian-registration-compliances/environment-compliance/epr-for-e-waste",
+    "services/testing/electronics-electricals-testing",
+    "certification/global-certifications/imei-registration"
+  ]
+}

@@ -1,0 +1,205 @@
+[
+ {
+  "ministry": "Ministry of Electronics and Information Technology",
+  "product": "Digital Television Receiver for Satellite Broadcast Transmission",
+  "is": "IS 18112:2022",
+  "date": "26-07-2026",
+  "scheme": "CRS (Scheme-II)"
+ },
+ {
+  "ministry": "Dept of Chemicals and Petrochemicals",
+  "product": "n-Butyl Acrylate",
+  "is": "IS 14709:1999",
+  "date": "31-07-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "Dept of Chemicals and Petrochemicals",
+  "product": "Linear Alkyl Benzene",
+  "is": "IS 12795:2020",
+  "date": "30-09-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Pipe Wrenches - General Purpose",
+  "is": "IS 4003 (Part 1):1978",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Pipe Wrenches - Heavy Duty",
+  "is": "IS 4003 (Part 2):1986",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Open-Jaw Wrenches (Spanners)",
+  "is": "IS 2028:2004",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Ring Wrenches (Spanners)",
+  "is": "IS 2029:1998",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Single-ended Open-jaw Adjustable Wrenches",
+  "is": "IS 6149:1984",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Chain Pipe Wrenches",
+  "is": "IS 4123:1982",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Open Ended Slugging Wrenches (Spanners)",
+  "is": "IS 4508:1992",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Ring Slugging Wrenches (Spanners)",
+  "is": "IS 4509:1992",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Combination Side Cutting Pliers",
+  "is": "IS 3650:1981",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Aluminium Utensils",
+  "is": "IS 1660:2024",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "Dept of Chemicals and Petrochemicals",
+  "product": "Aluminium Cans for Beverages",
+  "is": "IS 14407:2023",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "All electrical appliances for household/commercial use (rated <=250V single-phase / <=480V others, incl. DC & battery-operated) - approx. 90 appliance types incl. vacuum cleaners, cooking ranges, dishwashers, massage appliances, commercial kitchen equipment, personal e-transporters, etc.",
+  "is": "IS 302 (Part 1):2024 / IEC 60335-1:2020",
+  "date": "01-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "Dept of Chemicals and Petrochemicals",
+  "product": "Textiles - HDPE/PP Woven Sacks for Packaging of 50 kg Cement",
+  "is": "IS 11652:2017",
+  "date": "06-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "Dept of Chemicals and Petrochemicals",
+  "product": "Textiles - PP/HDPE Laminated Woven Sacks for Mail Sorting, Storage, Transport & Distribution",
+  "is": "IS 17399:2020",
+  "date": "06-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "Dept of Chemicals and Petrochemicals",
+  "product": "Textiles - PP Woven, Laminated, Block Bottom Valve Sacks for 50 kg Cement",
+  "is": "IS 16709:2017",
+  "date": "06-10-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloy bars, rods and sections (general engineering)",
+  "is": "IS 733:1983",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloys, forging stock & forgings (general engineering)",
+  "is": "IS 734:1975",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloy plate (general engineering)",
+  "is": "IS 736:1986",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloy sheet and strip (general engineering)",
+  "is": "IS 737:2008",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloy wire (general engineering)",
+  "is": "IS 739:1992",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloy rivet stock (general engineering)",
+  "is": "IS 740:1977",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloys - extruded round tube & hollow section",
+  "is": "IS 1285:2002",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Aluminium Wire for Electrical Purposes",
+  "is": "IS 2067:1975",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloys for manufacture of utensils",
+  "is": "IS 21:1992",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "DPIIT",
+  "product": "Wrought Al & Al alloy bars, rods, tubes, sections, plates & sheets for electrical applications",
+  "is": "IS 5082:1998",
+  "date": "01-12-2026",
+  "scheme": "ISI (Scheme-I)"
+ },
+ {
+  "ministry": "Ministry of Textiles",
+  "product": "Fibre Ropes - PP Split Film/Monofilament/Multifilament (PP2) & PP High-Tenacity Multifilament (PP3) - 3/4/8/12-strand",
+  "is": "IS 5175:2022",
+  "date": "05-06-2027",
+  "scheme": "ISI (Scheme-I)"
+ }
+]

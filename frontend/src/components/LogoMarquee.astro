@@ -1,0 +1,83 @@
+---
+import { atArea } from '../lib/images';
+import type { Home } from '../lib/types';
+
+interface Props {
+  logos: Home['clientLogos'];
+  title?: string | null;
+}
+
+const { logos: all, title } = Astro.props;
+const logos = await Promise.all(all.filter((l) => l.image).map(async (l) => ({ ...l, img: (await atArea(l.image, 2788, 21, 39))! })));
+// The track holds the list twice and slides by half its width, so the loop is seamless.
+const duration = `${Math.max(20, logos.length * 3.5)}s`;
+---
+
+{logos.length > 0 && (
+  <div role="region" aria-label={title || 'Our clients'}>
+    {title && <p class="container-page text-center text-sm font-semibold text-slate-600">{title}</p>}
+    <div class="marquee mt-5" style={`--marquee-duration: ${duration}`}>
+      {[0, 1].map((copy) => (
+        <ul class="marquee-list" aria-hidden={copy === 1 ? 'true' : undefined}>
+          {logos.map((l) => {
+            const Tag = l.url ? 'a' : 'span';
+            return (
+              <li>
+                <Tag href={l.url ?? undefined} target={l.url ? '_blank' : undefined} rel={l.url ? 'noopener' : undefined} tabindex={copy === 1 ? -1 : undefined} class="logo">
+                  <img src={l.img.src} alt={copy === 1 ? '' : l.name} title={l.name} width={l.img.width} height={l.img.height} style={`height: ${l.img.height}px`} loading="lazy" decoding="async" />
+                </Tag>
+              </li>
+            );
+          })}
+        </ul>
+      ))}
+    </div>
+  </div>
+)}
+
+<style>
+  .marquee {
+    display: flex;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+  .marquee-list {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 3.5rem;
+    padding-right: 3.5rem;
+    animation: marquee var(--marquee-duration) linear infinite;
+  }
+  .marquee:hover .marquee-list,
+  .marquee:focus-within .marquee-list {
+    animation-play-state: paused;
+  }
+  /* Every logo sits in the same row height; each image has its own height from its shape. */
+  .logo {
+    display: flex;
+    height: 2.4375rem;
+    align-items: center;
+  }
+  .logo img {
+    width: auto;
+    max-width: none;
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee {
+      overflow-x: auto;
+      mask-image: none;
+    }
+    .marquee-list {
+      animation: none;
+    }
+    .marquee-list[aria-hidden] {
+      display: none;
+    }
+  }
+</style>

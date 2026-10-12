@@ -1,0 +1,83 @@
+---
+/* Vector backdrop for the dark blue hero of the ad landing pages: a fine blueprint grid, a certification seal
+   behind the form and a dotted route with the steps on the left. The layers drift slightly with the pointer. */
+const scallops = 30;
+const at = (angle: number, r: number) => `${(200 + r * Math.cos(angle)).toFixed(1)} ${(200 + r * Math.sin(angle)).toFixed(1)}`;
+const rosette =
+  Array.from({ length: scallops }, (_, i) => {
+    const step = (Math.PI * 2) / scallops;
+    return `${i === 0 ? `M${at(0, 150)} ` : ''}Q${at((i + 0.5) * step, 166)} ${at((i + 1) * step, 150)}`;
+  }).join(' ') + 'Z';
+---
+
+<div class="hero-backdrop pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+  <svg class="hero-grid absolute inset-0 size-full">
+    <defs>
+      <pattern id="hero-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+        <path d="M48 0H0v48" fill="none" stroke="#fff" stroke-opacity="0.07" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#hero-grid)" />
+  </svg>
+
+  <div class="hero-layer absolute -top-40 -right-48 hidden size-[42rem] md:block" style="--depth: 28px">
+    <svg viewBox="0 0 400 400" class="size-full" fill="none">
+      <circle cx="200" cy="200" r="197" stroke="#fff" stroke-opacity="0.08" />
+      <circle class="hero-spin" cx="200" cy="200" r="182" stroke="#fff" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="0.5 9" stroke-linecap="round" />
+      <path d={rosette} stroke="#fff" stroke-opacity="0.1" />
+      <circle cx="200" cy="200" r="122" stroke="#fff" stroke-opacity="0.08" />
+      <path d="M152 204l34 34 66-76" stroke="var(--color-accent-400)" stroke-opacity="0.45" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </div>
+
+  <div class="hero-layer absolute -bottom-10 -left-24 hidden h-[52rem] w-[34rem] lg:block" style="--depth: 16px">
+    <svg viewBox="0 0 460 800" class="size-full" fill="none">
+      <path class="hero-route" d="M-20 820C60 740 40 600 120 540S260 420 200 320 140 160 260 100 380 20 470-20" stroke="#fff" stroke-opacity="0.2" stroke-width="1.5" stroke-dasharray="3 9" stroke-linecap="round" />
+      <circle cx="120" cy="540" r="7" fill="var(--color-brand-700)" stroke="#fff" stroke-opacity="0.35" stroke-width="1.5" />
+      <circle cx="200" cy="320" r="7" fill="var(--color-brand-700)" stroke="#fff" stroke-opacity="0.35" stroke-width="1.5" />
+      <circle cx="260" cy="100" r="7" fill="var(--color-accent-400)" fill-opacity="0.7" />
+    </svg>
+  </div>
+</div>
+
+<style is:global>
+  .hero-grid {
+    mask-image: radial-gradient(ellipse 70% 80% at 78% 30%, #000 10%, transparent 75%);
+  }
+  .hero-layer {
+    transform: translate3d(calc(var(--px, 0) * var(--depth) * -1), calc(var(--py, 0) * var(--depth) * -1), 0);
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .hero-spin {
+    transform-origin: 200px 200px;
+    animation: hero-spin 120s linear infinite;
+  }
+  .hero-route {
+    animation: hero-route 40s linear infinite;
+  }
+  @keyframes hero-spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes hero-route {
+    to { stroke-dashoffset: -480; }
+  }
+</style>
+
+<script>
+  const hero = document.querySelector<HTMLElement>('.hero-backdrop')?.parentElement;
+  if (hero && matchMedia('(pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
+    let frame = 0;
+    hero.addEventListener('pointermove', (event) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const box = hero.getBoundingClientRect();
+        hero.style.setProperty('--px', ((event.clientX - box.left) / box.width - 0.5).toFixed(3));
+        hero.style.setProperty('--py', ((event.clientY - box.top) / box.height - 0.5).toFixed(3));
+      });
+    });
+    hero.addEventListener('pointerleave', () => {
+      hero.style.setProperty('--px', '0');
+      hero.style.setProperty('--py', '0');
+    });
+  }
+</script>

@@ -1,0 +1,209 @@
+---
+import '../styles/global.css';
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import LandingHeader from '../components/LandingHeader.astro';
+import LandingFooter from '../components/LandingFooter.astro';
+import MobileCtaBar from '../components/MobileCtaBar.astro';
+import LeadDialog from '../components/LeadDialog.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import { socialLinks } from '../lib/social';
+import { getSite, linkResolver } from '../lib/content';
+import { atHeight } from '../lib/images';
+import type { Link, Seo } from '../lib/types';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  noindex?: boolean;
+  /** Only when this page duplicates another URL. */
+  canonical?: string;
+  type?: 'website' | 'article';
+  /** ISO date; also read by the sitemap for <lastmod>. */
+  modified?: string | null;
+  jsonLd?: Record<string, unknown>[];
+  /** Headline for Google Discover and social cards; defaults to the title. */
+  ogTitle?: string;
+  ogDescription?: string;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
+  imageAlt?: string | null;
+  /** ISO date. */
+  published?: string | null;
+  authorUrl?: string | null;
+  section?: string | null;
+  /** False keeps the lead popup from opening on its own (e.g. on articles, which Discover penalises for interstitials). */
+  autoPopup?: boolean;
+  /** Ad landing pages: logo and phone only, no site menu or quote popup. */
+  minimal?: boolean;
+  /** Ad landing pages: the header menu's links to the page's own sections. */
+  sections?: Link[];
+  /** Prefilled WhatsApp message for the mobile call bar. */
+  whatsappText?: string;
+  /** False hides the mobile call/WhatsApp/quote bar. */
+  ctaBar?: boolean;
+  /** The record's admin "SEO & sharing" panel; fills the social headline/description and robots when not passed directly. */
+  seo?: Pick<Seo, 'ogTitle' | 'ogDescription' | 'robots' | 'schemaMode' | 'schema'> | null;
+}
+
+const {
+  title: rawTitle,
+  description: rawDescription,
+  image = '/og-default.png',
+  noindex = false,
+  canonical: canonicalOverride,
+  type = 'website',
+  modified,
+  jsonLd = [],
+  ogTitle,
+  ogDescription,
+  imageWidth,
+  imageHeight,
+  imageAlt,
+  published,
+  authorUrl,
+  section,
+  autoPopup = true,
+  minimal = false,
+  sections,
+  whatsappText,
+  ctaBar = true,
+  seo,
+} = Astro.props;
+const [site, resolveLink] = await Promise.all([getSite(), linkResolver()]);
+
+// Google truncates titles past ~60 characters and descriptions past ~160, so drop the brand suffix / cut at a word.
+const title = rawTitle.length > 60 ? rawTitle.replace(/\s+[|–-]\s+Instacertify$/, '') : rawTitle;
+const description = rawDescription.length > 160 ? rawDescription.slice(0, 157).replace(/\s+\S*$/, '') + '…' : rawDescription;
+const pathname = Astro.url.pathname.replace(/\.html$/, '').replace(/\/index$/, '').replace(/\/$/, '') || '/';
+// Admin-entered canonicals may carry www, a trailing slash or a retired URL; point them at the live page.
+const canonical = new URL(resolveLink(canonicalOverride) ?? pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
+const socialTitle = ogTitle || seo?.ogTitle || title;
+const socialDescription = ogDescription || seo?.ogDescription || description;
+const hidden = noindex || /noindex/i.test(seo?.robots ?? '');
+const follow = /nofollow/i.test(seo?.robots ?? '') ? 'nofollow' : 'follow';
+const robots = hidden ? `noindex, ${follow}` : `index, ${follow}, max-image-preview:large, max-snippet:-1, max-video-preview:-1`;
+const faviconSource = site.favicon || '/favicon.png';
+const faviconType = /\.svg$/i.test(faviconSource) ? 'image/svg+xml' : /\.ico$/i.test(faviconSource) ? 'image/x-icon' : 'image/png';
+const uploadedIcon = site.favicon && faviconType === 'image/png';
+const favicon = uploadedIcon ? (await atHeight(site.favicon, 24, 'png'))!.src : faviconSource;
+const touchIcon = uploadedIcon ? (await atHeight(site.favicon, 90, 'png'))!.src : faviconSource;
+const matomoUrl = import.meta.env.PUBLIC_MATOMO_URL;
+const matomoSiteId = String(site.integrations?.matomoSiteId || import.meta.env.PUBLIC_MATOMO_SITE_ID || '1');
+const verification = Object.entries({
+  'google-site-verification': site.integrations?.googleVerification,
+  'msvalidate.01': site.integrations?.bingVerification,
+  'yandex-verification': site.integrations?.yandexVerification,
+  'p:domain_verify': site.integrations?.pinterestVerification,
+  'facebook-domain-verification': site.integrations?.facebookVerification,
+}).filter((entry): entry is [string, string] => !!entry[1]);
+
+const headOffice = site.offices?.find((o) => o.type === 'head' && o.street);
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': `${site.url}/#organization`,
+  name: site.name,
+  url: site.url,
+  logo: site.logo ?? `${site.url}/logo.png`,
+  image: site.logo ?? `${site.url}/logo.png`,
+  description: site.description,
+  telephone: site.contact.phoneE164,
+  email: site.contact.email,
+  address: headOffice
+    ? {
+        '@type': 'PostalAddress',
+        streetAddress: headOffice.street,
+        addressLocality: headOffice.city || undefined,
+        addressRegion: headOffice.region || undefined,
+        postalCode: headOffice.postalCode || undefined,
+        addressCountry: headOffice.country,
+      }
+    : {
+        '@type': 'PostalAddress',
+        streetAddress: 'A-34, Sector 63A',
+        addressLocality: 'Noida',
+        addressRegion: 'Uttar Pradesh',
+        postalCode: '201301',
+        addressCountry: 'IN',
+      },
+  ...(headOffice?.mapLink && { hasMap: headOffice.mapLink }),
+  areaServed: ['IN', 'Worldwide'],
+  sameAs: socialLinks(site).map((s) => s.href),
+};
+const customSchema = seo?.schema ?? [];
+const schemas = [organization, ...(seo?.schemaMode === 'replace' && customSchema.length ? [] : jsonLd), ...customSchema];
+// Admin text may contain "</script>", which would end the tag early.
+const ldJson = (schema: Record<string, unknown>) => JSON.stringify(schema).replace(/</g, '\\u003c');
+---
+
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={robots} />
+    <meta name="theme-color" content="#225175" />
+    <link rel="icon" href={favicon} type={faviconType} />
+    {faviconType === 'image/png' && <link rel="apple-touch-icon" href={touchIcon} />}
+
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:title" content={socialTitle} />
+    <meta property="og:description" content={socialDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    {ogImage.protocol === 'https:' && <meta property="og:image:secure_url" content={ogImage} />}
+    {imageWidth && imageHeight && <meta property="og:image:width" content={String(imageWidth)} />}
+    {imageWidth && imageHeight && <meta property="og:image:height" content={String(imageHeight)} />}
+    {imageAlt && <meta property="og:image:alt" content={imageAlt} />}
+    {published && <meta property="article:published_time" content={published} />}
+    {modified && <meta property="article:modified_time" content={modified} />}
+    {authorUrl && <meta property="article:author" content={authorUrl} />}
+    {section && <meta property="article:section" content={section} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    {imageAlt && <meta name="twitter:image:alt" content={imageAlt} />}
+    {verification.map(([name, content]) => <meta name={name} content={content} />)}
+
+    {schemas.map((schema) => (
+      <script type="application/ld+json" set:html={ldJson(schema)} />
+    ))}
+
+    {matomoUrl && (
+      <script is:inline define:vars={{ matomoUrl, matomoSiteId }}>
+        var _paq = (window._paq = window._paq || []);
+        _paq.push(['requireConsent'], ['trackPageView'], ['enableLinkTracking']);
+        (function () {
+          var u = matomoUrl.replace(/\/$/, '') + '/';
+          _paq.push(['setTrackerUrl', u + 'matomo.php'], ['setSiteId', matomoSiteId]);
+          var g = document.createElement('script');
+          g.async = true;
+          g.src = u + 'matomo.js';
+          document.head.appendChild(g);
+        })();
+      </script>
+    )}
+  </head>
+  <body class:list={['flex min-h-dvh flex-col', ctaBar && 'pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0']}>
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:rounded focus:bg-white focus:px-3 focus:py-2">
+      Skip to content
+    </a>
+    {/* Fixed to the bottom of the screen; first in the markup so it paints with the page instead of after it. */}
+    <CookieConsent site={site} />
+    {minimal ? <LandingHeader site={site} quote={ctaBar} sections={sections} /> : <Header site={site} />}
+    <main id="main" tabindex="-1" class:list={['flex-1 outline-none', minimal && 'text-base sm:text-[1.0625rem]']}>
+      <slot />
+    </main>
+    {minimal ? <LandingFooter site={site} /> : <Footer site={site} />}
+    {ctaBar && <MobileCtaBar site={site} quoteHref={minimal ? '#quote' : undefined} whatsappText={whatsappText} />}
+    {!minimal && pathname !== '/contact' && <LeadDialog site={site} auto={autoPopup} />}
+  </body>
+</html>

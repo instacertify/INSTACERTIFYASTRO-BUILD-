@@ -1,0 +1,63 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { getFaqs, getSite } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+
+const CATEGORY_LABELS: Record<string, string> = {
+  general: 'General questions',
+  certification: 'Certification questions',
+  testing: 'Testing questions',
+  services: 'About our services',
+};
+
+const [faqs, site] = await Promise.all([getFaqs(), getSite()]);
+const groups = Object.entries(CATEGORY_LABELS)
+  .map(([key, label]) => ({ key, label, items: faqs.filter((f) => f.category === key).map((f) => ({ q: f.question, a: f.answer })) }))
+  .filter((g) => g.items.length);
+const trail = [{ label: 'FAQ' }];
+
+const jsonLd = [
+  breadcrumbSchema(site.url, trail, 'faq'),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })),
+  },
+];
+---
+
+<Layout
+  title="Certification FAQ – BIS, CRS, WPC, testing & costs | Instacertify"
+  description="Answers to common questions about BIS, CRS, WPC and global product certification: timelines, documents, testing, costs and how Instacertify works."
+  jsonLd={jsonLd}
+>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 max-w-3xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]">Frequently asked questions</h1>
+      <p class="mt-4 max-w-2xl text-lg text-slate-600">Straight answers on certification timelines, documents, testing and fees. Can't find yours? Ask our specialists. {site.contact.responseTime}</p>
+      {groups.length > 1 && (
+        <nav aria-label="FAQ topics" class="mt-6 flex flex-wrap gap-2">
+          {groups.map((g) => <a href={`#${g.key}`} class="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-white px-3.5 text-sm text-slate-700 hover:border-brand-300">{g.label}</a>)}
+        </nav>
+      )}
+    </div>
+  </section>
+
+  <div class="container-page max-w-4xl space-y-12 py-10 sm:py-14">
+    {groups.map((g) => (
+      <section id={g.key} aria-labelledby={`${g.key}-h`} class="scroll-mt-24">
+        <h2 id={`${g.key}-h`} class="mb-5 text-2xl section-title">{g.label}</h2>
+        <Faq items={g.items} />
+      </section>
+    ))}
+    <p class="rounded-2xl border border-brand-100 bg-brand-50/50 p-6 text-slate-700">
+      Still have a question? <a href="/contact" class="font-semibold text-brand-700">Send us your product details</a> or call <a href={`tel:${site.contact.phoneE164}`} class="font-semibold text-brand-700">{site.contact.phone}</a>.
+    </p>
+  </div>
+
+  <CtaBand />
+</Layout>

@@ -1,0 +1,157 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import CtaBand from './CtaBand.astro';
+import CookieTable from './CookieTable.astro';
+import ReviewedBy from './ReviewedBy.astro';
+import { formatDate, getPage, getSite, linkResolver } from '../lib/content';
+import { breadcrumbSchema, trailFor } from '../lib/breadcrumbs';
+import { createAutolinker } from '../lib/autolink';
+import { responsive, responsiveHtml } from '../lib/images';
+import { fixHeadings, outline, structureHeadings } from '../lib/outline';
+
+interface Props {
+  path: string;
+}
+
+const [page, site, resolve] = await Promise.all([getPage(Astro.props.path), getSite(), linkResolver()]);
+if (!page) throw new Error(`Page not found: ${Astro.props.path}`);
+const seo = page.seo ?? {};
+const isHub = page.template === 'hub';
+const { html: body, headings } = outline(fixHeadings(page.template === 'policy' ? structureHeadings(page.content ?? '') : createAutolinker(site, page.path)(page.content)));
+const content = await responsiveHtml(body, '(min-width: 1024px) 760px, 100vw');
+const toc = !isHub && headings.length >= 3;
+const href = `/${page.path.replace(/^\//, '')}`;
+// The footer group this page sits in (e.g. the legal pages) doubles as the "related pages" list.
+const group = site.footer?.columns?.find((c) => c.links.some((l) => l.href === href));
+const trail = trailFor(page.path, page.title);
+const sections = (page.blocks?.sections ?? []) as { title?: string; description?: string; items?: { image?: string; title?: string; content?: string; link_custom?: string; link_text?: string }[] }[];
+const itemImages = await Promise.all(sections.map((s) => Promise.all((s.items ?? []).map((i) => responsive(i.image, [400, 600])))));
+const itemTitles = sections.flatMap((s) => s.items ?? []).map((i) => i.title).filter(Boolean);
+const description = [seo.description, page.excerpt].find((d) => d && d.length >= 50)
+  ?? (itemTitles.length ? `${page.title}: ${itemTitles.slice(0, 4).join(', ')} and more — with a free expert assessment from Instacertify.` : seo.description ?? page.excerpt ?? page.title);
+---
+
+<Layout title={seo.title ?? `${page.title} | Instacertify`} description={description} image={seo.image ?? page.image ?? undefined} canonical={seo.canonical} seo={seo} modified={page.updatedAt} jsonLd={[breadcrumbSchema(site.url, trail, page.path)]}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 max-w-3xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{page.title}</h1>
+      {page.excerpt && <p class="mt-4 max-w-2xl text-lg text-slate-600">{page.excerpt}</p>}
+      {page.template === 'policy' && page.updatedAt && <p class="mt-3 text-sm text-slate-500">Last updated {formatDate(page.updatedAt, { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
+      <ReviewedBy seo={seo} class="mt-3" />
+    </div>
+  </section>
+
+  {isHub ? (
+    <div class="container-page py-10 sm:py-14">
+      {content && <div class="prose-body max-w-3xl text-slate-700" set:html={content} />}
+      {sections.map((s, si) => (
+        <section class="mt-12 first:mt-0" aria-label={s.title ?? page.title}>
+          {s.title && <h2 class="text-2xl section-title">{s.title}</h2>}
+          {s.description && <p class="mt-2 max-w-3xl text-slate-600">{s.description}</p>}
+          <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {(s.items ?? []).map((i, ii) => {
+              if (!i.title) return null;
+              const link = i.link_custom && i.link_custom !== '/' ? resolve(i.link_custom)! : null;
+              const image = itemImages[si][ii];
+              const Tag = link ? 'a' : 'div';
+              return (
+                <li>
+                  <Tag href={link ?? undefined} class:list={['flex h-full flex-col overflow-hidden', link ? 'card-hover group' : 'card']}>
+                    {image && <img src={image.src} srcset={image.srcset} sizes="(min-width: 1024px) 300px, (min-width: 640px) 50vw, 100vw" alt="" width="400" height="225" loading="lazy" decoding="async" class="aspect-video w-full bg-slate-100 object-cover" />}
+                    <div class="flex flex-1 flex-col p-4">
+                      <h3 class:list={['font-semibold text-slate-900', link && 'group-hover:text-brand-700']}>{i.title}</h3>
+                      {i.content && <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{i.content}</p>}
+                      <span class="mt-auto inline-flex items-center gap-1 pt-3 text-sm font-semibold text-brand-700">
+                        {link ? <>{i.link_text || 'Learn more'} <Icon name="arrow-right" class="size-4" /></> : <a href={`/contact?service=${encodeURIComponent(page.path)}`} class="-my-1 inline-block py-1">Get a quote</a>}
+                      </span>
+                    </div>
+                  </Tag>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
+  ) : (
+    <div class:list={['container-page grid gap-8 py-8 sm:py-12 lg:gap-12', toc ? 'lg:grid-cols-[14rem_minmax(0,1fr)] xl:grid-cols-[15rem_minmax(0,1fr)_17rem]' : 'lg:grid-cols-[minmax(0,1fr)_18rem]']}>
+      {toc && (
+        <nav aria-label="On this page" class="lg:sticky lg:top-24 lg:self-start">
+          <details class="group rounded-xl border border-slate-200 lg:hidden">
+            <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 font-semibold text-slate-900 [&::-webkit-details-marker]:hidden">
+              On this page <span class="text-sm font-normal text-slate-500">{headings.length} sections</span>
+              <Icon name="chevron-down" class="ml-auto size-5 text-slate-500 transition-transform group-open:rotate-180" />
+            </summary>
+            <ol class="space-y-1 border-t border-slate-200 px-4 py-3 text-sm">
+              {headings.map((h) => <li><a href={`#${h.id}`} class="block py-1.5 text-slate-700 hover:text-brand-700">{h.text}</a></li>)}
+            </ol>
+          </details>
+          <div class="hidden lg:block">
+            <p class="text-sm font-semibold text-slate-900">On this page</p>
+            <ol class="mt-3 max-h-[calc(100vh-10rem)] space-y-0.5 overflow-y-auto border-l border-slate-200 text-sm">
+              {headings.map((h) => (
+                <li><a href={`#${h.id}`} class="-ml-px block border-l-2 border-transparent py-1.5 pl-3 leading-snug text-slate-600 hover:text-brand-700 aria-[current=true]:border-brand-700 aria-[current=true]:font-semibold aria-[current=true]:text-brand-700" data-toc={h.id}>{h.text}</a></li>
+              ))}
+            </ol>
+          </div>
+        </nav>
+      )}
+
+      <div class="min-w-0">
+        {content && <div class="prose-body max-w-3xl text-slate-700" set:html={content} />}
+        {page.path.replace(/^\//, '') === 'cookie-policy' && <CookieTable site={site} />}
+      </div>
+
+      <aside class:list={['space-y-8 lg:self-start', toc ? 'lg:col-start-2 xl:sticky xl:top-24 xl:col-start-3 xl:row-start-1' : 'lg:sticky lg:top-24']}>
+        <div class="rounded-2xl surface-tint p-5">
+          <p class="font-semibold text-slate-900">Questions about this page?</p>
+          {site.contact.responseTime && <p class="mt-1 text-sm text-slate-600">{site.contact.responseTime}</p>}
+          <ul class="mt-4 space-y-3 text-sm">
+            <li><a href={`mailto:${site.contact.email}`} class="-my-2 flex items-center gap-2.5 py-2 font-medium break-all text-slate-800 hover:text-brand-700"><Icon name="mail" class="size-4 shrink-0 text-brand-700" />{site.contact.email}</a></li>
+            <li><a href={`tel:${site.contact.phoneE164}`} class="-my-2 flex items-center gap-2.5 py-2 font-medium text-slate-800 hover:text-brand-700"><Icon name="phone" class="size-4 shrink-0 text-brand-700" />{site.contact.phone}</a></li>
+            {site.contact.hours && <li class="flex items-center gap-2.5 text-slate-600"><Icon name="clock" class="size-4 shrink-0 text-brand-700" />{site.contact.hours}</li>}
+          </ul>
+        </div>
+        {group && group.links.length > 1 && (
+          <nav aria-label={group.title}>
+            <p class="text-sm font-semibold text-slate-900">{group.title}</p>
+            <ul class="mt-2 divide-y divide-slate-100 border-y border-slate-100 text-sm">
+              {group.links.map((l) => (
+                <li>
+                  <a href={l.href} aria-current={l.href === href ? 'page' : undefined} class="flex items-center justify-between gap-2 py-2.5 text-slate-700 hover:text-brand-700 aria-[current=page]:font-semibold aria-[current=page]:text-brand-700">
+                    {l.label}<Icon name="chevron-right" class="size-4 shrink-0 text-slate-400" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+      </aside>
+    </div>
+  )}
+
+  <CtaBand />
+</Layout>
+
+{toc && (
+  <script>
+    // Marks the section being read in the "On this page" list.
+    const links = new Map([...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')].map((a) => [a.dataset.toc!, a]));
+    const seen = new Set<string>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => (e.isIntersecting ? seen.add(e.target.id) : seen.delete(e.target.id)));
+        const current = [...links.keys()].find((id) => seen.has(id));
+        if (current) links.forEach((a, id) => (id === current ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+      },
+      { rootMargin: '-96px 0px -60% 0px' },
+    );
+    links.forEach((_, id) => {
+      const h = document.getElementById(id);
+      if (h) observer.observe(h);
+    });
+  </script>
+)}

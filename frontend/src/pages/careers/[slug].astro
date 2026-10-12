@@ -1,0 +1,143 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Icon from '../../components/Icon.astro';
+import ApplicationForm from '../../components/ApplicationForm.astro';
+import { formatDate, getSite, getVacancies } from '../../lib/content';
+import { breadcrumbSchema } from '../../lib/breadcrumbs';
+import { fixHeadings } from '../../lib/outline';
+import type { Vacancy } from '../../lib/types';
+
+export const getStaticPaths = (async () => {
+  const vacancies = await getVacancies();
+  return vacancies.map((vacancy) => ({ params: { slug: vacancy.slug }, props: { vacancy, others: vacancies.filter((v) => v.slug !== vacancy.slug).slice(0, 4) } }));
+}) satisfies GetStaticPaths;
+
+const { vacancy: v, others } = Astro.props as { vacancy: Vacancy; others: Vacancy[] };
+const site = await getSite();
+const trail = [{ label: 'Careers', href: '/careers' }, { label: v.title }];
+
+const lakh = (n: number) => `₹${(n / 100000).toLocaleString('en-IN', { maximumFractionDigits: 1 })} L`;
+const salary = v.salary && (v.salary.min || v.salary.max)
+  ? [v.salary.min, v.salary.max].filter((n): n is number => !!n).map(lakh).join(' – ') + ' per year'
+  : null;
+const description = (v.summary ?? `${v.title} at Instacertify, ${v.location}.`).slice(0, 155);
+
+const facts = [
+  { icon: 'map-pin', label: 'Location', value: v.location },
+  { icon: 'clock', label: 'Job type', value: v.employmentTypeLabel },
+  v.experience && { icon: 'user', label: 'Experience', value: v.experience },
+  salary && { icon: 'rupee', label: 'Salary', value: salary },
+  v.openings > 1 && { icon: 'building', label: 'Openings', value: `${v.openings} positions` },
+  v.closesAt && { icon: 'calendar', label: 'Apply by', value: formatDate(v.closesAt, { day: 'numeric', month: 'long', year: 'numeric' }) },
+].filter(Boolean) as { icon: 'map-pin' | 'clock' | 'user' | 'rupee' | 'building' | 'calendar'; label: string; value: string }[];
+
+const jobPosting = {
+  '@context': 'https://schema.org',
+  '@type': 'JobPosting',
+  title: v.title,
+  description: v.description || `<p>${v.summary ?? v.title}</p>`,
+  identifier: { '@type': 'PropertyValue', name: site.name, value: v.slug },
+  datePosted: v.postedAt ?? v.updatedAt ?? undefined,
+  validThrough: v.closesAt ? `${v.closesAt}T23:59:59+05:30` : undefined,
+  employmentType: v.employmentType,
+  totalJobOpenings: v.openings,
+  directApply: true,
+  url: `${site.url}${v.url}`,
+  hiringOrganization: { '@type': 'Organization', '@id': `${site.url}/#organization`, name: site.name, sameAs: site.url, logo: site.logo ?? `${site.url}/logo.png` },
+  ...(v.workplace === 'remote'
+    ? { jobLocationType: 'TELECOMMUTE', applicantLocationRequirements: { '@type': 'Country', name: 'India' } }
+    : {
+        jobLocation: {
+          '@type': 'Place',
+          address: { '@type': 'PostalAddress', addressLocality: v.city ?? undefined, addressRegion: v.region ?? undefined, addressCountry: v.country },
+        },
+      }),
+  baseSalary: v.salary
+    ? { '@type': 'MonetaryAmount', currency: 'INR', value: { '@type': 'QuantitativeValue', minValue: v.salary.min ?? undefined, maxValue: v.salary.max ?? undefined, unitText: 'YEAR' } }
+    : undefined,
+  experienceRequirements: v.experienceMin
+    ? { '@type': 'OccupationalExperienceRequirements', monthsOfExperience: v.experienceMin * 12 }
+    : v.experienceMin === 0 ? 'no requirements' : undefined,
+  skills: v.skills.length ? v.skills.join(', ') : undefined,
+};
+---
+
+<Layout
+  title={`${v.title}${v.city ? ` – ${v.city}` : ''} | Careers at Instacertify`}
+  description={description}
+  modified={v.updatedAt}
+  jsonLd={[breadcrumbSchema(site.url, trail, v.url.slice(1)), jobPosting]}
+  autoPopup={false}
+>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      {v.department && <p class="eyebrow mt-6">{v.department}</p>}
+      <h1 class:list={['text-[2rem] leading-tight font-bold sm:text-[2.5rem]', v.department ? 'mt-2' : 'mt-6']}>{v.title}</h1>
+      {v.summary && <p class="mt-3 max-w-3xl text-lg text-slate-600">{v.summary}</p>}
+      <dl class="mt-6 flex flex-wrap gap-x-7 gap-y-3 text-sm">
+        {facts.map((f) => (
+          <div class="flex items-center gap-2">
+            <Icon name={f.icon} class="size-4 text-brand-700" />
+            <dt class="sr-only">{f.label}</dt>
+            <dd class="font-medium text-slate-800">{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div class="mt-7 flex flex-wrap items-center gap-3">
+        <a href="#apply" class="btn-primary">Apply now <Icon name="arrow-right" class="size-4" /></a>
+        {v.postedAt && <p class="text-sm text-slate-500">Posted {formatDate(v.postedAt, { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
+      </div>
+    </div>
+  </section>
+
+  <div class="container-page grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-14 lg:py-14">
+    <div class="min-w-0">
+      {v.description && <div class="prose-body max-w-3xl text-slate-700" set:html={fixHeadings(v.description)} />}
+      {v.skills.length > 0 && (
+        <div class="mt-8">
+          <h2 class="text-lg font-semibold text-slate-900">Key skills</h2>
+          <ul class="mt-3 flex flex-wrap gap-2">
+            {v.skills.map((s) => <li class="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">{s}</li>)}
+          </ul>
+        </div>
+      )}
+      <div id="apply" class="mt-12 scroll-mt-24">
+        <ApplicationForm id={`apply-${v.slug}`} vacancy={v.slug} title={`Apply for ${v.title}`} retentionMonths={site.privacy?.applicationMonths} />
+      </div>
+    </div>
+
+    <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+      <div class="card p-5">
+        <p class="font-semibold text-slate-900">At a glance</p>
+        <dl class="mt-4 space-y-3 text-sm">
+          {facts.map((f) => (
+            <div class="flex justify-between gap-4">
+              <dt class="text-slate-500">{f.label}</dt>
+              <dd class="text-right font-medium text-slate-800">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <a href="#apply" class="btn-primary mt-5 w-full">Apply now</a>
+      </div>
+      {others.length > 0 && (
+        <div class="card p-5">
+          <p class="font-semibold text-slate-900">Other openings</p>
+          <ul class="mt-3 space-y-3">
+            {others.map((o) => (
+              <li>
+                <a href={o.url} class="group block">
+                  <span class="font-medium text-slate-800 group-hover:text-brand-700">{o.title}</span>
+                  <span class="block text-xs text-slate-500">{o.location} · {o.employmentTypeLabel}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a href="/careers#openings" class="tap mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">All positions <Icon name="arrow-right" class="size-4" /></a>
+        </div>
+      )}
+    </aside>
+  </div>
+</Layout>

@@ -1,0 +1,143 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import logo from '../assets/brand/logo.png';
+import type { Link, Site } from '../lib/types';
+
+interface Props {
+  site: Site;
+  /** Off on pages without the #quote form, e.g. the thank-you page. */
+  quote?: boolean;
+  /** In-page links (#section) only, so visitors from an ad stay on the page. */
+  sections?: Link[];
+}
+
+const { site, quote = true, sections = [] } = Astro.props;
+const linkClass =
+  'group relative inline-flex h-16 items-center px-2.5 text-[0.9375rem] font-medium whitespace-nowrap text-slate-700 transition-colors hover:text-brand-700 aria-[current=location]:text-brand-700 xl:px-3';
+---
+
+<header class="sticky top-0 z-40 border-b border-slate-200 bg-white" data-landing-header>
+  <div class="container-page flex h-16 items-center justify-between gap-4">
+    <a href="/" class="shrink-0" aria-label="Instacertify home">
+      {site.logo ? (
+        <img src={site.logo} alt={site.name} loading="eager" class="h-8 w-auto max-w-48 object-contain sm:h-9" />
+      ) : (
+        <Image src={logo} alt="Instacertify" width={211} height={36} densities={[1, 2]} loading="eager" class="h-8 w-auto sm:h-9" />
+      )}
+    </a>
+
+    {sections.length > 0 && (
+      <nav aria-label="On this page" class="hidden lg:block">
+        <ul class="flex items-center">
+          {sections.map((s) => (
+            <li>
+              <a href={s.href} class={linkClass} data-section-link>
+                {s.label}
+                <span class="absolute inset-x-2.5 bottom-0 h-0.5 rounded-full bg-brand-700 opacity-0 transition-opacity group-aria-[current=location]:opacity-100 xl:inset-x-3" aria-hidden="true" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    <div class="flex items-center gap-1 sm:gap-2">
+      <a
+        href={`tel:${site.contact.phoneE164}`}
+        class="inline-flex min-h-11 items-center gap-2 rounded-lg px-2.5 font-semibold text-brand-700 hover:text-brand-800 xl:px-3"
+        aria-label={`Call ${site.contact.phone}`}
+        data-track="call"
+      >
+        <Icon name="phone" class="size-5" /><span class:list={['hidden', sections.length ? 'xl:inline' : 'sm:inline']}>{site.contact.phone}</span>
+      </a>
+      {quote && <a href="#quote" class="btn-primary hidden whitespace-nowrap sm:inline-flex" data-track="quote" data-focus-quote>Free quote</a>}
+      {sections.length > 0 && (
+        <button
+          type="button"
+          class="group inline-flex min-h-11 items-center gap-2 rounded-lg px-2.5 font-semibold text-slate-800 hover:bg-slate-100 lg:hidden"
+          aria-expanded="false"
+          aria-controls="landing-menu"
+          data-landing-menu-toggle
+        >
+          <Icon name="menu" class="size-6 group-aria-expanded:hidden" />
+          <Icon name="x" class="hidden size-6 group-aria-expanded:block" />
+          <span class="sr-only sm:not-sr-only">Menu</span>
+        </button>
+      )}
+    </div>
+  </div>
+
+  {sections.length > 0 && (
+    <div id="landing-menu" class="absolute inset-x-0 top-full hidden border-b border-slate-200 bg-white shadow-lg lg:hidden" data-landing-menu>
+      <nav aria-label="On this page" class="container-page max-h-[calc(100dvh-4rem)] overflow-y-auto py-2">
+        <ul class="divide-y divide-slate-100">
+          {sections.map((s) => (
+            <li>
+              <a href={s.href} class="flex min-h-12 items-center justify-between gap-3 text-base font-medium text-slate-900 aria-[current=location]:text-brand-700" data-section-link>
+                {s.label}<Icon name="chevron-right" class="size-5 text-slate-400" />
+              </a>
+            </li>
+          ))}
+        </ul>
+        {quote && (
+          <a href="#quote" class="btn mt-2 mb-3 min-h-12 w-full bg-cta text-base font-semibold text-white hover:bg-cta-hover" data-track="quote" data-focus-quote>
+            Get my free quote<Icon name="arrow-right" class="size-5" />
+          </a>
+        )}
+      </nav>
+    </div>
+  )}
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-landing-header]');
+  const toggle = header?.querySelector<HTMLButtonElement>('[data-landing-menu-toggle]');
+  const panel = header?.querySelector<HTMLElement>('[data-landing-menu]');
+
+  if (header && toggle && panel) {
+    const setOpen = (open: boolean) => {
+      panel.classList.toggle('hidden', !open);
+      toggle.setAttribute('aria-expanded', String(open));
+    };
+    toggle.addEventListener('click', () => setOpen(panel.classList.contains('hidden')));
+    panel.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('a')) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.classList.contains('hidden')) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (!header.contains(e.target as Node)) setOpen(false);
+    });
+    matchMedia('(min-width: 64rem)').addEventListener('change', () => setOpen(false));
+  }
+
+  /* Marks the menu link of the section being read. */
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-section-link]')];
+  const targets = [...new Set(links.map((a) => a.hash))].flatMap((hash) => document.querySelector<HTMLElement>(hash) ?? []);
+  if (targets.length && 'IntersectionObserver' in window) {
+    const visible = new Set<Element>();
+    const mark = () => {
+      const current = targets.find((t) => visible.has(t));
+      for (const a of links) {
+        if (current && a.hash === `#${current.id}`) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      }
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) visible.add(e.target);
+          else visible.delete(e.target);
+        }
+        mark();
+      },
+      { rootMargin: '-80px 0px -55% 0px' },
+    );
+    targets.forEach((t) => observer.observe(t));
+  }
+</script>

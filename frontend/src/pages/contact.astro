@@ -1,0 +1,179 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import LeadForm from '../components/LeadForm.astro';
+import { getServices, getSite } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+
+const [site, services] = await Promise.all([getSite(), getServices()]);
+const channels = [
+  { icon: 'phone' as const, title: 'Call us', value: site.contact.phone, href: `tel:${site.contact.phoneE164}`, track: 'call' },
+  { icon: 'whatsapp' as const, title: 'WhatsApp', value: 'Chat with a specialist', href: `https://wa.me/${site.contact.whatsapp}`, track: 'whatsapp' },
+  { icon: 'mail' as const, title: 'Email', value: site.contact.email, href: `mailto:${site.contact.email}`, track: 'email' },
+];
+const offices = site.offices ?? [];
+const officeNames = offices.length <= 4
+  ? offices.map((o) => o.name).join(', ').replace(/, ([^,]*)$/, ' and $1')
+  : `${offices.length} locations across India`;
+const tel = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;
+const branchSchema = offices.filter((o) => o.type !== 'head').map((o) => ({
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  name: `${site.name} – ${o.name}`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: o.street,
+    addressLocality: o.city || undefined,
+    addressRegion: o.region || undefined,
+    postalCode: o.postalCode || undefined,
+    addressCountry: o.country,
+  },
+  telephone: o.phone || site.contact.phoneE164,
+  email: o.email || undefined,
+  hasMap: o.mapLink,
+  url: `${site.url}/contact`,
+  parentOrganization: { '@id': `${site.url}/#organization` },
+}));
+---
+
+<Layout
+  title="Contact Instacertify – Free Certification Assessment & Quote"
+  description="Get a free product certification assessment within 24 hours. Call +91 99991 18039, WhatsApp, or send your requirement — BIS, WPC, CE, FCC and 120+ approvals."
+  jsonLd={[breadcrumbSchema(site.url, [{ label: 'Contact' }], 'contact'), ...branchSchema]}
+>
+  <section class="surface-tint">
+    <div class="container-page py-8 sm:py-12 lg:py-16">
+      <div class="grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:gap-14">
+        <div>
+          <Breadcrumbs items={[{ label: 'Contact' }]} />
+          <h1 class="mt-5 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">Get a free certification assessment</h1>
+          <p class="mt-4 text-lg text-slate-600">Tell us about your product. Within one business day a specialist will send you the applicable standards, document list, cost and timeline — no obligation.</p>
+
+          <ul class="mt-8 space-y-3">
+            {['Exact standards & schemes for your product', 'Itemised quote — govt, lab and our fee', 'Realistic timeline in writing'].map((t) => (
+              <li class="flex gap-3 text-slate-700"><Icon name="check-circle" class="size-5 shrink-0 text-emerald-600" />{t}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <LeadForm id="contact" variant="full" services={services} title="Tell us what you need" subtitle="Takes under a minute. Two quick steps." redirect="/thank-you" />
+        </div>
+      </div>
+
+      <ul class="mt-10 grid gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4" aria-label="Other ways to reach us">
+        {channels.map((c) => (
+          <li>
+            <a href={c.href} target={c.href.startsWith('http') ? '_blank' : undefined} rel="noopener" class="card-hover flex h-full items-center gap-3 p-4" data-track={c.track}>
+              <span class:list={['flex size-11 shrink-0 items-center justify-center rounded-xl', c.icon === 'whatsapp' ? 'bg-emerald-50 text-[#128C4B]' : 'bg-brand-50 text-brand-700']}>
+                <Icon name={c.icon} />
+              </span>
+              <span class="min-w-0">
+                <span class="block text-xs text-slate-500">{c.title}</span>
+                <span class="block truncate text-[0.9375rem] font-semibold text-slate-900">{c.value}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+        {site.contact.hours && (
+          <li class="card flex h-full items-center gap-3 p-4">
+            <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><Icon name="clock" /></span>
+            <span class="min-w-0">
+              <span class="block text-xs text-slate-500">Office hours</span>
+              <span class="block text-[0.9375rem] font-semibold text-slate-900">{site.contact.hours}</span>
+            </span>
+          </li>
+        )}
+      </ul>
+    </div>
+  </section>
+
+  {offices.length > 0 && (
+    <section class="section-tight border-t border-slate-200" aria-labelledby="offices-h">
+      <div class="container-page">
+        <h2 id="offices-h" class="text-2xl section-title sm:text-3xl">Our offices</h2>
+        <p class="mt-2 max-w-2xl text-slate-600">Meet our certification specialists in person — {officeNames}. Hover over an office to see it on the map.</p>
+
+        <div class="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]" data-offices>
+          <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            {offices.map((o, i) => (
+              <li data-office={i} data-city={o.name} data-active={String(i === 0)} class="group card relative p-5 transition data-[active=true]:border-brand-700 data-[active=true]:shadow-lg data-[active=true]:shadow-brand-700/10">
+                <button type="button" class="w-full text-left after:absolute after:inset-0 after:content-['']" aria-controls="office-map" aria-pressed={i === 0 ? 'true' : 'false'}>
+                  <span class="flex flex-wrap items-center gap-2 font-semibold text-slate-900">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 group-data-[active=true]:bg-brand-700 group-data-[active=true]:text-white"><Icon name={o.type === 'lab' ? 'flask' : 'map-pin'} class="size-4" /></span>
+                    {o.name}
+                    {o.typeLabel && (
+                      <span class:list={['rounded-full px-2 py-0.5 text-xs font-semibold', o.type === 'head' ? 'bg-accent-50 text-accent-700' : 'bg-slate-100 text-slate-600']}>{o.typeLabel}</span>
+                    )}
+                  </span>
+                  <span class="mt-3 block text-sm leading-relaxed text-slate-700">{o.address}</span>
+                  {o.landmark && <span class="mt-1 block text-sm text-slate-500">{o.landmark}</span>}
+                  {(o.hours || o.contactPerson) && (
+                    <span class="mt-3 flex flex-col gap-1 text-sm text-slate-600">
+                      {o.hours && <span class="flex items-center gap-2"><Icon name="clock" class="size-3.5 shrink-0 text-slate-400" />{o.hours}</span>}
+                      {o.contactPerson && <span class="flex items-center gap-2"><Icon name="user" class="size-3.5 shrink-0 text-slate-400" />{o.contactPerson}</span>}
+                    </span>
+                  )}
+                </button>
+                <div class="relative z-10 mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold">
+                  <a href={o.mapLink} target="_blank" rel="noopener" class="tap inline-flex items-center gap-1 text-brand-700 hover:underline">Get directions <Icon name="arrow-right" class="size-3.5" /></a>
+                  {o.phone && <a href={tel(o.phone)} class="inline-flex items-center gap-1 text-slate-700 hover:text-brand-700" data-track="call"><Icon name="phone" class="size-3.5" />{o.phone}</a>}
+                  {o.email && <a href={`mailto:${o.email}`} class="inline-flex min-w-0 items-center gap-1 text-slate-700 hover:text-brand-700" data-track="email"><Icon name="mail" class="size-3.5 shrink-0" /><span class="truncate">{o.email}</span></a>}
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div id="office-map" class="relative h-80 overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:h-96 lg:sticky lg:top-24 lg:h-[30rem]" aria-live="polite">
+            {offices.map((o, i) => (
+              <iframe
+                title={`Map of the Instacertify ${o.name} office`}
+                src={i === 0 ? o.mapEmbed : undefined}
+                data-src={o.mapEmbed}
+                data-map={i}
+                class:list={['absolute inset-0 size-full border-0 transition-opacity duration-300', i === 0 ? 'opacity-100' : 'pointer-events-none opacity-0']}
+                inert={i !== 0}
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen
+              ></iframe>
+            ))}
+            <p data-map-label class="pointer-events-none absolute top-3 right-3 rounded-full bg-white/95 px-3 py-1 text-sm font-semibold text-slate-800 shadow">{offices[0].name}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-offices]');
+  if (root) {
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-office]')];
+    const maps = [...root.querySelectorAll<HTMLIFrameElement>('[data-map]')];
+    const label = root.querySelector<HTMLElement>('[data-map-label]');
+
+    const show = (index: number) => {
+      cards.forEach((card, i) => {
+        card.dataset.active = String(i === index);
+        card.querySelector('button')?.setAttribute('aria-pressed', String(i === index));
+      });
+      maps.forEach((map, i) => {
+        const active = i === index;
+        if (active && !map.getAttribute('src')) map.src = map.dataset.src!;
+        map.classList.toggle('opacity-0', !active);
+        map.classList.toggle('pointer-events-none', !active);
+        map.classList.toggle('opacity-100', active);
+        map.inert = !active;
+      });
+      if (label) label.textContent = cards[index].dataset.city ?? '';
+    };
+
+    cards.forEach((card, i) => {
+      card.addEventListener('mouseenter', () => show(i));
+      card.addEventListener('focusin', () => show(i));
+      card.querySelector('button')?.addEventListener('click', () => show(i));
+    });
+  }
+</script>

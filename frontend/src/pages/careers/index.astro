@@ -1,0 +1,126 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Icon from '../../components/Icon.astro';
+import ApplicationForm from '../../components/ApplicationForm.astro';
+import { getSite, getVacancies } from '../../lib/content';
+import { breadcrumbSchema } from '../../lib/breadcrumbs';
+
+const [site, vacancies] = await Promise.all([getSite(), getVacancies()]);
+const careers = site.careers ?? {
+  headline: 'Build a career in product compliance',
+  intro: 'Join the team that helps manufacturers and brands get their products certified for India and 40+ markets.',
+  perks: [],
+  generalApplications: true,
+};
+const departments = [...new Set(vacancies.map((v) => v.department).filter((d): d is string => !!d))];
+const trail = [{ label: 'Careers' }];
+const perkIcons = ['bulb', 'badge', 'sparkles', 'globe', 'layers', 'shield'] as const;
+const count = vacancies.length;
+---
+
+<Layout
+  title={count ? `Careers at Instacertify – ${count} Open ${count === 1 ? 'Position' : 'Positions'}` : 'Careers at Instacertify – Jobs in Product Certification & Compliance'}
+  description={`Join Instacertify and help brands certify their products for India and 40+ markets. ${count ? `${count} open ${count === 1 ? 'role' : 'roles'} — apply online with your CV in 2 minutes.` : 'Send us your CV for upcoming roles in certification, testing and sales.'}`}
+  jsonLd={[breadcrumbSchema(site.url, trail, 'careers')]}
+  autoPopup={false}
+>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 max-w-3xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{careers.headline}</h1>
+      <p class="mt-4 max-w-2xl text-lg text-slate-600">{careers.intro}</p>
+      <div class="mt-7 flex flex-wrap gap-3">
+        {count > 0 && <a href="#openings" class="btn-primary">See {count} open {count === 1 ? 'position' : 'positions'} <Icon name="arrow-right" class="size-4" /></a>}
+        {careers.generalApplications && <a href="#apply" class:list={[count ? 'btn-ghost' : 'btn-primary']}>Send us your CV</a>}
+      </div>
+    </div>
+  </section>
+
+  {careers.perks.length > 0 && (
+    <section class="container-page py-12 sm:py-16" aria-labelledby="why-title">
+      <h2 id="why-title" class="text-2xl section-title sm:text-3xl">Why work with us</h2>
+      <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {careers.perks.map((perk, i) => (
+          <li class="card p-6">
+            <span class="flex size-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><Icon name={perkIcons[i % perkIcons.length]} class="size-6" /></span>
+            <h3 class="mt-4 font-semibold text-slate-900">{perk.title}</h3>
+            <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{perk.text}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section id="openings" class="scroll-mt-24 border-t border-slate-200 surface-tint" aria-labelledby="openings-title">
+    <div class="container-page py-12 sm:py-16">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <h2 id="openings-title" class="text-2xl section-title sm:text-3xl">Open positions</h2>
+        {departments.length > 1 && (
+          <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by department" data-dept-filter>
+            <button type="button" data-dept="" aria-pressed="true" class="rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-sm font-medium text-slate-700 aria-pressed:border-brand-700 aria-pressed:bg-brand-700 aria-pressed:text-white">All</button>
+            {departments.map((d) => (
+              <button type="button" data-dept={d} aria-pressed="false" class="rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-sm font-medium text-slate-700 aria-pressed:border-brand-700 aria-pressed:bg-brand-700 aria-pressed:text-white">{d}</button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {count > 0 ? (
+        <ul class="mt-8 grid gap-4">
+          {vacancies.map((v) => (
+            <li data-department={v.department ?? ''}>
+              <a href={v.url} class="card-hover group flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div class="min-w-0">
+                  {v.department && <p class="text-xs font-semibold tracking-wide text-brand-700 uppercase">{v.department}</p>}
+                  <h3 class="mt-1 text-lg font-semibold text-slate-900 group-hover:text-brand-700">{v.title}</h3>
+                  <ul class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+                    <li class="flex items-center gap-1.5"><Icon name="map-pin" class="size-4 text-slate-400" />{v.location}</li>
+                    <li class="flex items-center gap-1.5"><Icon name="clock" class="size-4 text-slate-400" />{v.employmentTypeLabel}</li>
+                    {v.experience && <li class="flex items-center gap-1.5"><Icon name="user" class="size-4 text-slate-400" />{v.experience}</li>}
+                  </ul>
+                  {v.summary && <p class="mt-2 max-w-3xl text-sm text-slate-600">{v.summary}</p>}
+                </div>
+                <span class="btn-ghost shrink-0 group-hover:border-brand-700 group-hover:text-brand-700">View &amp; apply <Icon name="arrow-right" class="size-4" /></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div class="card mt-8 p-8 text-center">
+          <p class="font-semibold text-slate-900">No open positions right now</p>
+          <p class="mt-1 text-sm text-slate-600">{careers.generalApplications ? 'We are always happy to meet good people — send us your CV below and we will reach out when a matching role opens.' : 'Please check back soon.'}</p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {careers.generalApplications && (
+    <section id="apply" class="container-page scroll-mt-24 py-12 sm:py-16" aria-labelledby="apply-title">
+      <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-14">
+        <div>
+          <h2 id="apply-title" class="text-2xl section-title sm:text-3xl">Don't see the right role?</h2>
+          <p class="mt-3 text-slate-600">Send us your CV anyway. We keep it on file for future openings in certification, testing, sales and operations, and contact you when there's a match.</p>
+          <ul class="mt-6 space-y-3 text-sm text-slate-700">
+            <li class="flex gap-2.5"><Icon name="check" class="mt-0.5 size-4 shrink-0 text-emerald-600" />Every application is read by a person, not a filter.</li>
+            <li class="flex gap-2.5"><Icon name="check" class="mt-0.5 size-4 shrink-0 text-emerald-600" />Your CV is visible only to our HR and hiring team.</li>
+            <li class="flex gap-2.5"><Icon name="check" class="mt-0.5 size-4 shrink-0 text-emerald-600" />Ask us anytime to see, correct or delete your data.</li>
+          </ul>
+        </div>
+        <ApplicationForm id="general" title="Send us your CV" subtitle="We'll match you to current and upcoming roles." retentionMonths={site.privacy?.applicationMonths} />
+      </div>
+    </section>
+  )}
+</Layout>
+
+<script>
+  const filter = document.querySelector<HTMLElement>('[data-dept-filter]');
+  filter?.addEventListener('click', (e) => {
+    const button = (e.target as Element).closest<HTMLButtonElement>('[data-dept]');
+    if (!button) return;
+    filter.querySelectorAll('[data-dept]').forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+    document.querySelectorAll<HTMLElement>('#openings [data-department]').forEach((item) => {
+      item.hidden = !!button.dataset.dept && item.dataset.department !== button.dataset.dept;
+    });
+  });
+</script>

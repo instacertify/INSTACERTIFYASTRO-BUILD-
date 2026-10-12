@@ -1,0 +1,114 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import MaterialIcon from '../components/MaterialIcon.astro';
+import { getSite } from '../lib/content';
+
+const site = await getSite();
+const waBase = `https://wa.me/${site.contact.whatsapp}`;
+const steps = [
+  { icon: 'mark_email_read', title: 'We read your enquiry', text: 'A compliance specialist checks your product and the route it needs. Not a call centre.' },
+  { icon: 'phone_in_talk', title: 'We call or WhatsApp you', text: 'Usually within 30 minutes in office hours, with the route, the cost and a realistic timeline.' },
+  { icon: 'handshake', title: 'You decide', text: 'Nothing is filed, booked or charged until you have the quote in writing and say yes.' },
+];
+const handy = [
+  'Product name and model number',
+  'HS code, if you know it',
+  'Photos of the product and its label',
+  'Any test reports or certificates you already hold',
+  'The country or marketplace you are selling into',
+];
+---
+
+<Layout title="Thank you – we’ve got your enquiry | Instacertify" description="Your enquiry has reached Instacertify. A compliance specialist will call or WhatsApp you shortly." noindex minimal ctaBar={false}>
+  <section class="panel-map bg-brand-700 text-white">
+    <div class="container-page max-w-3xl py-12 text-center sm:py-16">
+      <span class="mx-auto flex size-16 items-center justify-center rounded-full bg-white text-emerald-600"><Icon name="check-circle" class="size-9" /></span>
+      <h1 class="mt-6 text-[2rem] leading-tight font-bold tracking-[-0.02em] text-balance text-white sm:text-[2.5rem]">Thank you – we’ve got your enquiry</h1>
+      <p class="mt-4 text-lg leading-relaxed text-brand-100" data-topic-line>
+        A compliance specialist will call or WhatsApp you shortly{site.contact.hours ? ` (${site.contact.hours})` : ''}.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a href={waBase} target="_blank" rel="noopener" class="btn-whatsapp min-h-14 px-6 text-lg font-bold" data-track="whatsapp" data-wa-link>
+          <Icon name="whatsapp" class="size-5" />Need it faster? WhatsApp us
+        </a>
+        <a href={`tel:${site.contact.phoneE164}`} class="btn min-h-14 border-2 border-white/70 px-6 text-lg text-white hover:bg-white hover:text-brand-700" data-track="call">
+          <Icon name="phone" class="size-5" />{site.contact.phone}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page grid gap-12 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <h2 class="section-title text-2xl text-slate-950 sm:text-3xl">What happens next</h2>
+        <ol class="mt-8 space-y-7">
+          {steps.map((s, i) => (
+            <li class="relative flex gap-4">
+              {i < steps.length - 1 && <span aria-hidden="true" class="absolute top-14 -bottom-5 left-6 w-px bg-slate-200" />}
+              <span class="relative flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                <MaterialIcon name={s.icon} class="size-7" />
+                <span class="absolute -top-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full bg-cta text-xs font-bold text-white ring-2 ring-white">{i + 1}</span>
+              </span>
+              <div class="pt-2.5">
+                <h3 class="text-lg font-bold text-slate-950">{s.title}</h3>
+                <p class="mt-1 text-slate-600">{s.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div>
+        <h2 class="section-title text-2xl text-slate-950 sm:text-3xl">Keep these handy for the call</h2>
+        <p class="mt-3 text-slate-600">Don’t worry if you don’t have them all. It just makes the first call quicker.</p>
+        <ul class="mt-6 space-y-3">
+          {handy.map((item) => (
+            <li class="flex items-start gap-3 text-slate-700"><Icon name="check" class="mt-0.5 size-5 shrink-0 text-emerald-600" />{item}</li>
+          ))}
+        </ul>
+        <p class="mt-8 text-slate-600">
+          Prefer email? Write to <a href={`mailto:${site.contact.email}`} class="font-semibold text-brand-700 underline underline-offset-4">{site.contact.email}</a>.
+        </p>
+        <a href="/" class="mt-6 inline-flex min-h-11 items-center gap-2 font-semibold text-brand-700 hover:underline" data-back-link>
+          <Icon name="arrow-right" class="size-4 rotate-180" />Back to Instacertify
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-t border-slate-200 bg-white" aria-labelledby="declaration-h">
+    <div class="container-page max-w-4xl py-8">
+      <h2 id="declaration-h" class="flex items-center gap-2 text-sm font-bold text-slate-800"><Icon name="shield" class="size-4 shrink-0 text-brand-700" />Declaration</h2>
+      <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+        Instacertify Labs Private Limited is a private consulting company and testing marketplace. We are not a government body and are not affiliated with, endorsed by or
+        acting for any government department, regulator or certification authority. Testing is carried out by independent accredited partner laboratories; we coordinate it on
+        your behalf. Certificates, registrations and licences are issued only by the relevant authority or certification body.
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const topic = params.get('for')?.slice(0, 80);
+  const from = params.get('from');
+
+  if (topic) {
+    const line = document.querySelector<HTMLElement>('[data-topic-line]');
+    if (line) line.textContent = `Your ${topic} enquiry is with our team. ${line.textContent?.trim()}`;
+  }
+  const wa = document.querySelector<HTMLAnchorElement>('[data-wa-link]');
+  if (wa) {
+    const text = topic ? `Hi Instacertify, I just sent an enquiry about ${topic}.` : 'Hi Instacertify, I just sent an enquiry on your website.';
+    wa.href = `${wa.href.split('?')[0]}?text=${encodeURIComponent(text)}`;
+  }
+  // Only same-site paths, so the link can't be pointed elsewhere.
+  if (from && /^\/[a-z0-9/-]*$/i.test(from)) {
+    const back = document.querySelector<HTMLAnchorElement>('[data-back-link]');
+    if (back) {
+      back.href = from;
+      back.lastChild!.textContent = 'Back to the page you were on';
+    }
+  }
+</script>

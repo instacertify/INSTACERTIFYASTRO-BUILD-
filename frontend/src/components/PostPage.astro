@@ -1,0 +1,175 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import Faq from './Faq.astro';
+import PostCard from './PostCard.astro';
+import LeadForm from './LeadForm.astro';
+import CtaBand from './CtaBand.astro';
+import { POST_TYPES, formatDate, getPosts, getSite } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+import { createAutolinker } from '../lib/autolink';
+import { fixHeadings } from '../lib/outline';
+import { responsive, responsiveHtml } from '../lib/images';
+import type { Post } from '../lib/types';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const meta = POST_TYPES[post.type];
+const [all, site] = await Promise.all([getPosts(post.type), getSite()]);
+const seo = post.seo ?? {};
+const path = post.url.replace(/^\//, '');
+const trail = [{ label: 'Resources', href: '/resources' }, { label: meta.plural, href: `/${meta.listPath}` }, { label: post.title }];
+
+const sameCategory = all.filter((p) => p.slug !== post.slug && post.category && p.category?.slug === post.category.slug);
+const related = [...sameCategory, ...all.filter((p) => p.slug !== post.slug && !sameCategory.includes(p))].slice(0, 3);
+const content = await responsiveHtml(fixHeadings(createAutolinker(site, post.url)(post.content)), '(min-width: 1024px) 760px, 100vw');
+const [hero, authorPhoto] = await Promise.all([responsive(post.image, [480, 760, 1140], 66), responsive(post.author?.photo, [64, 128])]);
+const updated = post.updatedAt && post.publishedAt && post.updatedAt.slice(0, 10) > post.publishedAt.slice(0, 10) ? post.updatedAt : null;
+
+const pageUrl = `${site.url}${post.url}`;
+const imageWidth = post.imageWidth ?? null;
+const imageHeight = post.imageHeight ?? null;
+const imageObject = post.image
+  ? { '@type': 'ImageObject', url: post.image, width: imageWidth ?? undefined, height: imageHeight ?? undefined, caption: post.imageAlt ?? undefined }
+  : undefined;
+const editorial = { name: `${site.name} Editorial Team`, url: '/about' };
+const authorUrl = post.author ? `${site.url}${post.author.url}` : `${site.url}${editorial.url}`;
+const wordCount = post.content ? post.content.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length : undefined;
+
+const jsonLd: Record<string, unknown>[] = [
+  breadcrumbSchema(site.url, trail, path),
+  {
+    '@context': 'https://schema.org',
+    '@type': post.type === 'news' ? 'NewsArticle' : 'BlogPosting',
+    headline: post.title,
+    description: seo.description ?? post.excerpt,
+    image: imageObject,
+    datePublished: post.publishedAt,
+    dateModified: post.updatedAt ?? post.publishedAt,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl, primaryImageOfPage: imageObject },
+    author: post.author
+      ? {
+          '@type': 'Person',
+          name: post.author.name,
+          url: authorUrl,
+          jobTitle: post.author.role ?? undefined,
+          image: post.author.photo ?? undefined,
+          sameAs: Object.values(post.author.links ?? {}).filter(Boolean),
+        }
+      : { '@type': 'Organization', name: editorial.name, url: authorUrl },
+    publisher: { '@type': 'Organization', '@id': `${site.url}/#organization`, name: site.name, url: site.url, logo: { '@type': 'ImageObject', url: site.logo ?? `${site.url}/logo.png` } },
+    articleSection: post.category?.name,
+    keywords: seo.keyword,
+    wordCount,
+    inLanguage: 'en-IN',
+    isAccessibleForFree: true,
+  },
+];
+if (post.faqs?.length) {
+  jsonLd.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: post.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  });
+}
+---
+
+<Layout
+  title={seo.title ?? `${post.title} | Instacertify`}
+  description={[seo.description, post.excerpt].find((d) => d && d.length >= 70) ?? seo.description ?? post.excerpt}
+  image={seo.image ?? post.image ?? undefined}
+  canonical={seo.canonical}
+  seo={seo}
+  type="article"
+  modified={post.updatedAt ?? post.publishedAt}
+  jsonLd={jsonLd}
+  ogTitle={seo.ogTitle ?? post.title}
+  ogDescription={seo.ogDescription}
+  imageWidth={seo.image ? null : imageWidth}
+  imageHeight={seo.image ? null : imageHeight}
+  imageAlt={post.image ? post.imageAlt : null}
+  published={post.publishedAt}
+  authorUrl={authorUrl}
+  section={post.category?.name}
+  autoPopup={false}
+>
+  <article>
+    <header class="border-b border-slate-200 surface-tint">
+      <div class="container-page py-8 sm:py-12"><div class="max-w-4xl">
+        <Breadcrumbs items={trail} />
+        {post.category && <p class="eyebrow mt-6">{post.category.name}</p>}
+        <h1 class="mt-2 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{post.title}</h1>
+        <div class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-600">
+          <a href={post.author?.url ?? editorial.url} rel="author" class="flex items-center gap-2 font-medium text-slate-800 hover:text-brand-700">
+            {authorPhoto
+              ? <img src={authorPhoto.src} srcset={authorPhoto.srcset} sizes="32px" alt="" width="32" height="32" class="size-8 rounded-full object-cover" />
+              : <span class="flex size-8 items-center justify-center rounded-full bg-brand-100 text-brand-700"><Icon name="user" class="size-4" /></span>}
+            <span><span class="font-normal text-slate-500">By </span>{post.author?.name ?? editorial.name}</span>
+          </a>
+          {post.publishedAt && <span class="flex items-center gap-1.5"><Icon name="calendar" class="size-4" />Published <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time></span>}
+          {updated && <span>Updated <time datetime={updated}>{formatDate(updated)}</time></span>}
+          {post.readingTime && <span class="flex items-center gap-1.5"><Icon name="clock" class="size-4" />{post.readingTime} min read</span>}
+          {post.industry && (
+            <a href={`/${meta.listPath}/category/${post.industry.slug}`} class="tap flex items-center gap-1.5 hover:text-brand-700 hover:underline">
+              <Icon name="layers" class="size-4" />More on {post.industry.name}
+            </a>
+          )}
+        </div>
+        {seo.reviewer && (
+          <p class="mt-3 flex items-center gap-1.5 text-sm text-emerald-700"><Icon name="check-circle" class="size-4" />Reviewed by {seo.reviewer}{seo.reviewerCredentials && `, ${seo.reviewerCredentials}`}{seo.reviewedAt && ` on ${formatDate(seo.reviewedAt)}`}</p>
+        )}
+      </div></div>
+    </header>
+
+    <div class="container-page grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-14 lg:py-14">
+      <div class="min-w-0">
+        {hero && (
+          <img src={hero.src} srcset={hero.srcset} alt={post.imageAlt} width={imageWidth ?? 1200} height={imageHeight ?? 675} sizes="(min-width: 1024px) 760px, 100vw" loading="eager" fetchpriority="high" decoding="async" class="mb-8 h-auto w-full rounded-2xl bg-slate-100" />
+        )}
+        <div class="prose-body max-w-3xl text-slate-700" set:html={content} />
+
+        {!!post.faqs?.length && (
+          <section aria-labelledby="faq-h" class="mt-12 max-w-3xl">
+            <h2 id="faq-h" class="text-2xl section-title">Frequently asked questions</h2>
+            <div class="mt-5"><Faq items={post.faqs} /></div>
+          </section>
+        )}
+
+        {post.author && (
+          <aside class="mt-12 flex max-w-3xl gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6" aria-label="About the author">
+            {authorPhoto
+              ? <img src={authorPhoto.src} srcset={authorPhoto.srcset} sizes="64px" alt="" width="64" height="64" loading="lazy" class="size-16 shrink-0 rounded-full object-cover" />
+              : <span class="flex size-16 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700"><Icon name="user" class="size-7" /></span>}
+            <div>
+              <p class="text-xs font-semibold tracking-wide text-slate-500 uppercase">Written by</p>
+              <a href={post.author.url} class="tap mt-0.5 block text-lg font-semibold text-slate-900 hover:text-brand-700">{post.author.name}</a>
+              {post.author.role && <p class="text-sm text-slate-600">{post.author.role}{post.author.company && `, ${post.author.company}`}</p>}
+              {post.author.shortBio && <p class="mt-2 text-sm leading-relaxed text-slate-600">{post.author.shortBio}</p>}
+            </div>
+          </aside>
+        )}
+      </div>
+
+      <aside class="lg:self-start tall:sticky tall:top-24">
+        <LeadForm id={`post-${post.slug}`} title="Need help with compliance?" />
+      </aside>
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="section-tight border-t border-slate-200 surface-tint">
+      <div class="container-page">
+        <h2 class="text-2xl section-title">Keep reading</h2>
+        <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {related.map((p) => <PostCard post={p} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</Layout>

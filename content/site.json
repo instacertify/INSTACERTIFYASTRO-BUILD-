@@ -1,0 +1,446 @@
+{
+  "name": "Instacertify",
+  "tagline": "Product certification & compliance, handled end to end",
+  "description": "BIS, CRS, ISI, CE, FCC, WPC, TEC and 100+ global approvals. One specialist team for testing, documentation and regulator liaison across India and 40+ markets.",
+  "url": "https://instacertify.com",
+  "contact": {
+    "phone": "+91 99991 18039",
+    "phoneE164": "+919999118039",
+    "whatsapp": "919999118039",
+    "email": "contact@instacertify.com",
+    "address": "A-34, Sector 63A, Noida, Uttar Pradesh 201301, India",
+    "hours": "Mon–Sat, 9:30 AM – 7:00 PM IST",
+    "responseTime": "We reply within 1 business day — usually within 2 hours."
+  },
+  "stats": [
+    {
+      "value": "15+",
+      "label": "Years of regulatory experience"
+    },
+    {
+      "value": "98%",
+      "label": "First-time approval rate"
+    },
+    {
+      "value": "120+",
+      "label": "Certifications & licences"
+    },
+    {
+      "value": "40+",
+      "label": "Countries covered"
+    }
+  ],
+  "process": [
+    {
+      "title": "Free assessment",
+      "text": "Tell us your product and target market. We identify the exact standard, scheme and documents in 24 hours."
+    },
+    {
+      "title": "Testing & documents",
+      "text": "We book BIS/NABL-recognised labs, prepare your technical file and handle the paperwork."
+    },
+    {
+      "title": "Application & liaison",
+      "text": "We file on the regulator portal, answer every query and track the application daily."
+    },
+    {
+      "title": "Certificate & renewals",
+      "text": "You get your licence, marking guidance and automated renewal reminders so it never lapses."
+    }
+  ],
+  "whyUs": [
+    {
+      "title": "Specialist consultants",
+      "text": "Engineers and ex-lab professionals with 15+ years in Indian and global compliance."
+    },
+    {
+      "title": "Fixed, transparent quotes",
+      "text": "Government fees, lab fees and our fee shown separately — no surprises later."
+    },
+    {
+      "title": "One point of contact",
+      "text": "A dedicated manager from first call to final certificate, on phone and WhatsApp."
+    },
+    {
+      "title": "Faster approvals",
+      "text": "Pre-submission document checks cut BIS queries and shave weeks off the timeline."
+    }
+  ],
+  "nav": [
+    {
+      "label": "Certifications",
+      "href": "/certification",
+      "children": [
+        {
+          "label": "India (BIS, CRS, WPC, TEC)",
+          "href": "/certification/india"
+        },
+        {
+          "label": "Europe & Middle East (CE, UKCA, SABER)",
+          "href": "/certification/emea"
+        },
+        {
+          "label": "Asia (CCC, PSE, SNI)",
+          "href": "/certification/asia"
+        },
+        {
+          "label": "Americas (FCC, NOM)",
+          "href": "/certification/americas"
+        },
+        {
+          "label": "Global (ISO, CB, HACCP)",
+          "href": "/certification/global-certifications"
+        }
+      ]
+    },
+    {
+      "label": "Services",
+      "href": "/services",
+      "children": [
+        {
+          "label": "Product testing",
+          "href": "/services/testing"
+        },
+        {
+          "label": "Indian registrations & licences",
+          "href": "/services/indian-registration-compliances"
+        },
+        {
+          "label": "EPR & environment",
+          "href": "/services/indian-registration-compliances/environment-compliance"
+        },
+        {
+          "label": "Quality assurance",
+          "href": "/services/qualitiy"
+        }
+      ]
+    },
+    {
+      "label": "Industries",
+      "href": "/industries"
+    },
+    {
+      "label": "Resources",
+      "href": "/resources"
+    },
+    {
+      "label": "Contact",
+      "href": "/contact"
+    }
+  ],
+  "footer": {
+    "columns": [
+      {
+        "title": "Popular",
+        "links": [
+          {
+            "label": "BIS CRS registration",
+            "href": "/certification/india/bis-crs-mark-certification"
+          },
+          {
+            "label": "BIS ISI mark",
+            "href": "/certification/india/bis-isi-mark-domestic-manufacturers"
+          },
+          {
+            "label": "WPC ETA approval",
+            "href": "/certification/india/wpc-eta-approval"
+          },
+          {
+            "label": "TEC approval",
+            "href": "/certification/india/tec-approval"
+          },
+          {
+            "label": "CE marking",
+            "href": "/certification/emea/ce-certification"
+          },
+          {
+            "label": "EPR for e-waste",
+            "href": "/services/indian-registration-compliances/environment-compliance/epr-for-e-waste"
+          }
+        ]
+      },
+      {
+        "title": "Company",
+        "links": [
+          {
+            "label": "About us",
+            "href": "/about"
+          },
+          {
+            "label": "Careers",
+            "href": "/careers"
+          },
+          {
+            "label": "Industries",
+            "href": "/industries"
+          },
+          {
+            "label": "Events",
+            "href": "/resources/events"
+          },
+          {
+            "label": "Blog",
+            "href": "/resources/blogs"
+          },
+          {
+            "label": "FAQ",
+            "href": "/faq"
+          },
+          {
+            "label": "Contact",
+            "href": "/contact"
+          }
+        ]
+      },
+      {
+        "title": "Legal",
+        "links": [
+          {
+            "label": "Privacy policy",
+            "href": "/privacy-policy"
+          },
+          {
+            "label": "Terms of service",
+            "href": "/terms-of-service"
+          },
+          {
+            "label": "Refund policy",
+            "href": "/refund-policy"
+          },
+          {
+            "label": "Cookie policy",
+            "href": "/cookie-policy"
+          },
+          {
+            "label": "Data protection",
+            "href": "/data-protection"
+          }
+        ]
+      }
+    ],
+    "portals": []
+  },
+  "popup": {
+    "enabled": true,
+    "title": "",
+    "subtitle": "",
+    "button": "",
+    "delay": 30
+  },
+  "integrations": {
+    "gtm": "GTM-NJQ6BK77",
+    "clarity": "x9uh7uca0f"
+  },
+  "autolinksEnabled": true,
+  "autolinksMax": 6,
+  "autolinks": [
+    {
+      "keywords": "BIS CRS, CRS registration, CRS certification, Compulsory Registration Scheme",
+      "url": "/certification/india/bis-crs-mark-certification"
+    },
+    {
+      "keywords": "ISI mark, ISI certification, ISI licence, ISI license",
+      "url": "/certification/india/bis-isi-mark-domestic-manufacturers"
+    },
+    {
+      "keywords": "FMCS, Foreign Manufacturers Certification Scheme",
+      "url": "/certification/india/bis-isi-mark-fmcs"
+    },
+    {
+      "keywords": "Scheme-X, Scheme X",
+      "url": "/certification/india/scheme-x"
+    },
+    {
+      "keywords": "BIS certification, Bureau of Indian Standards",
+      "url": "/bis-certification"
+    },
+    {
+      "keywords": "WPC ETA, ETA approval, WPC approval, WPC",
+      "url": "/certification/india/wpc-eta-approval"
+    },
+    {
+      "keywords": "MTCTE, TEC certification, TEC approval",
+      "url": "/certification/india/tec-approval"
+    },
+    {
+      "keywords": "BEE star label, BEE star rating, BEE certification, star labelling",
+      "url": "/certification/india/bee-certification-services"
+    },
+    {
+      "keywords": "CDSCO medical device registration, medical device registration, CDSCO",
+      "url": "/certification/india/cdsco-medical-device"
+    },
+    {
+      "keywords": "CDSCO cosmetics, cosmetics registration, cosmetic import registration",
+      "url": "/certification/india/cdsco-cosmetics"
+    },
+    {
+      "keywords": "PESO certification, PESO approval, PESO",
+      "url": "/certification/india/peso-certification"
+    },
+    {
+      "keywords": "STQC certification, STQC",
+      "url": "/certification/india/stqc-certification"
+    },
+    {
+      "keywords": "IMEI registration, ICDR",
+      "url": "/certification/india/imei-icdr-registration"
+    },
+    {
+      "keywords": "CE marking, CE certification, CE mark",
+      "url": "/certification/emea/ce-certification"
+    },
+    {
+      "keywords": "UKCA marking, UKCA",
+      "url": "/certification/emea/ukca-certification"
+    },
+    {
+      "keywords": "FCC certification, FCC ID",
+      "url": "/certification/americas/fcc-certification"
+    },
+    {
+      "keywords": "CB Scheme, CB certificate, IECEE",
+      "url": "/certification/global-certifications/cb-iecee"
+    },
+    {
+      "keywords": "SABER, SASO",
+      "url": "/certification/emea/saber-certification"
+    },
+    {
+      "keywords": "SONCAP",
+      "url": "/certification/emea/soncap-certificate"
+    },
+    {
+      "keywords": "CCC certification, China Compulsory Certification",
+      "url": "/certification/asia/ccc"
+    },
+    {
+      "keywords": "PSE mark",
+      "url": "/certification/asia/pse-mark-certificate"
+    },
+    {
+      "keywords": "Anatel",
+      "url": "/certification/americas/anatel"
+    },
+    {
+      "keywords": "NOM certificate, NOM certification",
+      "url": "/certification/americas/nom-certificate"
+    },
+    {
+      "keywords": "EAC mark, GOST",
+      "url": "/certification/global-certifications/easc-gost-eac-mark-certification"
+    },
+    {
+      "keywords": "ISO certification, ISO 9001",
+      "url": "/certification/global-certifications/iso-certification"
+    },
+    {
+      "keywords": "HACCP",
+      "url": "/certification/global-certifications/haccp"
+    },
+    {
+      "keywords": "Halal certification",
+      "url": "/certification/global-certifications/halal-certification"
+    },
+    {
+      "keywords": "MSDS, safety data sheet",
+      "url": "/certification/global-certifications/msds-authoring"
+    },
+    {
+      "keywords": "EPR for e-waste, e-waste EPR, E-Waste Management Rules",
+      "url": "/services/indian-registration-compliances/environment-compliance/epr-for-e-waste"
+    },
+    {
+      "keywords": "EPR for plastic waste, plastic waste EPR, plastic EPR",
+      "url": "/services/indian-registration-compliances/environment-compliance/epr-for-plastic-waste"
+    },
+    {
+      "keywords": "EPR for battery waste, battery waste EPR, Battery Waste Management Rules",
+      "url": "/services/indian-registration-compliances/environment-compliance/epr-for-battery-waste"
+    },
+    {
+      "keywords": "LMPC, Legal Metrology",
+      "url": "/services/indian-registration-compliances/business-licenses/lmpc-for-packaging"
+    },
+    {
+      "keywords": "FSSAI registration, FSSAI licence, FSSAI license, FSSAI",
+      "url": "/services/indian-registration-compliances/business-licenses/fssai-basic-registration"
+    },
+    {
+      "keywords": "Import Export Code",
+      "url": "/services/indian-registration-compliances/import-export/import-export-code-iec"
+    },
+    {
+      "keywords": "Udyam registration, MSME registration",
+      "url": "/services/indian-registration-compliances/business-licenses/msme-udyam-registration"
+    },
+    {
+      "keywords": "GeM registration, GeM portal",
+      "url": "/services/indian-registration-compliances/others/gem-registration"
+    },
+    {
+      "keywords": "CHIMS",
+      "url": "/services/indian-registration-compliances/import-export/chims-registration"
+    },
+    {
+      "keywords": "Certificate of Origin",
+      "url": "/services/indian-registration-compliances/import-export/certificate-for-country-of-origin"
+    },
+    {
+      "keywords": "RoHS",
+      "url": "/services/testing/rohs-testing"
+    },
+    {
+      "keywords": "REACH",
+      "url": "/services/testing/reach-testing"
+    },
+    {
+      "keywords": "UN 38.3, UN38.3",
+      "url": "/un38-3-testing-and-certification"
+    },
+    {
+      "keywords": "LM-79, LM-80",
+      "url": "/services/testing/lm79"
+    },
+    {
+      "keywords": "IP rating, IP testing, ingress protection",
+      "url": "/ip-testing"
+    },
+    {
+      "keywords": "EMC testing, EMI/EMC testing, EMI testing",
+      "url": "/iec-61000-4-series"
+    },
+    {
+      "keywords": "salt spray test, salt spray testing",
+      "url": "/environmental-testing-astm-b117-2019-salt-spray"
+    },
+    {
+      "keywords": "environmental testing",
+      "url": "/services/testing/environmental-testing"
+    },
+    {
+      "keywords": "toy testing, toy safety testing",
+      "url": "/services/testing/toys"
+    },
+    {
+      "keywords": "cosmetics testing, cosmetic testing",
+      "url": "/services/testing/cosmetics-testing"
+    },
+    {
+      "keywords": "food testing, food safety testing",
+      "url": "/services/testing/food-beverages-testing"
+    },
+    {
+      "keywords": "wireless testing, RF testing",
+      "url": "/services/testing/wireless-testing"
+    },
+    {
+      "keywords": "IS/IEC 62368-1, IS 13252",
+      "url": "/is-iec-62368-1"
+    },
+    {
+      "keywords": "IS 16046",
+      "url": "/safety-testing-is-16046-2-2018-lithium-system-cells-batteries"
+    }
+  ]
+}

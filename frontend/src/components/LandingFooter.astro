@@ -1,0 +1,34 @@
+---
+import type { Site } from '../lib/types';
+
+interface Props {
+  site: Site;
+}
+
+const { site } = Astro.props;
+const year = new Date().getFullYear();
+const links = [
+  { label: 'About us', href: '/about' },
+  { label: 'Privacy policy', href: '/privacy-policy' },
+  { label: 'Terms of service', href: '/terms-of-service' },
+  { label: 'Refund policy', href: '/refund-policy' },
+];
+---
+
+<footer class="border-t border-slate-200 surface-tint text-sm text-slate-600">
+  <div class="container-page space-y-3 py-8">
+    <p>
+      <strong class="font-semibold text-slate-800">Instacertify Labs Private Limited</strong> · CIN U74999UP2022PTC170291 · {site.contact.address}
+    </p>
+    <p>
+      <a href={`tel:${site.contact.phoneE164}`} class="tap hover:text-brand-700">{site.contact.phone}</a>{' · '}
+      <a href={`mailto:${site.contact.email}`} class="tap hover:text-brand-700">{site.contact.email}</a> · {site.contact.hours}
+    </p>
+    <p class="text-xs text-slate-500">A private certification consultancy, not a government body. Government fees and lab testing are billed separately, against receipts.</p>
+    <ul class="flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-200 pt-4 text-sm">
+      <li>© {year} Instacertify</li>
+      {links.map((l) => <li><a href={l.href} class="tap hover:text-brand-700">{l.label}</a></li>)}
+      <li><button type="button" data-cookie-settings class="tap cursor-pointer hover:text-brand-700">Cookie settings</button></li>
+    </ul>
+  </div>
+</footer>

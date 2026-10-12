@@ -1,0 +1,112 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { KINDS, getServices, getSite } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+
+const [services, site] = await Promise.all([getServices(), getSite()]);
+const trail = [{ label: 'Services' }];
+const sections = Object.entries(KINDS).map(([kind, meta]) => ({
+  kind,
+  ...meta,
+  items: services.filter((s) => s.kind === kind),
+}));
+---
+
+<Layout
+  title="All Certification, Testing & Compliance Services | Instacertify"
+  description={`Browse ${services.length}+ product certifications, lab testing services and Indian business registrations — BIS, WPC, CE, FCC, EPR, FSSAI and more.`}
+  jsonLd={[breadcrumbSchema(site.url, trail, 'services')]}
+>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">Every certification & compliance service, in one place</h1>
+      <p class="mt-4 max-w-2xl text-lg text-slate-600">{services.length} services across certification, testing, registrations and quality assurance. Search or filter to find yours.</p>
+
+      <div class="mt-7 max-w-xl">
+        <label for="service-search" class="sr-only">Search services</label>
+        <div class="relative">
+          <Icon name="search" class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400" />
+          <input id="service-search" type="search" placeholder="Try “BIS”, “EPR”, “wireless” or “FSSAI”" class="field h-12 pl-11 text-base" autocomplete="off" />
+        </div>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-2" role="group" aria-label="Filter by type">
+        <button type="button" data-filter="" aria-pressed="true" class="filter-chip">All</button>
+        {sections.map((s) => <button type="button" data-filter={s.kind} aria-pressed="false" class="filter-chip">{s.label} <span class="opacity-75">{s.items.length}</span></button>)}
+      </div>
+    </div>
+  </section>
+
+  <div class="container-page space-y-12 py-10 sm:py-14">
+    {sections.map((section) => (
+      <section data-section={section.kind} aria-labelledby={`h-${section.kind}`}>
+        <div class="mb-5 flex items-end justify-between gap-4">
+          <h2 id={`h-${section.kind}`} class="text-xl section-title sm:text-2xl">{section.label}</h2>
+          <a href={section.href} class="tap text-sm font-semibold text-brand-700">Browse category →</a>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {section.items.map((s) => (
+            <div data-item data-kind={s.kind} data-search={`${s.title} ${s.summary}`.toLowerCase()}>
+              <ServiceCard service={s} />
+            </div>
+          ))}
+        </div>
+      </section>
+    ))}
+    <p id="no-results" hidden class="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-600">
+      No matching service. <a href="/contact" class="font-semibold text-brand-700">Tell us your product</a> and we'll find the right approval.
+    </p>
+  </div>
+
+  <CtaBand />
+</Layout>
+
+<style>
+  @reference "../styles/global.css";
+  .filter-chip {
+    @apply inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 text-sm text-slate-700 hover:border-brand-300 aria-pressed:border-brand-700 aria-pressed:bg-brand-700 aria-pressed:text-white;
+  }
+</style>
+
+<script>
+  const input = document.getElementById('service-search') as HTMLInputElement;
+  const chips = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const items = document.querySelectorAll<HTMLElement>('[data-item]');
+  const sections = document.querySelectorAll<HTMLElement>('[data-section]');
+  const empty = document.getElementById('no-results')!;
+  let kind = '';
+
+  function apply() {
+    const terms = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    items.forEach((el) => {
+      const matchKind = !kind || el.dataset.kind === kind;
+      const matchText = terms.every((t) => el.dataset.search!.includes(t));
+      el.hidden = !(matchKind && matchText);
+    });
+    let visible = 0;
+    sections.forEach((s) => {
+      const count = s.querySelectorAll('[data-item]:not([hidden])').length;
+      s.hidden = count === 0;
+      visible += count;
+    });
+    empty.hidden = visible > 0;
+  }
+
+  input.addEventListener('input', apply);
+  chips.forEach((chip) =>
+    chip.addEventListener('click', () => {
+      kind = chip.dataset.filter ?? '';
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      apply();
+    }),
+  );
+  const q = new URLSearchParams(location.search).get('q');
+  if (q) {
+    input.value = q;
+    apply();
+  }
+</script>

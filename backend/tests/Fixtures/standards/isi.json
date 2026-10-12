@@ -1,0 +1,62 @@
+[
+    {
+        "is": "IS 302 (Part 2/Sec 9): 2009",
+        "title": "SAFETY OF HOUSEHOLD AND SIMILAR ELECTRICAL APPLIANCES: PART 2 PARTICULAR REQUIREMENTS SECTION 9 GRILLS, TOASTERS AND SIMILAR PORTABLE COOKING APPLIANCES",
+        "broad": "Electrical Appliances",
+        "hsn4": "8516",
+        "hsn8": "85166000",
+        "status": "Mandatory",
+        "order": "Electrical Appliances (Quality Control) Order, 2025; since 01-03-2025",
+        "fees": {"large": 46000, "medium": 37000, "small": 23000, "micro": 9200},
+        "unit": "1 PCS",
+        "slabs": [[17.3, 1500], [10.4, "thereafter"]]
+    },
+    {
+        "is": "IS 459:1992",
+        "title": "Corrugated and semi-corrugated asbestos cement sheets",
+        "broad": "Cement & Construction Materials",
+        "hsn4": "6811",
+        "hsn8": "68114000",
+        "status": "Voluntary (ISI on request)",
+        "order": "Not under any QCO as per available records (verify latest BIS mandatory list)",
+        "fees": {"large": 46000, "medium": 37000, "small": 23000, "micro": 9200},
+        "unit": "1 M.T.",
+        "slabs": [[1.75, "For All"]]
+    },
+    {
+        "is": "IS 1",
+        "title": "Specification for The National Flag of India (Cotton Khadi)",
+        "broad": "Textiles",
+        "hsn4": "6306",
+        "hsn8": "63062990",
+        "status": "Voluntary (ISI on request)",
+        "order": "Not under any QCO as per available records",
+        "fees": {"large": 46000, "medium": 37000, "small": 23000, "micro": 9200},
+        "unit": "1 FLAG",
+        "slabs": [[0.36, "For All"]]
+    },
+    {
+        "is": "IS 1084",
+        "title": "MANILA ROPES",
+        "broad": "Textiles",
+        "hsn4": "5607",
+        "hsn8": "",
+        "status": "Upcoming mandatory",
+        "order": "Ropes and Cordages (Quality Control) Order",
+        "fees": {"large": 46000, "medium": 37000, "small": 23000, "micro": 9200},
+        "unit": "1 M.T.",
+        "slabs": [[12, "For All"]]
+    },
+    {
+        "is": "IS 12795",
+        "title": "Linear Alkyl Benzene",
+        "broad": "Chemicals",
+        "hsn4": "3817",
+        "hsn8": "",
+        "status": "Upcoming mandatory",
+        "order": "Linear Alkyl Benzene (Quality Control) Order",
+        "fees": {"large": 46000, "medium": 37000, "small": 23000, "micro": 9200},
+        "unit": "1 M.T.",
+        "slabs": [[5, "For All"]]
+    }
+]

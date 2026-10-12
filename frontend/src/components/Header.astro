@@ -1,0 +1,328 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import logo from '../assets/brand/logo.png';
+import type { Link, Site } from '../lib/types';
+
+interface Props {
+  site: Site;
+}
+
+const { site } = Astro.props;
+const current = Astro.url.pathname;
+const isActive = (href: string) => current === href || current.startsWith(`${href}/`);
+
+/** One block in a menu panel: a group heading with its links, or the second half of a long group. */
+type Block = { group: Link; links: Link[]; continued: boolean };
+const PANEL_COLUMNS = 4;
+const SPLIT_OVER = 15;
+const blockHeight = (b: Block) => 1.5 + (b.group.description ? 1 : 0) + b.links.length;
+/** Keeps a heading's arrow on the same line as its last word. */
+const headWords = (label: string) => {
+  const at = label.trimEnd().lastIndexOf(' ');
+  return { lead: at > 0 ? label.slice(0, at + 1) : '', last: at > 0 ? label.slice(at + 1) : label };
+};
+
+/**
+ * Packs a menu's groups, in order, into at most four columns with the shortest tallest column.
+ * A group longer than SPLIT_OVER continues at the top of the next column.
+ */
+function panelColumns(groups: Link[]): Block[][] {
+  const blocks: Block[] = groups.flatMap((group) => {
+    const links = group.children ?? [];
+    if (links.length <= SPLIT_OVER) return [{ group, links, continued: false }];
+    const half = Math.ceil(links.length / 2);
+    return [
+      { group, links: links.slice(0, half), continued: false },
+      { group, links: links.slice(half), continued: true },
+    ];
+  });
+  const height = (col: Block[]) => col.reduce((sum, b) => sum + blockHeight(b), 0) + Math.max(col.length - 1, 0);
+
+  const best = { tallest: Infinity, columns: [] as Block[][] };
+  const place = (start: number, columns: Block[][]) => {
+    if (start === blocks.length) {
+      const tallest = Math.max(...columns.map(height));
+      // Ties go to fewer columns, so short menus stay compact.
+      if (tallest < best.tallest || (tallest === best.tallest && columns.length < best.columns.length)) {
+        best.tallest = tallest;
+        best.columns = columns;
+      }
+      return;
+    }
+    if (columns.length === PANEL_COLUMNS) return;
+    for (let end = start + 1; end <= blocks.length; end++) {
+      if (end > start + 1 && blocks[end - 1].continued) break;
+      place(end, [...columns, blocks.slice(start, end)]);
+    }
+  };
+  place(0, []);
+  return best.columns;
+}
+---
+
+<div class="hidden bg-brand-700 text-sm text-brand-100 lg:block">
+  <div class="container-page flex h-9 items-center justify-end">
+    <div class="flex items-center gap-5">
+      <a href={`mailto:${site.contact.email}`} class="inline-flex items-center gap-1.5 hover:text-white">
+        <Icon name="mail" class="size-3.5" />{site.contact.email}
+      </a>
+      <a href={`tel:${site.contact.phoneE164}`} class="inline-flex items-center gap-1.5 hover:text-white">
+        <Icon name="phone" class="size-3.5" />{site.contact.phone}
+      </a>
+    </div>
+  </div>
+</div>
+
+<header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+  <div class="container-page flex h-16 items-center justify-between gap-6">
+    <a href="/" class="tap shrink-0" aria-label="Instacertify home">
+      {site.logo ? (
+        <img src={site.logo} alt={site.name} loading="eager" class="h-8 w-auto max-w-56 object-contain sm:h-9" />
+      ) : (
+        <Image src={logo} alt="Instacertify" width={211} height={36} densities={[1, 2]} loading="eager" class="h-8 w-auto sm:h-9" />
+      )}
+    </a>
+
+    <nav aria-label="Main" class="hidden lg:block">
+      <ul class="flex items-center gap-1">
+        {site.nav.map((item) => (
+          <li class="group" data-menu-item={item.children ? '' : undefined}>
+            <a
+              href={item.href}
+              class:list={[
+                'inline-flex h-16 items-center gap-1 px-2 text-base font-medium whitespace-nowrap transition-colors group-data-open:text-brand-700 hover:text-brand-700 xl:px-3',
+                isActive(item.href) ? 'text-brand-700' : 'text-slate-700',
+              ]}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+              aria-haspopup={item.children ? 'true' : undefined}
+              aria-expanded={item.children ? 'false' : undefined}
+            >
+              {item.label}
+              {item.children && <Icon name="chevron-down" class="size-4 text-accent-600 transition group-data-open:rotate-180" />}
+            </a>
+            {item.children && (
+              <div class="invisible absolute inset-x-0 top-full border-t border-slate-200 bg-white opacity-0 shadow-[0_0_0_100vmax_rgb(2_6_23/0.3)] transition [clip-path:inset(0_-100vmax_-100vmax_-100vmax)] pointer-events-none group-data-open:pointer-events-auto group-data-open:visible group-data-open:z-10 group-data-open:opacity-100">
+                <div class="container-page max-h-[calc(100dvh-11rem)] overflow-y-auto py-7">
+                  {item.children.some((g) => g.children?.length) ? (
+                    <div class="grid auto-cols-fr grid-flow-col gap-x-6 xl:gap-x-8 [&>*+*]:border-l [&>*+*]:border-slate-100 [&>*+*]:pl-6 xl:[&>*+*]:pl-8">
+                      {panelColumns(item.children).map((column) => (
+                        <div class="min-w-0 space-y-6">
+                          {column.map((block) => (
+                            <div>
+                              <a
+                                href={block.group.href}
+                                class:list={['group/head block', block.continued && 'invisible']}
+                                aria-hidden={block.continued ? 'true' : undefined}
+                                tabindex={block.continued ? -1 : undefined}
+                                aria-current={!block.continued && current === block.group.href ? 'page' : undefined}
+                              >
+                                <span class="text-[0.9375rem] leading-snug font-bold text-slate-900 group-hover/head:text-brand-700">
+                                  {headWords(block.group.label).lead}
+                                  <span class="whitespace-nowrap">
+                                    {headWords(block.group.label).last}
+                                    <Icon name="arrow-right" class="ml-1 inline size-4 align-[-0.15em] text-accent-600 transition-transform group-hover/head:translate-x-1" />
+                                  </span>
+                                </span>
+                                {block.group.description && <span class="mt-0.5 block truncate text-xs text-slate-500">{block.group.description}</span>}
+                              </a>
+                              <ul class="mt-2.5 space-y-px">
+                                {block.links.map((link) => (
+                                  <li>
+                                    <a
+                                      href={link.href}
+                                      class:list={['-mx-2 block rounded-md px-2 py-1 text-sm leading-snug hover:bg-tint hover:text-brand-700', current === link.href ? 'font-semibold text-brand-700' : 'text-slate-600']}
+                                      aria-current={current === link.href ? 'page' : undefined}
+                                    >
+                                      {link.label}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <ul class="grid grid-cols-3 gap-3">
+                      {item.children.map((link) => (
+                        <li>
+                          <a
+                            href={link.href}
+                            class:list={['group/tile flex h-full items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3.5 hover:border-brand-200 hover:bg-tint', current === link.href && 'border-brand-200 bg-tint']}
+                            aria-current={current === link.href ? 'page' : undefined}
+                          >
+                            <span class="min-w-0">
+                              <span class="block text-[0.9375rem] font-semibold text-slate-900 group-hover/tile:text-brand-700">{link.label}</span>
+                              {link.description && <span class="mt-0.5 block text-sm text-slate-500">{link.description}</span>}
+                            </span>
+                            <Icon name="arrow-right" class="size-4 shrink-0 text-accent-600 transition-transform group-hover/tile:translate-x-1" />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div class="border-t border-slate-200 surface-tint">
+                  <div class="container-page flex items-center justify-between gap-6 py-3 text-sm">
+                    <a href={item.href} class="group/all inline-flex items-center gap-1.5 font-semibold text-brand-700 hover:text-brand-800">
+                      View all {item.label.toLowerCase()}
+                      <Icon name="arrow-right" class="size-4 transition-transform group-hover/all:translate-x-1" />
+                    </a>
+                    <div class="flex items-center gap-5">
+                      <p class="text-slate-600">Not sure what applies to your product?</p>
+                      <a href={`tel:${site.contact.phoneE164}`} class="inline-flex items-center gap-1.5 font-medium text-slate-700 hover:text-brand-700"><Icon name="phone" class="size-4" />{site.contact.phone}</a>
+                      <a href="/contact" class="btn-primary h-9 min-h-9 px-4 text-sm" data-track="quote" data-open-lead>Get a free assessment</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href="/contact" class="btn-primary hidden h-10 min-h-10 px-4 text-sm whitespace-nowrap sm:inline-flex" data-track="quote" data-open-lead>Get a free quote</a>
+      <button
+        type="button"
+        class="inline-flex size-11 items-center justify-center rounded-lg text-slate-800 hover:bg-slate-100 lg:hidden"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-open
+      >
+        <Icon name="menu" class="size-6" />
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog id="mobile-menu" class="m-0 ml-auto h-dvh max-h-none w-full max-w-sm bg-white p-0 backdrop:bg-slate-950/40 lg:hidden">
+  <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4">
+    {site.logo ? <img src={site.logo} alt="" class="h-6 w-auto max-w-40 object-contain" /> : <Image src={logo} alt="" width={144} height={24} class="h-6 w-auto" />}
+    <button type="button" class="inline-flex size-11 items-center justify-center rounded-lg hover:bg-slate-100" aria-label="Close menu" data-menu-close>
+      <Icon name="x" class="size-6" />
+    </button>
+  </div>
+  <nav aria-label="Mobile" class="overflow-y-auto px-2 py-3" style="max-height: calc(100dvh - 9.5rem)">
+    {site.nav.map((item) =>
+      item.children ? (
+        <details class="group border-b border-slate-100">
+          <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between px-3 font-medium text-slate-900">
+            {item.label}
+            <Icon name="chevron-down" class="size-5 text-slate-400 transition group-open:rotate-180" />
+          </summary>
+          <ul class="pb-2">
+            {item.children.map((child) =>
+              child.children ? (
+                <li>
+                  <details class="group/sub">
+                    <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-lg px-5 text-base text-slate-700 hover:bg-slate-50">
+                      {child.label}
+                      <Icon name="chevron-down" class="size-4 text-slate-400 transition group-open/sub:rotate-180" />
+                    </summary>
+                    <ul class="mb-1 ml-5 border-l border-slate-200">
+                      {child.children.map((leaf) => (
+                        <li><a href={leaf.href} class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">{leaf.label}</a></li>
+                      ))}
+                      <li><a href={child.href} class="block px-4 py-2 text-sm font-semibold text-brand-700">All {child.label}</a></li>
+                    </ul>
+                  </details>
+                </li>
+              ) : (
+                <li><a href={child.href} class="block rounded-lg px-5 py-2.5 text-base text-slate-600 hover:bg-slate-50">{child.label}</a></li>
+              ),
+            )}
+            <li><a href={item.href} class="block px-5 py-2.5 text-base font-semibold text-brand-700">View all</a></li>
+          </ul>
+        </details>
+      ) : (
+        <a href={item.href} class="flex min-h-12 items-center border-b border-slate-100 px-3 font-medium text-slate-900">{item.label}</a>
+      ),
+    )}
+  </nav>
+  <div class="absolute inset-x-0 bottom-0 grid grid-cols-2 gap-2 border-t border-slate-200 bg-white p-4">
+    <a href={`tel:${site.contact.phoneE164}`} class="btn-ghost"><Icon name="phone" class="size-4" />Call</a>
+    <a href="/contact" class="btn-primary">Free quote</a>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('mobile-menu') as HTMLDialogElement | null;
+  const opener = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+  opener?.addEventListener('click', () => {
+    dialog?.showModal();
+    opener.setAttribute('aria-expanded', 'true');
+  });
+  dialog?.querySelector('[data-menu-close]')?.addEventListener('click', () => dialog.close());
+  dialog?.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+  dialog?.addEventListener('close', () => opener?.setAttribute('aria-expanded', 'false'));
+
+  /** Desktop mega menu: one panel open at a time, opened by hover, keyboard focus or a first tap on touch screens. */
+  const items = [...document.querySelectorAll<HTMLElement>('[data-menu-item]')];
+  const SWITCH_DELAY = 120;
+  const CLOSE_DELAY = 200;
+  let openItem: HTMLElement | null = null;
+  let timer: number | undefined;
+
+  const setOpen = (item: HTMLElement | null) => {
+    window.clearTimeout(timer);
+    if (item === openItem) return;
+    for (const el of items) {
+      el.toggleAttribute('data-open', el === item);
+      el.firstElementChild?.setAttribute('aria-expanded', String(el === item));
+    }
+    openItem = item;
+  };
+  const later = (fn: () => void, ms: number) => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(fn, ms);
+  };
+
+  for (const item of items) {
+    const top = item.firstElementChild as HTMLAnchorElement;
+    // A pointer crossing a neighbouring item on its way into an open panel must not swap the panel.
+    item.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      if (!openItem || openItem === item) setOpen(item);
+      else later(() => setOpen(item), SWITCH_DELAY);
+    });
+    item.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse') later(() => openItem === item && setOpen(null), CLOSE_DELAY);
+    });
+    item.addEventListener('focusin', () => setOpen(item));
+    item.addEventListener('focusout', (e) => {
+      if (!item.contains(e.relatedTarget as Node | null)) later(() => openItem === item && setOpen(null), 0);
+    });
+    // On touch screens the first tap opens the panel and a second tap follows the link.
+    let tapOpens = false;
+    top.addEventListener('pointerdown', (e) => {
+      tapOpens = e.pointerType !== 'mouse' && openItem !== item;
+    });
+    top.addEventListener('click', (e) => {
+      if (!tapOpens) return;
+      tapOpens = false;
+      e.preventDefault();
+      setOpen(item);
+    });
+    item.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      top.focus({ preventScroll: true });
+      setOpen(null);
+    });
+  }
+
+  document.addEventListener('pointerdown', (e) => {
+    if (openItem && !openItem.contains(e.target as Node)) setOpen(null);
+  });
+  // Pages restored by the Back button keep their old focus; start with every panel closed.
+  window.addEventListener('pageshow', () => {
+    setOpen(null);
+    if (document.activeElement instanceof HTMLElement && document.activeElement.closest('[data-menu-item]')) document.activeElement.blur();
+  });
+</script>

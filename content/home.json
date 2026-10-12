@@ -1,0 +1,328 @@
+{
+  "seo": {
+    "title": "BIS, CRS, ISI, WPC & CE Product Certification | Instacertify",
+    "description": "India's product certification partner for BIS CRS, ISI, WPC, TEC, BEE, CE, FCC and 120+ approvals. Testing, documents and filing handled. Free assessment."
+  },
+  "hero": {
+    "badge": "Making Certification Simple",
+    "title": "Be tested. Be certified.",
+    "highlight": "Be unstoppable.",
+    "intro": "Tell us your product and where you want to sell it. We handle the testing, the paperwork and the regulator for BIS, WPC, TEC, BEE, CE and 120+ more approvals.",
+    "buttonLabel": "Get a free assessment",
+    "buttonLink": "/contact",
+    "showPhone": true,
+    "pillars": [
+      {
+        "title": "Be tested",
+        "text": "We name the exact standard and book an accredited lab for your samples.",
+        "icon": "science"
+      },
+      {
+        "title": "Be certified",
+        "text": "We prepare the file, answer the regulator's questions and get your certificate issued.",
+        "icon": "verified"
+      },
+      {
+        "title": "Be audit-ready",
+        "text": "Our engineers run factory audits and inspections, in India and abroad.",
+        "icon": "factory"
+      },
+      {
+        "title": "Be unstoppable",
+        "text": "Sell in India and 40+ countries. We track renewals and changes, so you keep shipping.",
+        "icon": "rocket_launch"
+      }
+    ],
+    "showForm": false,
+    "formTitle": "Find out which approvals your product needs",
+    "formSubtitle": "A specialist replies within 24 hours with the standards, documents, cost and timeline.",
+    "image": null,
+    "imageAlt": null,
+    "overlay": "light",
+    "position": "center"
+  },
+  "clientLogosEnabled": true,
+  "clientLogosOnServices": true,
+  "clientLogosTitle": "Trusted by Leading Brands Across the Globe",
+  "clientLogos": [],
+  "stats": {
+    "visible": true,
+    "items": [
+      {
+        "value": "15+",
+        "label": "Years of regulatory experience",
+        "icon": "history"
+      },
+      {
+        "value": "24 h",
+        "label": "To tell you which approvals apply",
+        "icon": "schedule"
+      },
+      {
+        "value": "120+",
+        "label": "Certifications & licences",
+        "icon": "license"
+      },
+      {
+        "value": "40+",
+        "label": "Countries covered",
+        "icon": "public"
+      }
+    ]
+  },
+  "marks": {
+    "visible": true,
+    "title": "Approvals we file most often"
+  },
+  "popular": {
+    "visible": true,
+    "eyebrow": null,
+    "heading": "The approvals our clients ask for most",
+    "linkLabel": "See all 120+ services",
+    "linkUrl": "/services",
+    "items": []
+  },
+  "explore": {
+    "visible": true,
+    "eyebrow": null,
+    "heading": "Find your approval by country or by service",
+    "items": [
+      {
+        "title": "India",
+        "text": "BIS CRS, ISI, WPC, TEC, BEE, CDSCO and every mandatory Indian approval.",
+        "href": "/certification/india",
+        "icon": "flag"
+      },
+      {
+        "title": "Europe & Middle East",
+        "text": "CE, UKCA, SABER, SFDA, G-Mark and SONCAP for EU, UK, GCC and Africa.",
+        "href": "/certification/emea",
+        "icon": "euro"
+      },
+      {
+        "title": "Asia",
+        "text": "CCC for China, PSE and MIC for Japan, SNI for Indonesia.",
+        "href": "/certification/asia",
+        "icon": "globe_asia"
+      },
+      {
+        "title": "Americas",
+        "text": "FCC for the United States and NOM for Mexico.",
+        "href": "/certification/americas",
+        "icon": "public"
+      },
+      {
+        "title": "Global",
+        "text": "ISO, CB Scheme, HACCP, Halal, IMEI and other internationally recognised programmes.",
+        "href": "/certification/global-certifications",
+        "icon": "language"
+      },
+      {
+        "title": "Product testing",
+        "text": "Safety, EMC, RF, chemical and environmental testing at accredited labs.",
+        "href": "/services/testing",
+        "icon": "science"
+      },
+      {
+        "title": "Indian registrations",
+        "text": "EPR, FSSAI, IEC, LMPC, factory licence and 50+ business registrations.",
+        "href": "/services/indian-registration-compliances",
+        "icon": "app_registration"
+      },
+      {
+        "title": "Quality assurance",
+        "text": "Pre-shipment inspection, factory audits and market surveillance.",
+        "href": "/services/qualitiy",
+        "icon": "fact_check"
+      }
+    ]
+  },
+  "industries": {
+    "visible": true,
+    "eyebrow": null,
+    "heading": "Approvals by industry",
+    "linkLabel": "All industries",
+    "linkUrl": "/industries"
+  },
+  "fieldwork": {
+    "visible": true,
+    "eyebrow": null,
+    "heading": "Audits, inspections and trade fairs",
+    "intro": "Recent factory audits and inspections handled by our engineers, and the trade fairs coming up next."
+  },
+  "whatWeDo": {
+    "visible": true,
+    "eyebrow": null,
+    "heading": "What we do for your business",
+    "intro": "Whether you make, brand, import or sell products, one team handles your testing, certification, registrations and quality assurance.",
+    "items": [
+      {
+        "title": "Testing",
+        "text": "Product testing at BIS- and NABL-recognised labs, booked and followed up by us.",
+        "icon": "science",
+        "href": "/services/testing"
+      },
+      {
+        "title": "Certification",
+        "text": "BIS, WPC, TEC, BEE, CE, FCC and 100+ approvals for India and 40+ markets.",
+        "icon": "verified",
+        "href": "/certification"
+      },
+      {
+        "title": "Registrations",
+        "text": "EPR, import–export, business and labour registrations, filed and renewed on time.",
+        "icon": "assignment",
+        "href": "/services/indian-registration-compliances"
+      },
+      {
+        "title": "Quality assurance",
+        "text": "ISO management systems, factory audits and inspections that keep you audit-ready.",
+        "icon": "fact_check",
+        "href": "/services/qualitiy"
+      }
+    ]
+  },
+  "process": {
+    "visible": true,
+    "eyebrow": null,
+    "heading": "From requirement to result",
+    "intro": "A clear path for every product and market, and nothing starts until you approve the plan.",
+    "items": [
+      {
+        "title": "Identify",
+        "text": "We find the right certification or testing for your product and market. Free, within 24 hours.",
+        "icon": "travel_explore"
+      },
+      {
+        "title": "Plan",
+        "text": "Together we prepare a plan covering the scope, labs, documents, cost and timeline.",
+        "icon": "edit_note"
+      },
+      {
+        "title": "Approve",
+        "text": "You review the plan and give the go-ahead. You stay in control of every decision.",
+        "icon": "task_alt"
+      },
+      {
+        "title": "Deliver",
+        "text": "We run the testing and filing, and follow up until you have the result you need.",
+        "icon": "workspace_premium"
+      }
+    ]
+  },
+  "testingProcess": {
+    "items": [
+      {
+        "title": "Assessment of requirement",
+        "text": "We confirm the standard, the list of tests and how many samples your product needs.",
+        "icon": "fact_check"
+      },
+      {
+        "title": "Sample collection",
+        "text": "We collect the samples from your factory or warehouse, or tell you exactly where to send them.",
+        "icon": "inventory_2"
+      },
+      {
+        "title": "Right lab assigned",
+        "text": "We choose an accredited lab (NABL, BIS-recognised or ILAC) that covers your standard and can start soonest.",
+        "icon": "biotech"
+      },
+      {
+        "title": "Testing",
+        "text": "The lab tests your samples against the standard. We follow up and tell you at once if a test fails.",
+        "icon": "science"
+      },
+      {
+        "title": "Test report",
+        "text": "You receive the signed test report, ready to use for BIS, WPC, CE or your buyer.",
+        "icon": "description"
+      }
+    ]
+  },
+  "whyUs": {
+    "visible": false,
+    "eyebrow": null,
+    "heading": "How we stop applications getting stuck",
+    "intro": "Most delays come from the wrong standard, an incomplete file or slow replies to regulator queries. We check all three before anything is filed.",
+    "linkLabel": "About our team",
+    "linkUrl": "/about",
+    "items": [
+      {
+        "title": "Engineers handle your file",
+        "text": "Engineers and former lab staff with 15+ years in Indian and global certification prepare and check it.",
+        "icon": "engineering"
+      },
+      {
+        "title": "Fees shown line by line",
+        "text": "Government fees, lab fees and our fee are listed separately in a written quote.",
+        "icon": "request_quote"
+      },
+      {
+        "title": "One manager from start to finish",
+        "text": "The same person handles your case from the first call to the certificate, on phone and WhatsApp.",
+        "icon": "person_check"
+      },
+      {
+        "title": "Documents checked before filing",
+        "text": "We check every document against the regulator’s checklist before upload, so there are fewer reasons for a query.",
+        "icon": "fact_check"
+      }
+    ]
+  },
+  "testimonials": {
+    "visible": true,
+    "eyebrow": null,
+    "heading": "What clients say about working with us"
+  },
+  "promos": {
+    "visible": false,
+    "items": [
+      {
+        "image": null,
+        "imageAlt": "Electronica 2026 Munich",
+        "icon": "event",
+        "eyebrow": "Meet us · Nov 10, 2026",
+        "title": "Electronica 2026, Munich",
+        "text": "Book a slot with our team at the global electronics trade fair.",
+        "href": "/resources/events"
+      },
+      {
+        "image": null,
+        "imageAlt": "BIS audit for washing machines in Thailand",
+        "icon": "factory",
+        "eyebrow": "Audits & inspections",
+        "title": "BIS audit for washing machines (IS 302-2-7) in Thailand",
+        "text": "On-ground factory audits and inspections across the supply chain.",
+        "href": "/resources/blogs"
+      }
+    ]
+  },
+  "faq": {
+    "visible": true,
+    "eyebrow": null,
+    "heading": "Questions we are asked most",
+    "intro": "Can't find your answer?",
+    "items": [
+      {
+        "q": "Which certification does my product need to sell in India?",
+        "a": "It depends on the product and its Indian Standard. Electronics usually need BIS CRS; many appliances, toys and industrial goods need the ISI mark under a Quality Control Order; wireless devices need WPC ETA; telecom gear needs TEC. Share your product details and we will confirm the exact list for free."
+      },
+      {
+        "q": "How long does certification take?",
+        "a": "BIS CRS typically takes 4–8 weeks, WPC ETA 2–4 weeks, and ISI for foreign manufacturers 4–6 months including the factory audit. We give you a written timeline before you start."
+      },
+      {
+        "q": "Do you work with foreign manufacturers?",
+        "a": "Yes. Roughly half our clients are overseas factories. We act as your Authorised Indian Representative, coordinate sample shipping and testing in India, and manage BIS factory inspections abroad."
+      },
+      {
+        "q": "How much does it cost?",
+        "a": "Cost has three parts: government fees, lab testing fees and our professional fee. We quote all three separately and in writing before any work starts."
+      },
+      {
+        "q": "Can you handle certifications for multiple countries at once?",
+        "a": "Yes. We plan testing once and reuse reports across markets wherever possible — for example a CB report can speed up CE, BIS and other national approvals."
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+---
+import { formatDate, workTag } from '../lib/content';
+import { responsive } from '../lib/images';
+import type { Post } from '../lib/types';
+
+interface Props {
+  post: Post;
+  eager?: boolean;
+  /** "row" puts a small photo beside the text instead of above it. */
+  layout?: 'card' | 'row';
+  /** 2 when the cards sit directly under the page H1. */
+  level?: 2 | 3;
+}
+
+const { post, eager = false, layout = 'card', level = 3 } = Astro.props;
+const Heading = `h${level}` as const;
+const row = layout === 'row';
+/*
+ * Cards: most featured images are 2.2:1 banners with text on them, so the frame matches that and never crops.
+ * Rows (audit photos): the photo fills a box as tall as the text, so every row is the same height.
+ */
+const frame = row ? 'relative aspect-[2.2/1] w-full sm:aspect-auto sm:w-56 sm:shrink-0' : 'aspect-[2.2/1] w-full';
+const image = await responsive(post.image, [400, 660, 880]);
+const label = (post.type === 'audit' && workTag(post)) || post.category?.name;
+const sizes = row ? '(min-width: 640px) 224px, 100vw' : '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw';
+---
+
+<a href={post.url} class:list={['card-hover group flex h-full overflow-hidden', row ? 'flex-col sm:flex-row' : 'flex-col']}>
+  {image ? (
+    <span class:list={['block bg-slate-50', row ? '' : 'border-b border-slate-100', frame]}>
+      <img src={image.src} srcset={image.srcset} sizes={image.srcset ? sizes : undefined} alt={post.imageAlt} width="660" height="300" loading={eager ? 'eager' : 'lazy'} decoding="async" class:list={['size-full', row ? 'absolute inset-0 object-cover' : 'object-contain']} />
+    </span>
+  ) : (
+    <div class:list={['flex items-center justify-center bg-slate-100 px-6 text-center text-sm font-semibold text-brand-700', frame]}>{post.category?.name ?? 'Instacertify'}</div>
+  )}
+  <div class:list={['flex min-w-0 flex-1 flex-col', row ? 'p-4 sm:p-5' : 'p-5']}>
+    <div class="flex min-w-0 items-center gap-x-2 text-xs whitespace-nowrap text-slate-500">
+      {label && <span class="truncate font-semibold text-brand-700">{label}</span>}
+      {label && post.publishedAt && <span aria-hidden="true">·</span>}
+      {post.publishedAt && <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>}
+      {post.readingTime && <span aria-hidden="true">·</span>}
+      {post.readingTime && <span>{post.readingTime} min read</span>}
+    </div>
+    <Heading class:list={['mt-2 text-base leading-snug font-semibold text-slate-900 group-hover:text-brand-700', row ? 'line-clamp-2' : 'line-clamp-3 sm:min-h-[4.125em]']}>{post.title}</Heading>
+    <p class:list={['mt-2 text-sm leading-relaxed text-slate-600', row ? 'line-clamp-2' : 'line-clamp-3']}>{post.excerpt}</p>
+  </div>
+</a>

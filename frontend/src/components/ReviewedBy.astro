@@ -1,0 +1,19 @@
+---
+import Icon from './Icon.astro';
+import { formatDate } from '../lib/content';
+import type { Seo } from '../lib/types';
+
+interface Props {
+  seo?: Seo | null;
+  dark?: boolean;
+  class?: string;
+}
+
+const { seo, dark = false, class: className } = Astro.props;
+---
+
+{seo?.reviewer && (
+  <p class:list={['flex items-center gap-1.5 text-sm', dark ? 'text-emerald-300' : 'text-emerald-700', className]}>
+    <Icon name="check-circle" class="size-4 shrink-0" />Reviewed by {seo.reviewer}{seo.reviewerCredentials && `, ${seo.reviewerCredentials}`}{seo.reviewedAt && ` on ${formatDate(seo.reviewedAt)}`}
+  </p>
+)}

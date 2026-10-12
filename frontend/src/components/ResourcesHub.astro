@@ -1,0 +1,65 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import MaterialIcon from './MaterialIcon.astro';
+import PostCard from './PostCard.astro';
+import CtaBand from './CtaBand.astro';
+import { POST_TYPES, getPosts, getSite } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+import type { PostType } from '../lib/types';
+
+const site = await getSite();
+const trail = [{ label: 'Resources' }];
+const icons: Record<PostType, string> = { blog: 'article', news: 'newspaper', audit: 'fact_check', update: 'update' };
+const all = await Promise.all((Object.keys(POST_TYPES) as PostType[]).map(async (t) => [t, await getPosts(t)] as const));
+const sections = [
+  ...all.map(([type, posts]) => ({
+    href: `/${POST_TYPES[type].listPath}`,
+    icon: icons[type],
+    title: POST_TYPES[type].plural,
+    text: POST_TYPES[type].blurb,
+    action: posts.length ? `${posts.length} ${posts.length === 1 ? 'article' : 'articles'}` : 'Read',
+    posts: posts.slice(0, 3),
+  })),
+  { href: '/resources/events', icon: 'event', title: 'Trade fairs & events', text: 'Global trade fairs and webinars where you can meet our certification team.', action: 'See the calendar', posts: [] },
+  { href: '/resources/standards', icon: 'menu_book', title: 'Standards library', text: 'BIS ISI, CRS and BEE star-label products, mandatory and voluntary, with fees and testing charges.', action: 'Search standards', posts: [] },
+];
+---
+
+<Layout title="Compliance resources – guides, news & standards | Instacertify" description="Guides, regulatory news, audit checklists, events and a searchable library of Indian standards from Instacertify's compliance team." jsonLd={[breadcrumbSchema(site.url, trail, 'resources')]}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">Compliance resources</h1>
+      <p class="mt-4 max-w-2xl text-lg text-slate-600">Plain-English guides and the latest rule changes, written by the people who file certifications every day.</p>
+    </div>
+  </section>
+
+  <section class="container-page py-10 sm:py-12" aria-label="Browse resources">
+    <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {sections.map((s) => (
+        <li>
+          <a href={s.href} class="card-hover group flex h-full flex-col p-6">
+            <MaterialIcon name={s.icon} class="size-10 text-brand-700" />
+            <h2 class="mt-4 text-lg font-bold text-slate-900 group-hover:text-brand-700">{s.title}</h2>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-slate-600">{s.text}</p>
+            <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">{s.action}<Icon name="arrow-right" class="size-4" /></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  {sections.filter((s) => s.posts.length > 0).map((s) => (
+    <section class="container-page py-10" aria-label={s.title}>
+      <div class="flex items-end justify-between gap-4">
+        <h2 class="text-2xl section-title">Latest {s.title.toLowerCase()}</h2>
+        <a href={s.href} class="tap text-sm font-semibold text-brand-700 hover:underline">View all</a>
+      </div>
+      <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{s.posts.map((p) => <PostCard post={p} />)}</div>
+    </section>
+  ))}
+
+  <CtaBand />
+</Layout>

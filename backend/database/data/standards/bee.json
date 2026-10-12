@@ -1,0 +1,410 @@
+{
+ "mandatory": [
+  {
+   "product": "Room Air Conditioner (Fixed Speed), up to 10,465 W",
+   "regime": "Mandatory since 2010",
+   "testStandard": "IS 1391 (Part 1); ISEER method",
+   "ratingTable": "Revised table effective 1 Jan 2026",
+   "testingPrice": "1,50,000 - 2,50,000 / model",
+   "labs": "Intertek (Sohna), TUV Rheinland (Bengaluru), UL India (Manesar), SGS, ITC India",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Room AC (Inverter / Variable Speed; incl. Cassette, Floor-Standing Tower, Ceiling, Corner types)",
+   "regime": "Mandatory 2020; new types 1 Jan 2026",
+   "testStandard": "IS 1391 (Part 2); ISO 16358-1 (CSPF/ISEER)",
+   "ratingTable": "Revised table effective 1 Jan 2026",
+   "testingPrice": "1,75,000 - 3,00,000 / model",
+   "labs": "Intertek, TUV Rheinland, UL India, SGS, ITC India",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Frost Free Refrigerator",
+   "regime": "Mandatory since 2010",
+   "testStandard": "IS 15750 / IS 17550 (IEC 62552)",
+   "ratingTable": "Revised table effective 1 Jan 2026",
+   "testingPrice": "90,000 - 1,50,000 / model",
+   "labs": "Intertek, TUV SUD, TUV Rheinland, SGS, URS Labs",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Direct Cool Refrigerator",
+   "regime": "Mandatory since 1 Jan 2016",
+   "testStandard": "IS 1476 (Part 1) / IS 17550",
+   "ratingTable": "Revised table effective 1 Jan 2026",
+   "testingPrice": "75,000 - 1,20,000 / model",
+   "labs": "Intertek, TUV SUD, TUV Rheinland, SGS, URS Labs",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Deep Freezer",
+   "regime": "Mandatory 1 Jan 2026 (voluntary since Mar 2020)",
+   "testStandard": "IS 7872; IEC 62552 method",
+   "ratingTable": "1 Jan 2026 - 31 Dec 2028 (BEE advisory)",
+   "testingPrice": "80,000 - 1,20,000 / model",
+   "labs": "Intertek, TUV SUD, SGS, ITC India",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Ceiling Fan (incl. BLDC)",
+   "regime": "Mandatory 1 Jan 2023",
+   "testStandard": "IS 374:2019; service value",
+   "ratingTable": "Revised table implemented (verify validity)",
+   "testingPrice": "30,000 - 60,000 / model",
+   "labs": "ERTL(N) Delhi, Spectro, ITC India, Intertek",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Colour TV / Ultra-HD TV",
+   "regime": "Mandatory 2010; UHD 1 Jan 2026",
+   "testStandard": "IS 616 (safety); IEC 62087 energy method",
+   "ratingTable": "Revised table effective 1 Jan 2026 (TV ratings shifted up 1 star)",
+   "testingPrice": "50,000 - 90,000 / model",
+   "labs": "Intertek, UL India, TUV Rheinland, Spectro",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Electric Storage Water Heater (Geyser)",
+   "regime": "Mandatory since 2015",
+   "testStandard": "IS 2082; standing loss",
+   "ratingTable": "Current table in force",
+   "testingPrice": "45,000 - 75,000 / model",
+   "labs": "Intertek, ITC India, Spectro, TUV Rheinland",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Washing Machine",
+   "regime": "Mandatory 1 Jul 2023",
+   "testStandard": "IS 302-2-7 (safety); IEC 60456 performance",
+   "ratingTable": "Current table in force",
+   "testingPrice": "70,000 - 1,10,000 / model",
+   "labs": "Intertek, TUV Rheinland, UL India, SGS",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Tubular Fluorescent Lamp",
+   "regime": "Mandatory since 2010",
+   "testStandard": "IS 2418",
+   "ratingTable": "Current table in force",
+   "testingPrice": "15,000 - 30,000 / model",
+   "labs": "ERTL, Spectro, Nemko, ITC India",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "LED Lamp (Self-Ballasted)",
+   "regime": "Mandatory 1 Jan 2018",
+   "testStandard": "IS 16102 (Pt 1&2); IS 16106 / LM-79 photometry",
+   "ratingTable": "Current table in force",
+   "testingPrice": "20,000 - 40,000 / model",
+   "labs": "Spectro, ERTL, Nemko, ITC India",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Distribution Transformer (up to 2500 kVA)",
+   "regime": "Mandatory since 2010",
+   "testStandard": "IS 1180 (Part 1); losses at 50% & 100% load",
+   "ratingTable": "Current table in force",
+   "testingPrice": "1,00,000 - 2,00,000 / rating",
+   "labs": "ERDA Vadodara, CPRI (Bengaluru/Bhopal/Noida), NHPTL",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Domestic LPG Stove",
+   "regime": "Mandatory 1 Jan 2026",
+   "testStandard": "IS 4246 (thermal efficiency)",
+   "ratingTable": "First mandatory table effective 1 Jan 2026",
+   "testingPrice": "15,000 - 30,000 / model",
+   "labs": "Shriram Institute (Delhi), ITC India, BIS-recognised IS 4246 labs",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Chiller (Water / Air Cooled)",
+   "regime": "Mandatory 1 Jan 2026 (voluntary since 2018)",
+   "testStandard": "AHRI 550/590 / 551/591; IS 16590; IPLV",
+   "ratingTable": "First mandatory table effective 1 Jan 2026",
+   "testingPrice": "3,00,000 - 6,00,000 / model",
+   "labs": "AHRI-certified labs; witnessed factory testing per schedule; Intertek",
+   "labelFee": "Rs 3 per kW per label (Chiller Labels Regulations 2023)",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Cooling Tower",
+   "regime": "Mandatory 1 Jan 2026",
+   "testStandard": "CTI STD-201 / ATC-105 thermal performance",
+   "ratingTable": "First mandatory table effective 1 Jan 2026",
+   "testingPrice": "2,00,000 - 4,00,000 (site/witness)",
+   "labs": "CTI-certified test agencies; NABL mechanical labs",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Grid-Connected Solar Inverter",
+   "regime": "Mandatory 1 Jan 2026 (voluntary since 2019)",
+   "testStandard": "IS 16221 (Pt 2); IEC 61683 / IS 16169 efficiency",
+   "ratingTable": "First mandatory table effective 1 Jan 2026",
+   "testingPrice": "1,00,000 - 2,00,000 / model",
+   "labs": "UL India, TUV Rheinland, Intertek, NISE (Gurugram)",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  }
+ ],
+ "voluntary": [
+  {
+   "product": "Induction Motor (3-phase)",
+   "regime": "Voluntary since 2009",
+   "testStandard": "IS 12615; IEC 60034-2-1 efficiency",
+   "ratingTable": "Current table in force",
+   "testingPrice": "40,000 - 80,000 / rating",
+   "labs": "ERDA, CPRI, ICAT, SITARC",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Agricultural Pump Set (Monoset/Submersible/Openwell)",
+   "regime": "Voluntary since 2009",
+   "testStandard": "IS 8034, IS 9079, IS 14220, IS 6595",
+   "ratingTable": "Current table in force",
+   "testingPrice": "30,000 - 60,000 / model",
+   "labs": "FCRI Palakkad, SITARC, PSG Coimbatore, ERDA",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Diesel Engine Driven Monoset Pump",
+   "regime": "Voluntary since 2013",
+   "testStandard": "IS 11501",
+   "ratingTable": "Current table in force",
+   "testingPrice": "40,000 - 70,000 / model",
+   "labs": "FCRI, SITARC, ARAI",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Ballast (Electronic / Magnetic)",
+   "regime": "Voluntary since 2009",
+   "testStandard": "IS 1534 / IS 13021",
+   "ratingTable": "Current table in force",
+   "testingPrice": "15,000 - 25,000 / model",
+   "labs": "ERTL, Spectro, ITC India",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Office Equipment (Printer, Copier, MFD)",
+   "regime": "Voluntary since 2014",
+   "testStandard": "ENERGY STAR TEC/OM method",
+   "ratingTable": "Current table in force",
+   "testingPrice": "30,000 - 60,000 / model",
+   "labs": "Intertek, UL India, TUV Rheinland",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Computer (Notebook / Laptop)",
+   "regime": "Voluntary since 2014",
+   "testStandard": "IEC 62623 (ETEC)",
+   "ratingTable": "Current table in force",
+   "testingPrice": "35,000 - 60,000 / model",
+   "labs": "Intertek, UL India, TUV Rheinland",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Solid State Inverter (Home UPS)",
+   "regime": "Voluntary since 2016",
+   "testStandard": "IS 13314",
+   "ratingTable": "Current table in force",
+   "testingPrice": "30,000 - 50,000 / model",
+   "labs": "ERTL, Spectro, ITC India, Intertek",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Diesel Generator Set (up to 800 kW)",
+   "regime": "Voluntary since 2018",
+   "testStandard": "ISO 8528 / IS 4722; SFC",
+   "ratingTable": "Current table in force",
+   "testingPrice": "1,50,000 - 3,00,000 / rating",
+   "labs": "ARAI Pune, ICAT Manesar",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Microwave Oven",
+   "regime": "Voluntary since 2019",
+   "testStandard": "IEC 60705; IS 302-2-25 safety",
+   "ratingTable": "Validity extended per BEE advisory",
+   "testingPrice": "30,000 - 50,000 / model",
+   "labs": "Intertek, TUV Rheinland, ITC India",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Solar Water Heater",
+   "regime": "Voluntary since 14 Dec 2019",
+   "testStandard": "IS 12976 / IS 16544",
+   "ratingTable": "Validity extended per BEE advisory",
+   "testingPrice": "50,000 - 90,000 / system",
+   "labs": "NISE Gurugram, TUV Rheinland, Intertek",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Light Commercial Air Conditioner (LCAC)",
+   "regime": "Voluntary since 2 Mar 2020",
+   "testStandard": "IS 1391 (Pt 3) / ISO 5151 / ISO 16358; balanced ambient calorimeter",
+   "ratingTable": "Current table (Schedule 24)",
+   "testingPrice": "2,00,000 - 3,50,000 / model",
+   "labs": "Intertek, TUV Rheinland, UL India",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Air Compressor",
+   "regime": "Voluntary since 2020",
+   "testStandard": "ISO 1217 specific power",
+   "ratingTable": "Validity extended per BEE advisory",
+   "testingPrice": "1,00,000 - 1,75,000 / model",
+   "labs": "CPRI, Intertek, NABL mechanical labs",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "High Energy Li-ion Battery / Storage",
+   "regime": "Voluntary since 2021",
+   "testStandard": "IS 16893 / IEC 62620; round-trip efficiency",
+   "ratingTable": "Current table in force",
+   "testingPrice": "1,00,000 - 2,00,000 / model",
+   "labs": "UL India, TUV Rheinland, Intertek, ARAI",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Tyres (C1, C2, C3 - AIS 142 scope)",
+   "regime": "Voluntary since 2021",
+   "testStandard": "IS 15633 (rolling resistance), IS 15636 (wet grip)",
+   "ratingTable": "Current table in force",
+   "testingPrice": "1,00,000 - 1,80,000 / tyre line",
+   "labs": "ARAI, ICAT, NATRAX",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Pedestal / Table / Wall Fan",
+   "regime": "Voluntary since 2022",
+   "testStandard": "IS 555; service value",
+   "ratingTable": "Validity extended per BEE advisory",
+   "testingPrice": "25,000 - 45,000 / model",
+   "labs": "ERTL, Spectro, ITC India, Intertek",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Induction Hob / Cooktop",
+   "regime": "Voluntary since 2023",
+   "testStandard": "IS 302-2-6 (safety); BEE schedule efficiency",
+   "ratingTable": "Current table in force",
+   "testingPrice": "25,000 - 45,000 / model",
+   "labs": "Intertek, ITC India, Spectro",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Evaporative Air Cooler",
+   "regime": "Voluntary launch 2024",
+   "testStandard": "IS 3315; cooling efficiency & power",
+   "ratingTable": "First voluntary table in force",
+   "testingPrice": "30,000 - 55,000 / model",
+   "labs": "Intertek, ITC India, NABL air-flow labs",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "EV Charger (EVSE)",
+   "regime": "Voluntary (new, 2026 Regulations)",
+   "testStandard": "IS 17017 series; BEE schedule efficiency",
+   "ratingTable": "First table under 2026 Regulations (verify)",
+   "testingPrice": "80,000 - 1,50,000 / model",
+   "labs": "ARAI, ICAT, UL India, TUV Rheinland",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  },
+  {
+   "product": "Solar PV Module",
+   "regime": "Voluntary (new, 2026 Regulations)",
+   "testStandard": "IS 14286 / IEC 61215, IEC 61730",
+   "ratingTable": "First table under 2026 Regulations (verify)",
+   "testingPrice": "1,50,000 - 2,50,000 / family",
+   "labs": "NISE, UL India, TUV Rheinland, Intertek",
+   "labelFee": "Per-label fee as per product schedule; payable quarterly with CA-certified sales data",
+   "registrationFee": "Brand: Rs 50,000 (MSME) / Rs 3,00,000 (Med-Large); Model: Rs 300 (MSME) / Rs 5,000 (Large)"
+  }
+ ],
+ "fees": [
+  {
+   "head": "Brand / Company Registration",
+   "msme": "Rs 50,000",
+   "large": "Rs 3,00,000",
+   "frequency": "One-time per brand",
+   "remarks": "As provided by Instacertify (user input, Jul 2026); MSME status via Udyam"
+  },
+  {
+   "head": "Model Registration",
+   "msme": "Rs 300 per model",
+   "large": "Rs 5,000 per model",
+   "frequency": "Per model / on table revision",
+   "remarks": "As provided by Instacertify (user input, Jul 2026)"
+  },
+  {
+   "head": "Company Registration Application Fee",
+   "msme": "Rs 5,000",
+   "large": "Rs 5,000",
+   "frequency": "One-time application",
+   "remarks": "Per BEE (Labelling Fees) Regulations, 2025"
+  },
+  {
+   "head": "Label Security Deposit",
+   "msme": "Rs 1,00,000 per appliance",
+   "large": "Rs 5,00,000 per appliance",
+   "frequency": "One-time, refundable on exit",
+   "remarks": "Per Labelling Fees Regulations 2025; small-scale gets reduced deposit"
+  },
+  {
+   "head": "Label Permission Fee",
+   "msme": "Rs 5,000 per application",
+   "large": "Rs 5,000 per application",
+   "frequency": "At model label permission",
+   "remarks": "Permission valid 3 years under 2026 Regulations"
+  },
+  {
+   "head": "Label Permission Renewal Fee",
+   "msme": "Rs 1,000",
+   "large": "Rs 1,000",
+   "frequency": "On star-rating revision",
+   "remarks": "NIL if renewal is mere continuation of existing rating/endorsement"
+  },
+  {
+   "head": "Label Fee (per label affixed)",
+   "msme": "Product-specific rate",
+   "large": "Product-specific rate",
+   "frequency": "Quarterly, with CA-certified sales data",
+   "remarks": "E.g. Chiller: Rs 3 per kW per label; other products per their schedule; late payment attracts penalty"
+  }
+ ],
+ "notes": [
+  "NOTES: (1) Test report must be < 1 year old at submission, from NABL-accredited lab. (2) Rating-table revision = fresh testing + model re-registration. (3) Non-payment of label fees can forfeit security deposit; defaulters publicly notified. (4) QR code on labels compulsory (refrigerators from Oct 2025); verified retailer list upload required on portal. (5) Testing prices are tentative market ranges - confirm per model/capacity with lab. (6) Standards, dates & lab scopes indicative - verify live schedule PDFs on beestarlabel.com."
+ ]
+}

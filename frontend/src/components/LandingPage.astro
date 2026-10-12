@@ -1,0 +1,272 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from './Icon.astro';
+import LeadForm from './LeadForm.astro';
+import Faq from './Faq.astro';
+import ReviewedBy from './ReviewedBy.astro';
+import Testimonials from './Testimonials.astro';
+import { getPage, getSite, getTestimonials, linkResolver } from '../lib/content';
+import { responsive, type Responsive } from '../lib/images';
+import type { PageRecord } from '../lib/types';
+
+interface Props {
+  path: string;
+}
+
+type Block = { type: string; config: Record<string, any> };
+
+const [page, site, resolve, testimonials] = await Promise.all([getPage(Astro.props.path), getSite(), linkResolver(), getTestimonials()]) as [
+  PageRecord,
+  Awaited<ReturnType<typeof getSite>>,
+  Awaited<ReturnType<typeof linkResolver>>,
+  Awaited<ReturnType<typeof getTestimonials>>,
+];
+const seo = page.seo ?? {};
+
+/** Legacy page-builder text is not sanitised, so render it as plain text. */
+const txt = (v: unknown) => (typeof v === 'string' ? v.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim() : '');
+const list = <T,>(v: unknown, keep: (item: T) => boolean = (i) => Boolean(typeof i === 'string' ? txt(i) : i)) => (Array.isArray(v) ? (v as T[]).filter(keep) : []);
+const has = (...values: unknown[]) => values.some((v) => (Array.isArray(v) ? v.length > 0 : txt(v) !== ''));
+
+const blocks = ((page.blocks?.sections ?? []) as Block[]).filter((b) => b && b.config);
+const hero = blocks.find((b) => b.type === 'hero')?.config ?? {};
+const faqs = blocks.filter((b) => b.type === 'faq').flatMap((b) => list<any>(b.config.items, (i) => has(i.question)).map((i) => ({ q: txt(i.question), a: txt(i.answer) })));
+const wanted: [string, number[]][] = blocks.flatMap(({ config: c }) => [
+  ...(typeof c.background_image === 'string' ? [[c.background_image, [768, 1280, 1920]] as [string, number[]]] : []),
+  ...(typeof c.image === 'string' ? [[c.image, [480, 760, 1140]] as [string, number[]]] : []),
+  ...list<any>(c.cards ?? c.items).filter((i) => typeof i?.image === 'string').map((i) => [i.image, [400, 640]] as [string, number[]]),
+]);
+const pictures = new Map<string, Responsive | null>(await Promise.all(wanted.map(async ([src, widths]) => [src, await responsive(src, widths)] as const)));
+const pic = (src: string) => pictures.get(src) ?? { src };
+const whatsapp = `https://wa.me/${site.contact.whatsapp}?text=${encodeURIComponent(`Hi, I need help with ${page.title}.`)}`;
+
+const jsonLd = faqs.length
+  ? [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }]
+  : [];
+---
+
+<Layout title={seo.title ?? `${page.title} | Instacertify`} description={seo.description ?? (txt(hero.description).slice(0, 160) || page.title)} image={seo.image ?? page.image ?? undefined} canonical={seo.canonical} seo={seo} modified={page.updatedAt} jsonLd={jsonLd}>
+  {blocks.map(({ type, config: c }) => {
+    switch (type) {
+      case 'hero':
+        return (
+          <section class="relative overflow-hidden panel-map bg-brand-700 text-white">
+            {c.background_image && <img src={pic(c.background_image).src} srcset={pic(c.background_image).srcset} sizes="100vw" alt="" class="absolute inset-0 size-full object-cover opacity-20" loading="eager" decoding="async" />}
+            <div class="container-page relative grid gap-10 py-10 sm:py-16 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center">
+              <div>
+                {has(c.subtitle) && <p class="eyebrow text-accent-200">{txt(c.subtitle)}</p>}
+                <h1 class="mt-3 text-[2rem] leading-tight font-bold text-white sm:text-[2.5rem]">{txt(c.title) || page.title}</h1>
+                {has(c.description) && <p class="mt-5 max-w-2xl text-lg leading-relaxed text-brand-100">{txt(c.description)}</p>}
+                {list<string>(c.bullets).length > 0 && (
+                  <ul class="mt-6 grid gap-2.5 sm:grid-cols-2">
+                    {list<string>(c.bullets).map((b) => <li class="flex gap-2 text-brand-50"><Icon name="check-circle" class="mt-0.5 size-5 shrink-0 text-emerald-400" />{txt(b)}</li>)}
+                  </ul>
+                )}
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <a href={`tel:${site.contact.phoneE164}`} class="btn-primary" data-track="call"><Icon name="phone" class="size-4" />{txt(c.expert_cta) || `Call ${site.contact.phone}`}</a>
+                  <a href={whatsapp} class="btn-whatsapp" target="_blank" rel="noopener" data-track="whatsapp"><Icon name="whatsapp" class="size-5" />WhatsApp an expert</a>
+                </div>
+                <ReviewedBy seo={seo} dark class="mt-5" />
+              </div>
+              {c.show_form !== false && (
+                <div id="enquire" class="text-slate-700">
+                  <LeadForm id={`landing-${page.path}`} title={txt(c.lead_form_title) || 'Get a free assessment'} subtitle={txt(c.lead_form_offer) || site.contact.responseTime} />
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      case 'credentials':
+      case 'stats': {
+        const items = list<any>(c.items, (i) => has(i.label, i.number));
+        return items.length > 0 && (
+          <section class="border-b border-slate-200 bg-white">
+            <dl class="container-page grid grid-cols-2 gap-6 py-8 lg:grid-cols-4">
+              {items.map((i) => (
+                <div>
+                  <dt class="text-sm text-slate-500">{txt(i.sub ?? i.description)}</dt>
+                  <dd class="order-first text-lg font-bold text-slate-900">{txt(i.number) || txt(i.label)}</dd>
+                  {i.number && <dd class="text-sm font-medium text-slate-700">{txt(i.label)}</dd>}
+                </div>
+              ))}
+            </dl>
+          </section>
+        );
+      }
+      case 'client_logos': {
+        const logos = list<any>(c.logos, (l) => has(l.image));
+        return logos.length > 0 && (
+          <section class="py-8">
+            <div class="container-page">
+              {has(c.title) && <p class="text-center text-xs font-semibold tracking-[0.15em] text-slate-500 uppercase">{txt(c.title)}</p>}
+              <ul class="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+                {logos.map((l) => <li><img src={l.image} alt={txt(l.name) || 'Client logo'} loading="lazy" class="h-10 w-auto object-contain" /></li>)}
+              </ul>
+            </div>
+          </section>
+        );
+      }
+      case 'about_company':
+      case 'about_licence':
+      case 'pricing_transparency':
+      case 'content_image': {
+        const paragraphs = [c.body1, c.body2, c.body3, c.content].filter((v) => has(v)).map(txt);
+        const points = list<string>(c.fact_items ?? c.checklist_items ?? c.points ?? c.bullets);
+        if (!has(c.heading) && paragraphs.length === 0) return null;
+        return (
+          <section class="section-tight">
+            <div class:list={['container-page grid gap-10', (points.length || c.image) && 'lg:grid-cols-2 lg:items-center']}>
+              <div>
+                {has(c.eyebrow) && <p class="eyebrow">{txt(c.eyebrow)}</p>}
+                {has(c.heading) && <h2 class="mt-1 text-2xl section-title sm:text-3xl">{txt(c.heading)}</h2>}
+                {has(c.sub_heading) && <p class="mt-2 font-medium text-slate-800">{txt(c.sub_heading)}</p>}
+                <div class="prose-body mt-4 text-slate-600">{paragraphs.map((p) => <p>{p}</p>)}</div>
+                {has(c.cta_text) && <a href={resolve(c.cta_link) ?? '#enquire'} class="btn-primary mt-6">{txt(c.cta_text)}</a>}
+              </div>
+              {c.image ? (
+                <img src={pic(c.image).src} srcset={pic(c.image).srcset} sizes="(min-width: 1024px) 600px, 100vw" alt={txt(c.heading)} loading="lazy" decoding="async" class:list={['w-full rounded-2xl object-cover', c.image_position === 'left' && 'lg:order-first']} />
+              ) : points.length > 0 && (
+                <div class="card p-6">
+                  {has(c.fact_heading, c.checklist_heading) && <p class="font-semibold text-slate-900">{txt(c.fact_heading ?? c.checklist_heading)}</p>}
+                  <ul class="mt-4 space-y-3">{points.map((p) => <li class="flex gap-2.5 text-base"><Icon name="check" class="mt-0.5 size-5 shrink-0 text-emerald-600" />{txt(p)}</li>)}</ul>
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      }
+      case 'card_grid':
+      case 'why_us':
+      case 'commitments':
+      case 'related_services':
+      case 'blog_carousel':
+      case 'certification_grid': {
+        const items = list<any>(c.cards ?? c.items, (i) => has(i.title, i.name));
+        return items.length > 0 && (
+          <section class="section-tight surface-tint">
+            <div class="container-page">
+              {has(c.eyebrow) && <p class="eyebrow">{txt(c.eyebrow)}</p>}
+              {has(c.heading) && <h2 class="mt-1 text-2xl section-title sm:text-3xl">{txt(c.heading)}</h2>}
+              {has(c.subtitle, c.subtext, c.subheading) && <p class="mt-3 max-w-3xl text-slate-600">{txt(c.subtitle ?? c.subtext ?? c.subheading)}</p>}
+              <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((i) => {
+                  const href = resolve(i.link || i.url);
+                  const Tag = href ? 'a' : 'div';
+                  return (
+                    <li>
+                      <Tag href={href || undefined} class:list={['flex h-full flex-col p-5', href ? 'card-hover group' : 'card']}>
+                        {i.image && <img src={pic(i.image).src} srcset={pic(i.image).srcset} sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" alt="" loading="lazy" decoding="async" class="mb-4 aspect-video w-full rounded-lg object-cover" />}
+                        {!i.image && typeof i.icon === 'string' && i.icon.startsWith('http') && <img src={i.icon} alt="" loading="lazy" class="mb-3 size-10 object-contain" />}
+                        <h3 class:list={['font-semibold text-slate-900', href && 'group-hover:text-brand-700']}>{txt(i.title ?? i.name)}</h3>
+                        {has(i.description, i.desc) && <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{txt(i.description ?? i.desc)}</p>}
+                        {href && <span class="mt-auto inline-flex items-center gap-1 pt-3 text-sm font-semibold text-brand-700">Learn more <Icon name="arrow-right" class="size-4" /></span>}
+                      </Tag>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </section>
+        );
+      }
+      case 'types_panels':
+      case 'docs_lists': {
+        const panels = list<any>(c.panels ?? c.columns, (p) => has(p.title) || list<string>(p.items).length > 0);
+        return panels.length > 0 && (
+          <section class="section-tight">
+            <div class="container-page">
+              {has(c.eyebrow) && <p class="eyebrow">{txt(c.eyebrow)}</p>}
+              {has(c.heading) && <h2 class="mt-1 text-2xl section-title sm:text-3xl">{txt(c.heading)}</h2>}
+              {has(c.subtext) && <p class="mt-3 max-w-3xl text-slate-600">{txt(c.subtext)}</p>}
+              <div class="mt-8 grid gap-4 md:grid-cols-2">
+                {panels.map((p) => (
+                  <div class="card p-5">
+                    <h3 class="flex items-center gap-2 font-semibold"><Icon name="file" class="size-5 text-brand-700" />{txt(p.title)}{has(p.tag, p.pill) && <span class="rounded-full bg-brand-50 px-2 py-0.5 text-xs text-brand-700">{txt(p.tag ?? p.pill)}</span>}</h3>
+                    <ul class="mt-3 space-y-2">{list<string>(p.items).map((i) => <li class="flex gap-2.5 text-base"><Icon name="check" class="mt-1 size-4 shrink-0 text-brand-500" />{txt(i)}</li>)}</ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      }
+      case 'process_steps': {
+        const steps = list<any>(c.steps, (s) => has(s.title));
+        return steps.length > 0 && (
+          <section class="section-tight surface-tint">
+            <div class="container-page">
+              {has(c.eyebrow) && <p class="eyebrow">{txt(c.eyebrow)}</p>}
+              {has(c.heading) && <h2 class="mt-1 text-2xl section-title sm:text-3xl">{txt(c.heading)}</h2>}
+              {has(c.subtext) && <p class="mt-3 max-w-3xl text-slate-600">{txt(c.subtext)}</p>}
+              <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {steps.map((s, n) => (
+                  <li class="card p-5">
+                    <span class="flex size-8 items-center justify-center rounded-full bg-brand-700 text-sm font-bold text-white">{n + 1}</span>
+                    <h3 class="mt-3 font-semibold">{txt(s.title)}</h3>
+                    <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{txt(s.desc)}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+        );
+      }
+      case 'faq':
+        return null;
+      case 'offices': {
+        const offices = list<any>(c.offices, (o) => has(o.address));
+        return offices.length > 0 && (
+          <section class="section-tight">
+            <div class="container-page">
+              <h2 class="text-2xl section-title sm:text-3xl">{txt(c.heading) || 'Our offices'}</h2>
+              <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {offices.map((o) => <li class="card p-5"><p class="flex items-center gap-2 font-semibold"><Icon name="map-pin" class="size-4 text-brand-700" />{txt(o.name)}</p><p class="mt-2 text-sm text-slate-600">{txt(o.address)}</p></li>)}
+              </ul>
+            </div>
+          </section>
+        );
+      }
+      case 'testimonials':
+        return testimonials.length > 0 && (
+          <section class="section-tight surface-tint">
+            <div class="container-page">
+              <h2 class="text-2xl section-title sm:text-3xl">{txt(c.heading) || 'What our clients say'}</h2>
+              <div class="mt-6"><Testimonials items={testimonials} /></div>
+            </div>
+          </section>
+        );
+      case 'final_cta':
+        return (
+          <section class="panel-map bg-brand-700 py-12 text-white">
+            <div class="container-page flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+              <div>
+                <h2 class="text-2xl font-semibold text-white">{txt(c.heading) || `Start your ${page.title} today`}</h2>
+                {has(c.subtext) && <p class="mt-2 max-w-2xl text-brand-100">{txt(c.subtext)}</p>}
+              </div>
+              <div class="flex shrink-0 flex-col gap-3 sm:flex-row">
+                <a href={`tel:${site.contact.phoneE164}`} class="btn-primary" data-track="call"><Icon name="phone" class="size-4" />{site.contact.phone}</a>
+                <a href={whatsapp} class="btn-whatsapp" target="_blank" rel="noopener" data-track="whatsapp"><Icon name="whatsapp" class="size-5" />WhatsApp</a>
+              </div>
+            </div>
+          </section>
+        );
+      case 'disclaimer':
+        return has(c.text) && (
+          <section class="container-page py-8">
+            <p class="max-w-2xl rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-500"><strong class="text-slate-700">{txt(c.heading) || 'Disclaimer:'}</strong> {txt(c.text)}</p>
+          </section>
+        );
+      default:
+        return null;
+    }
+  })}
+
+  {faqs.length > 0 && (
+    <section class="section-tight">
+      <div class="container-page max-w-3xl">
+        <h2 class="text-2xl section-title sm:text-3xl">{txt(blocks.find((b) => b.type === 'faq')?.config.heading) || 'Frequently asked questions'}</h2>
+        <div class="mt-6"><Faq items={faqs} /></div>
+      </div>
+    </section>
+  )}
+</Layout>

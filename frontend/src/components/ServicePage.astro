@@ -1,0 +1,615 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from './Icon.astro';
+import MaterialIcon from './MaterialIcon.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import LeadForm from './LeadForm.astro';
+import Faq from './Faq.astro';
+import Testimonials from './Testimonials.astro';
+import ReviewProof from './ReviewProof.astro';
+import CtaBand from './CtaBand.astro';
+import LogoMarquee from './LogoMarquee.astro';
+import ServiceSection from './ServiceSection.astro';
+import { getHome, getService, getServices, getSite, getTestCategories, getTestimonials, servicesByPaths } from '../lib/content';
+import { breadcrumbSchema, trailFor } from '../lib/breadcrumbs';
+import { createAutolinker } from '../lib/autolink';
+import { fixHeadings } from '../lib/outline';
+import { responsiveHtml } from '../lib/images';
+import { stepIcon } from '../lib/stepIcons';
+import type { ServiceDetail } from '../lib/types';
+
+interface Props {
+  path: string;
+}
+
+const { path } = Astro.props;
+const [service, all, site, home, testimonials, testCategories] = await Promise.all([getService(path), getServices(), getSite(), getHome(), getTestimonials(), getTestCategories()]);
+if (!service) throw new Error(`Service not found: ${path}`);
+
+const d = service.detail && !Array.isArray(service.detail) ? service.detail : {};
+const autolink = createAutolinker(site, service.path);
+const body = d.body ? await responsiveHtml(fixHeadings(autolink(d.body), 2), '(min-width: 1024px) 720px, 100vw') : null;
+const related = (
+  d.related?.length
+    ? servicesByPaths(all, d.related)
+    : all.filter(
+        (s) =>
+          s.path !== service.path &&
+          s.kind === service.kind &&
+          s.region === service.region &&
+          (!service.testCategories?.length || s.testCategories?.some((c) => service.testCategories!.includes(c))),
+      )
+).slice(0, 8);
+
+const trail = trailFor(service.path, service.title).map((item) => {
+  const category = item.href?.startsWith('/services/testing/') && testCategories.find((c) => item.href === `/services/testing/${c.slug}`);
+  return category ? { ...item, label: category.label } : item;
+});
+const seo = service.seo ?? {};
+const suffix = ' – Process, Documents & Cost | Instacertify';
+const fallbackTitle = `${service.title}${service.title.length + suffix.length <= 65 ? suffix : ' | Instacertify'}`;
+const title = (seo.title && seo.title !== `${service.title} | Instacertify` ? seo.title : null) ?? d.seoTitle ?? fallbackTitle;
+const lead = [seo.description, d.seoDescription, service.summary].find((x) => x && x.trim().length >= 30)?.trim() ?? `${service.title}: requirements, documents, cost and timeline.`;
+const description = [seo.description, d.seoDescription].find((x) => x && x.length >= 70) ?? `${lead.replace(/([^.!?])$/, '$1.')} Free assessment from Instacertify specialists.`;
+const h = d.headings ?? {};
+const intro = d.intros ?? {};
+const hasCosts = Boolean(d.costs?.length || intro.costs);
+const hasOverview = Boolean(d.body || d.overview || d.keyFacts?.length || d.includes?.length);
+const shortName = service.title.replace(/ (Registration|Certification|Approval)$/, '');
+const showLogos =
+  (service.kind === 'certification' || service.kind === 'testing') && home.clientLogosOnServices !== false && (home.clientLogos ?? []).some((l) => l.image);
+
+// Testing has its own path (sample collection, lab, report); a service's own procedure always wins.
+const testingSteps = home.testingProcess?.items ?? [];
+const generalSteps = service.kind === 'testing' && testingSteps.length ? testingSteps : site.process ?? [];
+const heroSteps: { title: string; duration?: string; icon?: string | null; iconImage?: string | null }[] = (d.steps?.length ? d.steps : generalSteps).slice(0, 6);
+
+type TabKey = 'overview' | 'documents' | 'process' | 'products' | 'cost' | 'validity' | 'faq';
+type Section = NonNullable<ServiceDetail['sections']>[number];
+const TABS: [TabKey, string][] = [
+  ['overview', 'Overview'],
+  ['documents', 'Documents'],
+  ['process', 'Process'],
+  ['products', 'Products'],
+  ['cost', 'Cost'],
+  ['validity', 'Validity'],
+  ['faq', 'FAQs'],
+];
+
+// Certification and registration pages always show every tab; testing and quality pages only the ones they have content for.
+const fullTabs = service.kind === 'certification' || service.kind === 'registration';
+const business = service.kind === 'registration';
+
+// Imported pages keep their content as free-form sections ("Documents Required", "Cost & Fees"…); sort them under the matching tab.
+const TOPICS: [TabKey, RegExp][] = [
+  ['validity', /validity|renewal/],
+  ['cost', /\bcosts?\b|\bfees?\b|pricing|investment/],
+  ['process', /process|procedure|roadmap|\bsteps?\b|how to apply|journey|timeline/],
+  ['documents', /document|dossier|checklist|paperwork|evidence folder|technical file/],
+  ['products', /\bproducts?\b|scope|categor|covered|sectors/],
+  ['overview', /overview|what is|understanding|about|why|mandatory|who can apply|who needs/],
+];
+const topics = (text: string) => TOPICS.filter(([, re]) => re.test(text.toLowerCase())).map(([key]) => key);
+const legacy = Object.fromEntries(TABS.map(([key]) => [key, [] as { s: Section; i: number }[]])) as Record<TabKey, { s: Section; i: number }[]>;
+const coveredBy: Partial<Record<TabKey, TabKey>> = {};
+let lastTopic: TabKey = 'overview';
+(d.sections ?? []).forEach((s, i) => {
+  const [key] = fullTabs ? topics(`${s.label ?? ''} ${s.heading}`) : [];
+  if (key) lastTopic = key;
+  legacy[key ?? lastTopic].push({ s, i });
+  // A section labelled "Process & Documents Required" also answers the Documents tab.
+  if (key) topics(s.label ?? '').filter((k) => k !== key).forEach((k) => (coveredBy[k] ??= key));
+});
+
+const own: Record<TabKey, boolean> = {
+  overview: hasOverview || legacy.overview.length > 0 || !!d.consequences,
+  documents: !!d.documents?.length || legacy.documents.length > 0,
+  process: !!d.steps?.length || legacy.process.length > 0 || !!d.timeline?.length,
+  products: !!d.table || legacy.products.length > 0,
+  cost: hasCosts || legacy.cost.length > 0,
+  validity: !!d.validity?.length || legacy.validity.length > 0,
+  faq: !!d.faqs?.length,
+};
+const fallback = (key: TabKey) => fullTabs && !own[key] && !(coveredBy[key] && own[coveredBy[key]!]);
+const showHow = !d.steps?.length && !legacy.process.length && generalSteps.length > 0;
+
+const fallbackDocuments = business
+  ? [
+      { title: 'About your business', items: ['PAN of the business and of the proprietor, partners or directors', 'Certificate of incorporation, partnership deed or other proof of constitution', 'Address proof of the premises – rent agreement or ownership document, with a recent utility bill', 'GST registration, where you have one'] },
+      { title: 'About the applicant', items: ['Aadhaar or other ID proof of the authorised signatory', 'Passport-size photograph, email address and mobile number', 'Board resolution or authorisation letter for the person signing'] },
+    ]
+  : [
+      { title: 'About your company', items: ['Business registration of the applicant – certificate of incorporation, GST or the overseas equivalent', 'ID and address proof of the authorised signatory', 'Authorisation letter if an agent or local representative applies on your behalf'] },
+      { title: 'About your product', items: ['Model list with brand names and technical specifications', 'Product photos, labels and the user manual', 'Test reports or certificates you already hold, if any'] },
+    ];
+const fallbackCosts = business
+  ? [
+      { title: 'Government fee', text: 'Set by the department or board that issues the registration, and shown in your quote at the published rate.' },
+      { title: 'Our professional fee', text: 'A fixed fee for preparing and filing the application and following up until it is approved.' },
+    ]
+  : [
+      { title: 'Government or authority fee', text: 'Set by the regulator or certification body, and shown in your quote at the published rate.' },
+      { title: 'Testing or audit charges', text: 'Charged by the accredited lab or audit body where the scheme needs testing or an inspection. They depend on the product and the number of models.' },
+      { title: 'Our professional fee', text: 'A fixed fee for preparing the file, coordinating with the lab and authority, and following up until the certificate is issued.' },
+    ];
+const fallbackValidity = business
+  ? ['Some registrations are valid for life; others must be renewed every year or every few years.', 'Many come with annual returns or periodic filings that keep them active.', 'Changes to your business name, address, constitution or activities usually need an amendment.', 'We record your renewal and filing dates and remind you before they are due.']
+  : ['Validity depends on the scheme: some approvals run for a fixed term and must be renewed before they expire, others stay valid while the product and the applicable standard stay the same.', 'Changes to the product design, critical components, factory or brand name can need a fresh test or an amendment.', 'We record your expiry date and remind you well before a renewal or surveillance step is due.'];
+const fallbackFaqs = [
+  {
+    q: `Who needs ${service.title}?`,
+    a: business
+      ? 'It depends on your business activity, size and location. Share a few details and we will confirm, free of charge, whether you need it.'
+      : `It depends on the product, the standard it falls under and the market you sell in. Share your product details and we will confirm, free of charge, whether ${service.title} applies.`,
+  },
+  {
+    q: `How long does ${service.title} take?`,
+    a: business
+      ? 'It depends on how complete your documents are and on the issuing department’s processing time. We give you a written timeline before you start and update you at every stage.'
+      : 'It depends on how complete your documents are and, where testing or an inspection is needed, on lab and authority schedules. We give you a written timeline before you start and update you at every stage.',
+  },
+  {
+    q: `How much does ${service.title} cost?`,
+    a: business
+      ? 'There are two parts: the government fee and our professional fee. We quote both separately and in writing before any work starts.'
+      : 'There are up to three parts: the government or authority fee, testing or audit charges where they apply, and our professional fee. We quote each one separately and in writing before any work starts.',
+  },
+  {
+    q: `Can Instacertify handle ${service.title} end to end?`,
+    a: business
+      ? 'Yes. We confirm the requirement, prepare and file the application and follow up with the department until it is approved.'
+      : 'Yes. We confirm the requirement, prepare the documents, coordinate testing or audits and follow up with the authority until the certificate is issued.',
+  },
+];
+
+const fallbackDocumentsIntro = business
+  ? 'The exact list depends on your business type and state. These are the documents most applications start with; we confirm your full list on the first call.'
+  : 'The exact checklist depends on your product and on whether you are the manufacturer, importer or brand owner. These are the documents most applications start with; we confirm your full list on the first call.';
+const fallbackCostIntro = business
+  ? 'The total depends on your business category and state. Your written quote lists each part separately:'
+  : 'The total depends on your product, the number of models and the route that applies. Your written quote lists each part separately:';
+
+const documentGroups = d.documents?.length ? d.documents : fallback('documents') ? fallbackDocuments : [];
+const costItems = d.costs?.length ? d.costs : fallback('cost') ? fallbackCosts : [];
+const validityItems = d.validity?.length ? d.validity : fallback('validity') ? fallbackValidity : [];
+const faqItems = d.faqs?.length ? d.faqs : fallback('faq') ? fallbackFaqs : [];
+
+const present = (key: TabKey) => own[key] || fallback(key) || (key === 'process' && showHow);
+const toc = TABS.flatMap(([key, label]) => {
+  if (present(key)) return [{ id: key, label: key === 'products' ? (h.products ?? label) : label }];
+  const target = fullTabs ? coveredBy[key] : undefined;
+  return target && present(target) ? [{ id: target, label }] : [];
+});
+
+const whatsapp = `https://wa.me/${site.contact.whatsapp}?text=${encodeURIComponent(`Hi, I need help with ${service.title}.`)}`;
+
+const jsonLd: Record<string, unknown>[] = [
+  breadcrumbSchema(site.url, trail, service.path),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: service.title,
+    description: service.summary,
+    serviceType: service.title,
+    provider: { '@id': `${site.url}/#organization` },
+    areaServed: service.region === 'india' ? 'IN' : 'Worldwide',
+    url: `${site.url}/${service.path}`,
+  },
+];
+if (d.faqs?.length) {
+  jsonLd.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: d.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  });
+}
+---
+
+<Layout title={title} description={description} jsonLd={jsonLd} image={seo.image ?? service.image ?? undefined} canonical={seo.canonical} seo={seo} modified={service.updatedAt}>
+  <!-- Hero -->
+  <section class="panel-map bg-brand-700">
+    <div class="container-page grid items-start gap-10 py-8 sm:py-12 lg:grid-cols-[minmax(0,1fr)_23.75rem] lg:gap-12 lg:py-14">
+      <div>
+        <Breadcrumbs items={trail} dark />
+
+        {d.eyebrow && <p class="mt-6 text-sm font-semibold text-accent-200">{d.eyebrow}</p>}
+        <h1 class:list={['text-[2rem] leading-tight font-bold tracking-[-0.02em] text-white sm:text-[2.5rem]', d.eyebrow ? 'mt-2' : 'mt-6']}>{d.headline ?? service.title}</h1>
+        <p class="mt-5 max-w-2xl text-base leading-[1.65] text-white/80 sm:text-lg">{d.lead ?? service.summary}</p>
+
+        <ReviewProof site={site} testimonials={testimonials} class="mt-6" />
+
+        {heroSteps.length > 0 && (
+          <div class="mt-8 border-t border-white/15 pt-6">
+            <h2 class="text-base font-bold text-white">How {shortName} works</h2>
+            <ol class="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+              {heroSteps.map((step, i) => (
+                <li class="relative flex gap-3.5">
+                  {/* On phones the steps read as one timeline, so a line joins each icon to the next. */}
+                  {i < heroSteps.length - 1 && <span aria-hidden="true" class="absolute top-11 -bottom-3 left-5 w-px bg-white/20 sm:hidden" />}
+                  <span class="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-accent-200 ring-1 ring-white/15">
+                    <MaterialIcon name={step.icon || stepIcon(step.title)} src={step.iconImage} class="size-[1.375rem]" />
+                    <span class="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-cta text-xs font-bold text-white ring-2 ring-brand-700">{i + 1}</span>
+                  </span>
+                  <span class:list={['min-w-0', step.duration ? 'pt-px' : 'self-center']}>
+                    <span class="block leading-snug font-semibold text-white">{step.title}</span>
+                    {step.duration && <span class="mt-0.5 flex items-center gap-1 text-sm text-white/70"><Icon name="clock" class="size-3.5 shrink-0" />{step.duration}</span>}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <a href="#process" class="tap mt-4 inline-flex min-h-7 items-center gap-1 text-sm font-semibold text-accent-200 hover:text-white">Each step explained <Icon name="arrow-right" class="size-4" /></a>
+          </div>
+        )}
+      </div>
+
+      <LeadForm id={`svc-hero-${service.slug}`} servicePath={service.path} title={`Get a free ${shortName} assessment`} subtitle={site.contact.responseTime} />
+    </div>
+  </section>
+
+  {showLogos && (
+    <div class="border-b border-slate-200 bg-white py-6 sm:py-8">
+      <LogoMarquee logos={home.clientLogos} title={home.clientLogosTitle || 'Trusted by Leading Brands Across the Globe'} />
+    </div>
+  )}
+
+  {toc.length > 1 && (
+    <div class="sticky top-16 z-30 bg-white/90 py-3 backdrop-blur">
+      <nav aria-label="On this page" class="container-page">
+        <div class="rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_8px_24px_rgb(0_0_0/0.04)]">
+          {/* The faded edge shows that more tabs are hidden on that side. */}
+          <ul data-tabs class="flex gap-1 overflow-x-auto [scrollbar-width:none] data-[fade=both]:[mask-image:linear-gradient(to_right,transparent,#000_2.5rem,#000_calc(100%-2.5rem),transparent)] data-[fade=end]:[mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] data-[fade=start]:[mask-image:linear-gradient(to_left,#000_calc(100%-2.5rem),transparent)]">
+            {toc.map((t, i) => (
+              <li class="flex-1">
+                <a
+                  href={`#${t.id}`}
+                  data-tab={t.id}
+                  aria-current={i === 0 ? 'true' : undefined}
+                  class="flex min-h-11 items-center justify-center rounded-xl px-4 text-base font-semibold whitespace-nowrap text-slate-600 transition hover:text-slate-950 aria-[current=true]:bg-cta aria-[current=true]:font-bold aria-[current=true]:text-white"
+                >{t.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    </div>
+  )}
+
+  <div class="bg-white pt-4 pb-16 lg:pb-20">
+    <div class="container-page grid gap-9 lg:grid-cols-[minmax(0,1fr)_23.75rem]">
+      <div class="min-w-0 space-y-6">
+        {present('overview') && (
+          <div id="overview" class="scroll-mt-20 space-y-6">
+          {(hasOverview || fallback('overview')) && (
+          <article class="content-card" aria-labelledby="overview-h">
+            <h2 id="overview-h" class="card-title">{h.body ?? `Overview of ${service.title}`}</h2>
+
+            {d.keyFacts && (
+              <dl class="mt-5 grid grid-cols-2 gap-x-6 border-t border-slate-200 sm:grid-cols-4">
+                {d.keyFacts.map((f) => (
+                  <div class="border-b border-slate-200 py-3.5">
+                    <dt class="text-sm text-slate-500">{f.label}</dt>
+                    <dd class="mt-0.5 font-bold text-slate-950">{f.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+
+            {body
+              ? <div class="prose-body mt-5" set:html={body} />
+              : d.overview
+                ? <div class="prose-body mt-5">{d.overview.map((p) => <p>{p}</p>)}</div>
+                : !hasOverview && <div class="prose-body mt-5"><p>{service.summary}</p></div>}
+
+            {d.includes && (
+              <div class="mt-8 border-t border-slate-200 pt-6">
+                <h3 class="text-lg font-bold text-slate-900">What we do for you</h3>
+                <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+                  {d.includes.map((item) => (
+                    <li class="flex gap-3 text-base leading-[1.5] text-slate-800"><span class="mt-px flex size-[1.375rem] shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white"><Icon name="check" class="size-3.5 [stroke-width:3]" /></span>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </article>
+          )}
+          {legacy.overview.map(({ s, i }) => <ServiceSection label={s.label} heading={s.heading} html={autolink(s.html)} index={i} />)}
+          {d.consequences && (
+          <article class="content-card" aria-labelledby="why-h">
+            <h2 id="why-h" class="card-title">{d.consequences.title}</h2>
+            {d.consequences.text && <p class="mt-3 leading-[1.65] text-slate-800">{d.consequences.text}</p>}
+            <ul class="mt-5 divide-y divide-slate-200 border-y border-slate-200">
+              {(d.consequences.items ?? []).map((c) => (
+                <li class="flex gap-4 py-4">
+                  <Icon name="alert" class="mt-0.5 size-5 shrink-0 text-accent-600" />
+                  <div>
+                    <h3 class="font-bold text-slate-900">{c.title}</h3>
+                    <p class="mt-1 leading-[1.6] text-slate-700">{c.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </article>
+          )}
+          </div>
+        )}
+
+        {present('documents') && (
+          <div id="documents" class="scroll-mt-20 space-y-6">
+          {documentGroups.length > 0 && (
+          <article class="content-card" aria-labelledby="docs-h">
+            <h2 id="docs-h" class="card-title">{h.documents ?? 'Documents required'}</h2>
+            <p class="mt-3 leading-[1.65] text-slate-800">{intro.documents ?? (d.documents?.length ? 'We check every document before filing, so the authority has fewer reasons to raise a query.' : fallbackDocumentsIntro)}</p>
+            <div class="mt-6 grid gap-6 md:grid-cols-2">
+              {documentGroups.map((group, i) => (
+                <div class:list={[i === documentGroups.length - 1 && documentGroups.length % 2 === 1 && documentGroups.length > 1 && 'md:col-span-2']}>
+                  <h3 class="flex items-center gap-2 text-lg font-bold text-slate-800"><Icon name="file" class="size-5 text-brand-700" />{group.title}</h3>
+                  <ul class="mt-3 space-y-2.5">
+                    {group.items.map((item) => (
+                      <li class="flex gap-3 text-base leading-[1.5] text-slate-800"><span class="mt-px flex size-[1.375rem] shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white"><Icon name="check" class="size-3.5 [stroke-width:3]" /></span>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </article>
+          )}
+          {legacy.documents.map(({ s, i }) => <ServiceSection label={s.label} heading={s.heading} html={autolink(s.html)} index={i} />)}
+          </div>
+        )}
+
+        {present('process') && (
+          <div id="process" class="scroll-mt-20 space-y-6">
+          {!!d.steps?.length && (
+          <article class="content-card" aria-labelledby="process-h">
+            <h2 id="process-h" class="card-title">{h.steps ?? `Procedure to get ${service.title}`}</h2>
+            {intro.steps && <p class="mt-3 leading-[1.65] text-slate-800">{intro.steps}</p>}
+            <ol class="relative mt-6 space-y-5 before:absolute before:top-2 before:bottom-2 before:left-5 before:w-px before:bg-slate-200">
+              {d.steps.map((step, i) => (
+                <li class="relative flex gap-4">
+                  <span class="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-4 ring-white">
+                    <MaterialIcon name={step.icon || stepIcon(step.title)} src={step.iconImage} class="size-[1.375rem]" />
+                    <span class="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-cta text-xs font-bold text-white ring-2 ring-white">{i + 1}</span>
+                  </span>
+                  <div class="flex-1 pt-2">
+                    <div class="flex flex-wrap items-baseline justify-between gap-2">
+                      <h3 class="text-lg leading-snug font-bold text-slate-800">{step.title}</h3>
+                      {step.duration && <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-500"><Icon name="clock" class="size-3.5" />{step.duration}</span>}
+                    </div>
+                    {step.text && <p class="mt-1.5 leading-[1.65] text-slate-700">{step.text}</p>}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </article>
+          )}
+          {legacy.process.map(({ s, i }) => <ServiceSection label={s.label} heading={s.heading} html={autolink(s.html)} index={i} />)}
+          {!!d.timeline?.length && (
+          <article class="content-card" aria-labelledby="timeline-h">
+            <h2 id="timeline-h" class="card-title">{h.timeline ?? 'How long it takes'}</h2>
+            {intro.timeline && <p class="mt-3 leading-[1.65] text-slate-800">{intro.timeline}</p>}
+            <ol class="mt-5 divide-y divide-slate-200 border-y border-slate-200">
+              {d.timeline.map((t, i) => (
+                <li class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3.5">
+                  <span class="font-semibold text-slate-900"><span class="mr-2 text-slate-500">{i + 1}.</span>{t.phase}</span>
+                  <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700"><Icon name="clock" class="size-4" />{t.duration}</span>
+                </li>
+              ))}
+            </ol>
+          </article>
+          )}
+          {showHow && (
+            <article class="content-card" aria-labelledby="how-h">
+              <h2 id="how-h" class="card-title">How we handle {service.title}</h2>
+              <ol class="mt-5 divide-y divide-slate-200 border-y border-slate-200">
+                {generalSteps.map((step, i) => (
+                  <li class="flex gap-4 py-4">
+                    <span class="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                      <MaterialIcon name={step.icon || stepIcon(step.title)} src={step.iconImage} class="size-[1.375rem]" />
+                      <span class="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-cta text-xs font-bold text-white ring-2 ring-white">{i + 1}</span>
+                    </span>
+                    <div class="pt-2">
+                      <h3 class="font-bold text-slate-900">{step.title}</h3>
+                      <p class="mt-1 leading-[1.6] text-slate-700">{step.text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </article>
+          )}
+          </div>
+        )}
+
+        {present('products') && (
+          <div id="products" class="scroll-mt-20 space-y-6">
+          {d.table && (
+          <article class="content-card" aria-labelledby="products-h">
+            <h2 id="products-h" class="card-title">{d.table.title}</h2>
+            <div class="mt-5 rounded-xl border border-slate-200 sm:overflow-x-auto">
+              <table class="w-full text-left text-sm max-sm:block sm:min-w-[36rem]">
+                <thead class="bg-slate-50 text-slate-900 max-sm:hidden">
+                  <tr>{d.table.columns.map((c) => <th scope="col" class="px-4 py-3 font-bold">{c}</th>)}</tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 max-sm:block">
+                  {d.table.rows.map((row) => (
+                    <tr class="max-sm:block max-sm:px-4 max-sm:py-3.5">{row.map((cell, i) => (
+                      <td
+                        data-label={d.table!.columns[i]}
+                        class:list={[
+                          'px-4 py-3 align-top max-sm:block max-sm:p-0',
+                          i === 0 ? 'font-semibold text-slate-900' : 'text-slate-700 max-sm:mt-2 max-sm:before:block max-sm:before:text-xs max-sm:before:font-medium max-sm:before:text-slate-500 max-sm:before:content-[attr(data-label)]',
+                        ]}
+                      >{cell}</td>
+                    ))}</tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {d.table.note && <p class="mt-3 text-sm text-slate-500">{d.table.note}</p>}
+          </article>
+          )}
+          {legacy.products.map(({ s, i }) => <ServiceSection label={s.label} heading={s.heading} html={autolink(s.html)} index={i} />)}
+          {fallback('products') && (
+            <article class="content-card" aria-labelledby="products-h">
+              <h2 id="products-h" class="card-title">{business ? `Who needs ${service.title}` : 'Products covered'}</h2>
+              <p class="mt-3 leading-[1.65] text-slate-800">
+                {business
+                  ? `Whether you need ${service.title} depends on what your business makes, sells, imports or employs, and where it operates. Tell us about your business and we will confirm whether it applies, which category you fall under and what follows after registration.`
+                  : `Whether ${service.title} applies depends on the product category and the standard or regulation it falls under. Send us the product name, HS code or model list and we will confirm whether it is covered, which standard it is assessed against and whether several models can share one application.`}
+              </p>
+              <a href="#enquire" class="mt-5 inline-flex items-center gap-1 font-semibold text-brand-700 hover:text-brand-800" data-track="quote">
+                {business ? 'Check whether it applies to you' : 'Check whether your product is covered'}<Icon name="arrow-right" class="size-4" />
+              </a>
+            </article>
+          )}
+          </div>
+        )}
+
+        {d.tip && (
+          <aside class="flex gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
+            <Icon name="bulb" class="size-6 shrink-0 text-amber-600" />
+            <div>
+              <p class="text-lg font-bold text-slate-900">{d.tip.title}</p>
+              <p class="mt-1 leading-[1.65] text-slate-800">{d.tip.text}</p>
+            </div>
+          </aside>
+        )}
+
+        {present('cost') && (
+          <div id="cost" class="scroll-mt-20 space-y-6">
+          {(hasCosts || costItems.length > 0) && (
+          <article class="content-card" aria-labelledby="cost-h">
+            <h2 id="cost-h" class="card-title">{h.costs ?? 'Cost & fee structure'}</h2>
+            {(intro.costs || fallback('cost')) && <p class="mt-3 leading-[1.65] text-slate-800">{intro.costs ?? fallbackCostIntro}</p>}
+            {costItems.length > 0 && (
+              <ol class="mt-5 divide-y divide-slate-200 border-y border-slate-200">
+                {costItems.map((c, i) => (
+                  <li class="grid gap-1 py-4 sm:grid-cols-[13rem_1fr] sm:gap-6">
+                    <h3 class="font-bold text-slate-900"><span class="mr-2 text-slate-500">{i + 1}.</span>{c.title}</h3>
+                    <p class="leading-[1.6] text-slate-700">{c.text}</p>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <div class="mt-5 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+              <p class="text-base text-slate-700">Send your product and number of models for a written quote with each fee listed separately.</p>
+              <a href="#enquire" class="btn-primary shrink-0" data-track="quote">Request a quote</a>
+            </div>
+          </article>
+          )}
+          {legacy.cost.map(({ s, i }) => <ServiceSection label={s.label} heading={s.heading} html={autolink(s.html)} index={i} />)}
+          </div>
+        )}
+
+        {present('validity') && (
+          <div id="validity" class="scroll-mt-20 space-y-6">
+          {validityItems.length > 0 && (
+          <article class="content-card" aria-labelledby="validity-h">
+            <h2 id="validity-h" class="card-title">{h.validity ?? 'Validity & renewal'}</h2>
+            {intro.validity && <p class="mt-3 leading-[1.65] text-slate-800">{intro.validity}</p>}
+            <ul class="mt-5 space-y-3">
+              {validityItems.map((v) => (
+                <li class="flex gap-3 text-base leading-[1.5] text-slate-800"><Icon name="refresh" class="mt-0.5 size-5 shrink-0 text-brand-700" />{v}</li>
+              ))}
+            </ul>
+          </article>
+          )}
+          {legacy.validity.map(({ s, i }) => <ServiceSection label={s.label} heading={s.heading} html={autolink(s.html)} index={i} />)}
+          </div>
+        )}
+
+        {faqItems.length > 0 && (
+          <article id="faq" class="content-card scroll-mt-20" aria-labelledby="faq-h">
+            <h2 id="faq-h" class="card-title">{h.faqs ?? 'Frequently asked questions'}</h2>
+            <div class="mt-5"><Faq items={faqItems} flush /></div>
+          </article>
+        )}
+
+        {seo.reviewer && (
+          <article class="content-card" aria-labelledby="reviewer-h">
+            <p class="text-sm font-semibold text-slate-500">Reviewed by</p>
+            <h2 id="reviewer-h" class="mt-2 text-xl leading-tight font-bold text-slate-950 sm:text-2xl">{seo.reviewer}</h2>
+            {seo.reviewerCredentials && <p class="mt-1.5 font-semibold text-brand-700">{seo.reviewerCredentials}</p>}
+            {seo.reviewedAt && <p class="mt-3 text-sm text-slate-500">Last reviewed on {new Date(seo.reviewedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
+          </article>
+        )}
+      </div>
+
+      <aside class="flex flex-col gap-5">
+        {related.length > 0 && (
+          <nav aria-labelledby="other-h" class="card order-2 rounded-[1.25rem] p-5 lg:order-none">
+            <h2 id="other-h" class="text-base font-bold text-slate-950">Related services</h2>
+            <ul class="mt-3 divide-y divide-slate-100">
+              {related.map((s) => (
+                <li>
+                  <a href={s.url} class="group flex items-center justify-between gap-3 py-2.5 text-base text-slate-700 hover:text-brand-700">
+                    {s.title}<Icon name="chevron-right" class="size-4 shrink-0 text-slate-300 group-hover:text-brand-700" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+
+        <div id="enquire" class="scroll-mt-36 space-y-5 lg:sticky lg:top-36">
+          <LeadForm id={`svc-${service.slug}`} servicePath={service.path} title={`Ask about ${shortName}`} subtitle={site.contact.responseTime} />
+
+          <div class="card rounded-[1.25rem] p-5">
+            <p class="text-base font-bold text-slate-950">Talk to an expert</p>
+            <p class="mt-1 text-sm text-slate-500">{site.contact.hours}</p>
+            <div class="mt-4 grid grid-cols-2 gap-2.5">
+              <a href={`tel:${site.contact.phoneE164}`} class="btn-ghost px-3" data-track="call"><Icon name="phone" class="size-4" />Call us</a>
+              <a href={whatsapp} target="_blank" rel="noopener" class="btn-whatsapp px-3" data-track="whatsapp"><Icon name="whatsapp" class="size-4" />Chat</a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <section id="reviews" class="section-tight scroll-mt-24 border-t border-slate-200 surface-tint">
+    <div class="container-page">
+      <h2 class="text-2xl leading-tight font-bold tracking-[-0.02em] text-slate-950 sm:text-3xl">What our clients say</h2>
+      <div class="mt-8"><Testimonials items={testimonials} /></div>
+    </div>
+  </section>
+
+  <CtaBand formAnchor="#enquire" />
+</Layout>
+
+<script>
+  // Highlights the tab of the section currently in view.
+  const tabs = document.querySelector<HTMLElement>('[data-tabs]');
+  if (tabs) {
+    const links = [...tabs.querySelectorAll<HTMLAnchorElement>('[data-tab]')];
+    const sections = links.map((a) => document.getElementById(a.dataset.tab!)).filter((s): s is HTMLElement => !!s);
+    let currentId = '';
+    const activate = (id: string) => {
+      if (id === currentId) return;
+      currentId = id;
+      links.forEach((a) => (a.dataset.tab === id ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+      const active = links.find((a) => a.dataset.tab === id);
+      if (!active) return;
+      const left = active.getBoundingClientRect().left - tabs.getBoundingClientRect().left + tabs.scrollLeft;
+      tabs.scrollTo({ left: left - 40, behavior: 'smooth' });
+    };
+    const fade = () => {
+      const max = tabs.scrollWidth - tabs.clientWidth;
+      tabs.dataset.fade = max <= 1 ? '' : tabs.scrollLeft <= 1 ? 'end' : tabs.scrollLeft >= max - 1 ? 'start' : 'both';
+    };
+    tabs.addEventListener('scroll', fade, { passive: true });
+    addEventListener('resize', fade);
+    fade();
+    const update = () => {
+      const line = 170;
+      let current = sections[0];
+      for (const s of sections) if (s.getBoundingClientRect().top <= line) current = s;
+      // A short last section never reaches the line, so the page bottom selects it.
+      const last = sections.at(-1);
+      if (last && innerHeight + scrollY >= document.documentElement.scrollHeight - 2 && last.getBoundingClientRect().top < innerHeight) current = last;
+      if (current) activate(current.id);
+    };
+    links.forEach((a) => a.addEventListener('click', () => activate(a.dataset.tab!)));
+    addEventListener('scroll', update, { passive: true });
+    update();
+  }
+</script>

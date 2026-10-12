@@ -1,0 +1,67 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import Icon from '../../components/Icon.astro';
+import MaterialIcon from '../../components/MaterialIcon.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { getIndustries, getSite } from '../../lib/content';
+import { breadcrumbSchema } from '../../lib/breadcrumbs';
+import { responsive } from '../../lib/images';
+
+const industryImages = import.meta.glob<{ default: ImageMetadata }>('../../assets/industries/*.webp', { eager: true });
+const [industries, site] = await Promise.all([getIndustries(), getSite()]);
+const trail = [{ label: 'Industries' }];
+const photos = await Promise.all(industries.map((ind) => responsive(ind.image, [320, 480, 640])));
+---
+
+<Layout
+  title="Industries We Certify – Electronics, Toys, Food & More | Instacertify"
+  description="Which certifications electronics, toys, polymers, cosmetics, food and connected-device makers need in India and abroad, and the order to get them in."
+  jsonLd={[breadcrumbSchema(site.url, trail, 'industries')]}
+>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <h1 class="mt-5 max-w-3xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]">Conformity Solutions by Industry</h1>
+      <p class="mt-4 max-w-2xl text-lg text-slate-600">Each sector has its own mandatory marks, lab tests and registrations. Pick yours to see which ones apply and in what order.</p>
+    </div>
+  </section>
+
+  <div class="container-page grid gap-6 py-10 sm:py-14 md:grid-cols-2">
+    {industries.map((ind, i) => {
+      const img = industryImages[`../../assets/industries/${ind.slug}.webp`]?.default;
+      const photo = photos[i];
+      return (
+        <article class="card flex flex-col overflow-hidden sm:flex-row">
+          <a href={ind.url} tabindex="-1" aria-hidden="true" class="shrink-0">
+            {photo ? (
+              <img src={photo.src} srcset={photo.srcset} sizes="(min-width: 640px) 224px, 100vw" alt={ind.name} loading="lazy" decoding="async" class="h-44 w-full object-cover sm:h-full sm:w-56" />
+            ) : img && <Image src={img} alt={ind.name} widths={[320, 480]} sizes="(min-width: 640px) 220px, 100vw" class="h-44 w-full object-cover sm:h-full sm:w-56" />}
+          </a>
+          <div class="flex flex-1 flex-col p-5">
+            <h2 class="text-lg font-semibold">
+              <a href={ind.url} class="tap inline-flex items-center gap-2 hover:text-brand-700">
+                {(ind.icon || ind.iconImage) && <MaterialIcon name={ind.icon} src={ind.iconImage} fallback="factory" class="size-6 shrink-0 text-brand-700" />}{ind.name}
+              </a>
+            </h2>
+            <p class="mt-1.5 text-sm text-slate-600">{ind.summary}</p>
+            <ul class="mt-4 space-y-1.5">
+              {ind.highlights.slice(0, 3).map((h) => <li class="flex gap-2 text-sm text-slate-700"><Icon name="check" class="mt-0.5 size-4 shrink-0 text-emerald-600" />{h}</li>)}
+            </ul>
+            <div class="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
+              <a href={`${ind.url}#certification`} class="btn-primary px-3" aria-label={`Certification for ${ind.name}`}>
+                <MaterialIcon name="verified" class="size-5" />Certification
+              </a>
+              <a href={`${ind.url}#testing`} class="btn-ghost px-3" aria-label={`Testing for ${ind.name}`}>
+                <MaterialIcon name="science" class="size-5" />Testing
+              </a>
+            </div>
+          </div>
+        </article>
+      );
+    })}
+  </div>
+
+  <CtaBand title="Your industry not listed?" text="Tell us your product and where you sell it. We reply with the list of approvals, the lab tests and the expected timeline." />
+</Layout>

@@ -1,0 +1,26 @@
+[
+    {
+        "sno": 1,
+        "product": "Mobile Phones",
+        "is": "IS 13252 (Part 1)",
+        "broad": "Electronics & IT Goods",
+        "hsn4": "8517",
+        "hsn8": "85171300",
+        "status": "Mandatory (CRS Registration)",
+        "order": "CRO Phase-II; effective 2014",
+        "fees": {"micro": 7000, "small": 14500, "large": 27000},
+        "remarks": "Registration per model per factory"
+    },
+    {
+        "sno": 99,
+        "product": "Smart Rings",
+        "is": "IS 13252 (Part 1)",
+        "broad": "Electronics & IT Goods",
+        "hsn4": "8517",
+        "hsn8": "",
+        "status": "Mandatory (CRS Registration)",
+        "order": "CRO 2025; effective 01-01-2026",
+        "fees": {"micro": 7000, "small": 14500, "large": 27000},
+        "remarks": ""
+    }
+]

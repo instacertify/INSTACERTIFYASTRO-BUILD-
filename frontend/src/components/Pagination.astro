@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  base: string;
+  page: number;
+  pages: number;
+}
+
+const { base, page, pages } = Astro.props;
+const href = (n: number) => (n === 1 ? `/${base}` : `/${base}/page/${n}`);
+const shown = [...new Set([1, page - 1, page, page + 1, pages])].filter((n) => n >= 1 && n <= pages).sort((a, b) => a - b);
+---
+
+{pages > 1 && (
+  <nav aria-label="Pagination" class="mt-10 flex flex-wrap items-center justify-center gap-1.5">
+    {page > 1 && <a href={href(page - 1)} rel="prev" class="btn-ghost min-h-10 px-3"><Icon name="chevron-right" class="size-4 rotate-180" /><span class="sr-only sm:not-sr-only">Previous</span></a>}
+    {shown.map((n, i) => (
+      <>
+        {i > 0 && n - shown[i - 1] > 1 && <span class="px-1 text-slate-400">…</span>}
+        <a href={href(n)} aria-current={n === page ? 'page' : undefined} class:list={['inline-flex size-10 items-center justify-center rounded-lg text-sm font-semibold', n === page ? 'bg-brand-700 text-white' : 'text-slate-700 hover:bg-slate-100']}>{n}</a>
+      </>
+    ))}
+    {page < pages && <a href={href(page + 1)} rel="next" class="btn-ghost min-h-10 px-3"><span class="sr-only sm:not-sr-only">Next</span><Icon name="chevron-right" class="size-4" /></a>}
+  </nav>
+)}

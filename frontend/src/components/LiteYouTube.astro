@@ -1,0 +1,34 @@
+---
+interface Props {
+  url: string;
+  title: string;
+}
+
+const { url, title } = Astro.props;
+const id = url.match(/(?:[?&]v=|youtu\.be\/|shorts\/|embed\/)([\w-]{11})/)?.[1];
+---
+
+{id && (
+  <div class="lite-yt relative aspect-video overflow-hidden rounded-2xl bg-slate-900" data-id={id} data-title={title}>
+    <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" width="480" height="360" loading="lazy" decoding="async" class="absolute inset-0 size-full object-cover" />
+    <button type="button" class="group absolute inset-0 flex items-center justify-center bg-slate-950/20 transition hover:bg-slate-950/10" aria-label={`Play video: ${title}`} data-track="video">
+      <span class="flex size-18 items-center justify-center rounded-full bg-cta text-white shadow-lg transition group-hover:scale-105">
+        <svg viewBox="0 0 24 24" class="ml-1 size-8" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14" /></svg>
+      </span>
+    </button>
+  </div>
+)}
+
+<script>
+  document.querySelectorAll<HTMLElement>('.lite-yt').forEach((box) =>
+    box.querySelector('button')?.addEventListener('click', () => {
+      const frame = document.createElement('iframe');
+      frame.src = `https://www.youtube-nocookie.com/embed/${box.dataset.id}?autoplay=1&rel=0`;
+      frame.title = box.dataset.title ?? 'Video';
+      frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      frame.allowFullscreen = true;
+      frame.className = 'absolute inset-0 size-full';
+      box.replaceChildren(frame);
+    }),
+  );
+</script>

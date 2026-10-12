@@ -1,0 +1,366 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Faq from './Faq.astro';
+import Icon, { type IconKey } from './Icon.astro';
+import LeadForm from './LeadForm.astro';
+import CtaBand from './CtaBand.astro';
+import { getSite, getStandardCategories } from '../lib/content';
+import { breadcrumbSchema } from '../lib/breadcrumbs';
+import { createAutolinker } from '../lib/autolink';
+import { fixHeadings } from '../lib/outline';
+import { responsive, responsiveHtml } from '../lib/images';
+import { CONSULTING_NOTE, ISI_OTHER_CHARGES, SCHEME, STATUS, isLabel, range, relatedStandards, rowStatusLine, rupees, statusLine } from '../lib/standards';
+import type { StandardProduct } from '../lib/types';
+
+interface Props {
+  path: string;
+}
+
+const [categories, site] = await Promise.all([getStandardCategories(), getSite()]);
+const category = categories.find((c) => c.standards.some((s) => s.path === Astro.props.path))!;
+const standard = category.standards.find((s) => s.path === Astro.props.path)!;
+const seo = standard.seo ?? {};
+const trail = [
+  { label: 'Standards library', href: '/resources/standards' },
+  { label: category.title, href: category.url },
+  { label: standard.title },
+];
+
+const products = standard.products ?? [];
+const heroImage = standard.image ?? products.find((p) => p.image)?.image ?? null;
+const [description, thumbs, hero] = await Promise.all([
+  standard.description ? responsiveHtml(fixHeadings(createAutolinker(site, standard.path)(standard.description)), '(min-width: 1024px) 760px, 100vw') : null,
+  Promise.all(products.map((p) => responsive(p.image, [80, 160]))),
+  responsive(heroImage, [360, 560, 840, 1120], 80),
+]);
+const heroAlt = standard.image ? standard.imageAlt || standard.title : products.find((p) => p.image)?.name ?? standard.title;
+const status = standard.regulationStatus;
+const isCrs = standard.scheme === 'crs';
+const otherCharges = ISI_OTHER_CHARGES.application + ISI_OTHER_CHARGES.licence + ISI_OTHER_CHARGES.audit;
+const priced = products.filter((p) => p.fee_large || p.fee_micro);
+const feeKey = (p: StandardProduct) => [p.fee_large, p.fee_medium, p.fee_small, p.fee_micro, p.unit_fee].join('|');
+const sameFees = priced.length > 0 && new Set(priced.map(feeKey)).size === 1;
+const tiers = [
+  ['Large', 'fee_large'],
+  ['Medium', 'fee_medium'],
+  ['Small', 'fee_small'],
+  ['Micro', 'fee_micro'],
+] as const;
+// Below `sm` the tables stack into one block per row; cells show their column name from data-label.
+const cellLabel = 'max-sm:before:block max-sm:before:text-xs max-sm:before:font-medium max-sm:before:text-slate-500 max-sm:before:content-[attr(data-label)]';
+const tested = products.filter((p) => p.test_min);
+const testMin = tested.length ? Math.min(...tested.map((p) => p.test_min!)) : null;
+const testMax = tested.length ? Math.max(...tested.map((p) => p.test_max ?? p.test_min!)) : null;
+const labCount = tested.length === 1 ? tested[0].labs ?? 0 : Math.max(0, ...tested.map((p) => p.labs ?? 0));
+const hsn = [...new Set(products.map((p) => p.hsn).filter(Boolean))];
+const orders = [...new Set(products.map((p) => p.order).filter(Boolean))] as string[];
+const notes = [...new Set(products.map((p) => p.note).filter(Boolean))] as string[];
+const hasRowStatus = products.some((p) => p.status);
+const multiStatus = new Set(products.map((p) => p.status).filter(Boolean)).size > 1;
+const hasImages = products.some((p) => p.image);
+const allFacts = standard.facts ?? [];
+const factTesting = allFacts.find((f) => f.label === 'Testing charges' || f.label === 'Indicative testing charges');
+const factRegistration = allFacts.find((f) => f.label === 'Registration fees');
+const facts = allFacts.filter((f) => f !== factTesting && f !== factRegistration);
+const [registrationValue, ...registrationRest] = (factRegistration?.value ?? '').split(';').map((s) => s.trim());
+const amounts = (text: string) => [...text.matchAll(/₹\s?([\d,]+)/g)].map((m) => `₹${m[1]}`);
+const [brandLow, brandHigh] = amounts(registrationValue ?? '');
+const [modelLow, modelHigh] = amounts(registrationRest.join(' '));
+
+const glance = [
+  priced.length > 0 && {
+    icon: 'rupee',
+    label: isCrs ? 'BIS fee' : 'Minimum marking fee per year',
+    value: range(Math.min(...priced.map((p) => p.fee_micro ?? p.fee_small ?? p.fee_large!)), Math.max(...priced.map((p) => p.fee_large ?? 0)))!,
+    hint: isCrs ? 'For each application, micro to large firms' : 'Micro to large firms',
+  },
+  factTesting
+    ? { icon: 'flask', label: 'Testing cost', value: factTesting.value, hint: 'Guide price, NABL-accredited lab' }
+    : testMin && {
+        icon: 'flask',
+        label: 'Testing cost',
+        value: range(testMin, testMax)!,
+        hint: labCount > 1 ? `Based on ${labCount} lab prices` : 'Guide price from one lab',
+      },
+  registrationValue &&
+    (brandHigh
+      ? {
+          icon: 'rupee',
+          label: 'BEE brand registration',
+          value: `${brandLow} – ${brandHigh}`,
+          hint: `MSMEs pay less.${modelHigh ? ` Each model: ${modelLow} – ${modelHigh}` : ''}`,
+        }
+      : { icon: 'rupee', label: 'BEE registration', value: registrationValue.replace(/^brand:\s*/i, ''), hint: registrationRest.join('; ') || null }),
+  hsn.length > 0 && { icon: 'file', label: hsn.length > 1 ? 'HSN codes' : 'HSN code', value: hsn.slice(0, 3).join(', '), hint: 'Check the code with customs' },
+].filter(Boolean) as { icon: IconKey; label: string; value: string; hint: string | null }[];
+
+// Pages citing the same Indian Standard first, then the same sector, then the rest of the section.
+const related = relatedStandards(categories, standard);
+const relatedPaths = new Set(related.map((s) => s.path));
+const peers = category.standards.filter((s) => s.path !== standard.path && !relatedPaths.has(s.path));
+const others = [
+  ...related,
+  ...peers.filter((s) => standard.sector && s.sector === standard.sector),
+  ...peers.filter((s) => !standard.sector || s.sector !== standard.sector),
+].slice(0, 8);
+
+const jumps = [
+  products.length > 0 && ['#products-h', standard.productsTitle ? 'Products' : 'Products covered'],
+  priced.length > 0 && ['#fees-h', 'BIS fee'],
+  facts.length > 0 && ['#facts-h', 'Key facts'],
+  !!standard.faqs?.length && ['#faq-h', 'Questions'],
+  others.length > 0 && ['#related-h', 'Related'],
+].filter(Boolean) as [string, string][];
+
+const jsonLd: Record<string, unknown>[] = [breadcrumbSchema(site.url, trail, standard.path)];
+if (standard.faqs?.length) {
+  jsonLd.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: standard.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  });
+}
+---
+
+<Layout title={seo.title ?? `${standard.title} – Products & certification | Instacertify`} description={seo.description ?? standard.summary} image={seo.image ?? heroImage ?? undefined} canonical={seo.canonical} seo={seo} modified={standard.updatedAt} jsonLd={jsonLd}>
+  <section class="border-b border-slate-200 surface-tint">
+    <div class="container-page py-8 sm:py-12">
+      <Breadcrumbs items={trail} />
+      <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-center lg:gap-12 xl:grid-cols-[minmax(0,1fr)_26rem]">
+        <div>
+          <p class="eyebrow">{category.title}</p>
+          <h1 class="mt-2 max-w-4xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{standard.title}</h1>
+          {(status || standard.sector) && (
+            <div class="mt-5 flex flex-wrap items-center gap-2 text-sm">
+              {status && (
+                <span class={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-medium ring-1 ring-inset ${STATUS[status].badge}`}>
+                  <span class={`size-2 rounded-full ${STATUS[status].dot}`} aria-hidden="true" />{statusLine(status, standard.mandatorySince)}
+                </span>
+              )}
+              {standard.sector && <span class="text-slate-600">{standard.sector}</span>}
+            </div>
+          )}
+        </div>
+        {hero ? (
+          <figure class="flex aspect-[16/10] items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:aspect-[2/1] lg:aspect-[4/3] lg:p-6">
+            <img
+              src={hero.src}
+              srcset={hero.srcset}
+              sizes="(min-width: 1280px) 26rem, (min-width: 1024px) 22rem, calc(100vw - 2rem)"
+              alt={heroAlt}
+              width={hero.width}
+              height={hero.height}
+              fetchpriority="high"
+              decoding="async"
+              class="h-auto max-h-full w-auto max-w-full object-contain"
+            />
+          </figure>
+        ) : (
+          <div class="hidden aspect-[4/3] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-center lg:flex">
+            <Icon name={standard.scheme === 'iso' ? 'badge' : 'shield'} class="size-12 text-brand-700" />
+            {standard.scheme && <p class="mt-4 font-semibold text-slate-900">{SCHEME[standard.scheme]}</p>}
+            {standard.isNumbers.length > 0 && <p class="mt-1 text-sm text-slate-500">{standard.isNumbers.slice(0, 3).map(isLabel).join(' · ')}</p>}
+          </div>
+        )}
+      </div>
+      {glance.length > 0 && (
+        <dl class:list={['mt-8 grid gap-px overflow-hidden rounded-2xl bg-slate-200 ring-1 ring-slate-200 sm:grid-cols-2', glance.length === 3 && 'lg:grid-cols-3', glance.length > 3 && 'lg:grid-cols-4']}>
+          {glance.map((g) => (
+            <div class="flex flex-col bg-white px-5 py-4">
+              <dt class="flex items-center gap-2 text-sm text-slate-500"><Icon name={g.icon} class="size-4 text-brand-700" />{g.label}</dt>
+              <dd class="mt-1 text-lg leading-snug font-bold text-slate-900">{g.value}</dd>
+              {g.hint && <dd class="mt-0.5 text-xs text-slate-500">{g.hint}</dd>}
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
+  </section>
+
+  {jumps.length > 2 && (
+    <nav aria-label="On this page" class="sticky top-16 z-20 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+      <ul class="container-page flex gap-6 overflow-x-auto text-sm font-medium whitespace-nowrap text-slate-600">
+        {jumps.map(([anchor, label]) => <li><a href={anchor} class="inline-block border-b-2 border-transparent py-3 hover:border-brand-700 hover:text-brand-700">{label}</a></li>)}
+        <li class="ml-auto"><a href="#get-certified" class="inline-flex items-center gap-1 py-3 font-semibold text-cta hover:text-cta-hover">Get a free quote <Icon name="arrow-right" class="size-4" /></a></li>
+      </ul>
+    </nav>
+  )}
+
+  <div class="container-page grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-14 lg:py-14">
+    <div class="min-w-0 space-y-12 [&_h2]:scroll-mt-36">
+      {description && <div class="prose-body max-w-3xl text-slate-700" set:html={description} />}
+
+      {products.length > 0 && (
+        <section aria-labelledby="products-h">
+          <h2 id="products-h" class="text-2xl section-title">{standard.productsTitle ?? 'Products covered'}</h2>
+          <div class="mt-5 rounded-2xl border border-slate-200 sm:overflow-x-auto">
+            <table class="w-full text-left text-sm max-sm:block sm:min-w-[30rem]">
+              <thead class="bg-slate-50 text-slate-900 max-sm:hidden">
+                <tr>
+                  <th scope="col" class="w-48 px-4 py-3 font-semibold">IS number</th>
+                  <th scope="col" class="px-4 py-3 font-semibold">Product</th>
+                  {multiStatus && <th scope="col" class="px-4 py-3 font-semibold">Status</th>}
+                  {tested.length > 0 && <th scope="col" class="px-4 py-3 font-semibold">Testing cost</th>}
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 max-sm:block">
+                {products.map((p, pi) => (
+                  <tr class="align-top max-sm:block max-sm:px-4 max-sm:py-3.5">
+                    <td class="px-4 py-3 font-medium whitespace-nowrap text-slate-900 max-sm:block max-sm:p-0">{isLabel(p.is_number)}</td>
+                    <td class="px-4 py-3 text-slate-600 max-sm:mt-2 max-sm:block max-sm:p-0">
+                      <div class={hasImages ? 'flex items-center gap-4' : undefined}>
+                        {p.image ? (
+                          <a href={p.image} target="_blank" rel="noopener" class="shrink-0" aria-label={`Photo of ${p.name} (opens full size)`}>
+                            <img src={thumbs[pi]!.src} srcset={thumbs[pi]!.srcset} sizes="80px" alt={p.name} width="80" height="80" loading="lazy" decoding="async" class="size-20 rounded-lg border border-slate-200 bg-white object-contain p-1" />
+                          </a>
+                        ) : hasImages && <span class="size-20 shrink-0" aria-hidden="true" />}
+                        <span>
+                          {p.name}
+                          {!multiStatus && hasRowStatus && p.hsn && products.length > 1 && <span class="mt-0.5 block text-xs text-slate-500">HSN {p.hsn}</span>}
+                        </span>
+                      </div>
+                    </td>
+                    {multiStatus && (
+                      <td data-label="Status" class={`px-4 py-3 text-xs max-sm:mt-2 max-sm:block max-sm:p-0 ${cellLabel}`}>
+                        {p.status && <span class={`badge ${STATUS[p.status].badge}`}>{STATUS[p.status].label}</span>}
+                        {p.since && <span class="mt-1 block text-slate-500">{rowStatusLine(p)}</span>}
+                      </td>
+                    )}
+                    {tested.length > 0 && (
+                      <td data-label="Testing cost" class={`px-4 py-3 whitespace-nowrap text-slate-700 max-sm:mt-2 max-sm:block max-sm:p-0 ${cellLabel}`}>
+                        {range(p.test_min, p.test_max) ?? '—'}
+                        {!!p.labs && <span class="block text-xs text-slate-500">{p.labs} lab{p.labs === 1 ? '' : 's'}</span>}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {(orders.length > 0 || notes.length > 0) && (
+            <ul class="mt-4 space-y-2 text-sm text-slate-600">
+              {orders.map((o) => <li class="flex gap-2"><Icon name="file" class="mt-0.5 size-4 shrink-0 text-brand-700" /><span><span class="font-semibold text-slate-900">Legal order:</span> {o}</span></li>)}
+              {notes.map((n) => <li class="flex gap-2"><Icon name="alert" class="mt-0.5 size-4 shrink-0 text-amber-600" />{n}</li>)}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {priced.length > 0 && (
+        <section aria-labelledby="fees-h">
+          <h2 id="fees-h" class="text-2xl section-title">{isCrs ? 'BIS fee by firm size' : 'Minimum marking fee by firm size'}</h2>
+          <p class="mt-2 max-w-3xl text-slate-600">
+            {isCrs
+              ? 'You pay BIS a fee for each application. Micro and small firms pay less. You pay the lab for testing separately.'
+              : 'You pay BIS a minimum marking fee every year. Micro, small and medium firms (with Udyam registration) pay less. BIS also works out a fee from the unit rate and your production. You pay whichever amount is higher.'}
+          </p>
+          {sameFees ? (
+            <>
+              <dl class="mt-5 grid grid-cols-2 gap-x-8 border-t border-slate-200 sm:grid-cols-4">
+                {tiers.filter(([, key]) => priced[0][key]).map(([label, key]) => (
+                  <div class="border-b border-slate-200 py-4">
+                    <dt class="text-sm text-slate-500">{label}{label === 'Large' && isCrs ? ' & medium' : ''} firms</dt>
+                    <dd class="mt-1 text-xl font-bold text-slate-900">{rupees(priced[0][key]!)}</dd>
+                  </div>
+                ))}
+              </dl>
+              {priced[0].unit_fee && <p class="mt-3 text-sm text-slate-600"><span class="font-semibold text-slate-900">Unit rate:</span> {priced[0].unit_fee}</p>}
+            </>
+          ) : (
+            <div class="mt-5 rounded-2xl border border-slate-200 sm:overflow-x-auto">
+              <table class="w-full text-left text-sm max-sm:block sm:min-w-[40rem]">
+                <thead class="bg-slate-50 text-slate-900 max-sm:hidden">
+                  <tr>
+                    <th scope="col" class="px-4 py-3 font-semibold">IS number</th>
+                    {tiers.map(([label, key]) => priced.some((p) => p[key]) && <th scope="col" class="px-4 py-3 text-right font-semibold">{label}</th>)}
+                    {priced.some((p) => p.unit_fee) && <th scope="col" class="px-4 py-3 font-semibold">Unit rate</th>}
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 max-sm:block">
+                  {priced.map((p) => (
+                    <tr class="align-top max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-4 max-sm:gap-y-2 max-sm:px-4 max-sm:py-3.5">
+                      <td class="px-4 py-3 font-medium whitespace-nowrap text-slate-900 max-sm:col-span-2 max-sm:p-0">{isLabel(p.is_number)}</td>
+                      {tiers.map(([label, key]) => priced.some((x) => x[key]) && <td data-label={label} class={`px-4 py-3 text-right whitespace-nowrap text-slate-700 max-sm:p-0 max-sm:text-left ${cellLabel}`}>{p[key] ? rupees(p[key]!) : '—'}</td>)}
+                      {priced.some((x) => x.unit_fee) && <td data-label="Unit rate" class={`px-4 py-3 text-xs text-slate-600 max-sm:col-span-2 max-sm:p-0 ${cellLabel}`}>{p.unit_fee ?? '—'}</td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <dl class="mt-6 divide-y divide-slate-200 border-y border-slate-200 text-sm">
+            {!isCrs && (
+              <div class="grid gap-1 py-3.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+                <dt class="font-semibold text-slate-900">Other BIS charges</dt>
+                <dd class="text-slate-600">
+                  <span class="font-semibold text-slate-900">{rupees(otherCharges)}</span> for every ISI mark product: application charge {rupees(ISI_OTHER_CHARGES.application)} · licence fee {rupees(ISI_OTHER_CHARGES.licence)} · audit charges {rupees(ISI_OTHER_CHARGES.audit)}
+                </dd>
+              </div>
+            )}
+            {!isCrs && (
+              <div class="grid gap-1 py-3.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+                <dt class="font-semibold text-slate-900">Foreign manufacturers</dt>
+                <dd><a href="#get-certified" class="tap font-semibold text-brand-700 hover:underline">Get a detailed quote</a></dd>
+              </div>
+            )}
+            <div class="grid gap-1 py-3.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+              <dt class="font-semibold text-slate-900">Our consulting fee</dt>
+              <dd><a href="#get-certified" class="tap font-semibold text-brand-700 hover:underline">{CONSULTING_NOTE}</a></dd>
+            </div>
+          </dl>
+        </section>
+      )}
+
+      {facts.length > 0 && (
+        <section aria-labelledby="facts-h">
+          <h2 id="facts-h" class="text-2xl section-title">Key facts</h2>
+          <dl class="mt-5 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
+            {facts.map((f) => (
+              <div class="grid gap-1 px-5 py-3.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+                <dt class="text-sm font-semibold text-slate-900">{f.label}</dt>
+                <dd class="text-sm text-slate-600">{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      {(priced.length > 0 || tested.length > 0 || facts.length > 0) && (
+        <p class="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500">
+          All prices are a guide only and do not include GST. Rules and dates can change, so check the latest notice before you apply. <a href="/contact" class="font-semibold text-brand-700">Ask us</a> for an up-to-date quote.
+        </p>
+      )}
+
+      {!!standard.faqs?.length && (
+        <section aria-labelledby="faq-h">
+          <h2 id="faq-h" class="text-2xl section-title">Common questions</h2>
+          <div class="mt-5"><Faq items={standard.faqs} /></div>
+        </section>
+      )}
+
+      {others.length > 0 && (
+        <section aria-labelledby="related-h">
+          <h2 id="related-h" class="text-xl section-title">Related products</h2>
+          <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+            {others.map((s) => (
+              <li>
+                <a href={s.url} class="flex h-full items-start justify-between gap-3 rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-800 hover:border-brand-300 hover:text-brand-700">
+                  <span>{s.title}</span>
+                  {s.regulationStatus && <span class={`badge shrink-0 ${STATUS[s.regulationStatus].badge}`}>{STATUS[s.regulationStatus].label}</span>}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a href={category.url} class="tap mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline">See all {category.standards.length.toLocaleString('en-IN')} in {category.title} <Icon name="arrow-right" class="size-4" /></a>
+        </section>
+      )}
+    </div>
+
+    <aside id="get-certified" class="scroll-mt-32 lg:self-start tall:sticky tall:top-32">
+      <LeadForm id={`std-${standard.slug}`} title="Get certified" subtitle="We check the rules, the lab and the timeline for you. It is free." />
+    </aside>
+  </div>
+
+  <CtaBand />
+</Layout>

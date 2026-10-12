@@ -1,0 +1,149 @@
+{
+	email {$ACME_EMAIL:admin@instacertify.com}
+	servers {
+		metrics
+	}
+	# Only run.sh inside this container may change the configuration; Prometheus reads metrics from :2020 below.
+	admin localhost:2019
+}
+
+http://:2020 {
+	metrics
+}
+
+(security) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Content-Security-Policy "frame-ancestors 'self'"
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	encode zstd gzip
+}
+
+# Hosts that must never appear in search results: logins, dashboards and internal tools.
+(private) {
+	header X-Robots-Tag "noindex, nofollow"
+	respond /robots.txt <<TXT
+		User-agent: *
+		Disallow: /
+		TXT 200
+}
+
+# Public marketing site (static Astro build)
+{$SITE_DOMAIN:localhost} {
+	import security
+	# The release the builder published last (see frontend/scripts/publish-server.mjs).
+	root * /srv/site/current
+
+	# A staging or test copy of the site (any host but the live one) is kept out of search engines entirely.
+	@notLive not host {$LIVE_DOMAIN:instacertify.com}
+	header @notLive X-Robots-Tag "noindex, nofollow"
+	@notLiveRobots {
+		not host {$LIVE_DOMAIN:instacertify.com}
+		path /robots.txt
+	}
+	respond @notLiveRobots <<TXT
+		User-agent: *
+		Disallow: /
+		TXT 200
+
+	redir /admin* https://{$API_DOMAIN:api.localhost}{uri}
+
+	# Legacy URL redirects generated at build time from the admin's Redirects screen.
+	import /srv/site/current/redirects*.caddy
+	@internal path /redirects.caddy
+	respond @internal 404
+
+	# Search Console has the legacy sitemap URL registered.
+	rewrite /sitemap.xml /sitemap-index.xml
+
+	# Admin previews of unsaved drafts (noindex, links expire); everything else is the static build.
+	@preview path /preview/* /_preview/*
+	handle @preview {
+		reverse_proxy preview:4321
+	}
+
+	# Search indexes fetched by page scripts; not pages of their own.
+	@data path *.json
+	header @data X-Robots-Tag "noindex"
+
+	# Hashed build assets never change; other files keep their name across deploys.
+	@hashed path /_astro/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	@static {
+		not path /_astro/*
+		path *.png *.jpg *.jpeg *.webp *.avif *.gif *.svg *.ico *.woff2
+	}
+	header @static Cache-Control "public, max-age=604800"
+	# Pages are requested as /about, so match everything that is not an asset; a deploy shows up on the next visit.
+	@pages not path /_astro/* /preview/* /_preview/* *.png *.jpg *.jpeg *.webp *.avif *.gif *.svg *.ico *.woff2
+	header @pages Cache-Control "public, max-age=0, must-revalidate"
+
+	# Pages are built as /about.html; serve them at /about only, so each page has one URL.
+	route {
+		redir /index.html / permanent
+		@dotHtml path_regexp dothtml ^/(.+)\.html$
+		redir @dotHtml /{re.dothtml.1}{?query} permanent
+		@trailingSlash path_regexp trailing ^(/.+)/$
+		redir @trailingSlash {re.trailing.1}{?query} permanent
+		try_files {path} {path}.html {path}/index.html
+	}
+	# The build writes .br/.gz copies of text files (scripts/precompress.mjs).
+	file_server {
+		precompressed br gzip
+	}
+	handle_errors 404 {
+		rewrite * /404.html
+		file_server {
+			precompressed br gzip
+		}
+	}
+}
+
+# One host for the site: www sends visitors and crawlers to the same path on the bare domain.
+www.{$SITE_DOMAIN:localhost} {
+	import security
+	redir https://{$SITE_DOMAIN:localhost}{uri} permanent
+}
+
+# Laravel API + Filament admin. Its robots.txt blocks crawling; uploaded media stays indexable for image search and link previews.
+{$API_DOMAIN:api.localhost} {
+	import security
+	@notMedia not path /storage/*
+	header @notMedia X-Robots-Tag "noindex, nofollow"
+	# Uploads are only ever files to download: never run as code, and an SVG opened directly cannot run scripts.
+	@storageCode path_regexp storagecode (?i)^/storage/.*\.(php\d?|phtml|phar)
+	respond @storageCode 404
+	@media path /storage/*
+	header @media Content-Security-Policy "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; frame-ancestors 'self'; sandbox"
+	reverse_proxy app:80
+}
+
+# Optional tools — only resolve when the matching compose profile is running.
+{$ANALYTICS_DOMAIN:analytics.localhost} {
+	import security
+	import private
+	reverse_proxy matomo:80
+}
+
+{$AUTOMATION_DOMAIN:n8n.localhost} {
+	import security
+	import private
+	reverse_proxy n8n:5678
+}
+
+{$ERRORS_DOMAIN:errors.localhost} {
+	import security
+	import private
+	reverse_proxy glitchtip:8000
+}
+
+{$GRAFANA_DOMAIN:grafana.localhost} {
+	import security
+	import private
+	reverse_proxy grafana:3000
+}

@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from 'astro';
+import IndustryPage from '../../components/IndustryPage.astro';
+import { getIndustries } from '../../lib/content';
+import type { Industry } from '../../lib/types';
+
+export const getStaticPaths = (async () => {
+  const industries = await getIndustries();
+  return industries.map((industry) => ({ params: { slug: industry.slug }, props: { industry } }));
+}) satisfies GetStaticPaths;
+
+const { industry } = Astro.props as { industry: Industry };
+---
+
+<IndustryPage industry={industry} />

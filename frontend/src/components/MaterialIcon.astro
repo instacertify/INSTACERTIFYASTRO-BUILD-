@@ -1,0 +1,45 @@
+---
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+
+/** Google Material Symbols (Rounded), inlined at build time so no icon font is downloaded. Names as on fonts.google.com/icons. */
+interface Props {
+  name?: string | null;
+  /** An icon uploaded in the admin; shown instead of the named icon. */
+  src?: string | null;
+  fallback?: string;
+  filled?: boolean;
+  class?: string;
+}
+
+const { name, src, fallback = 'verified', filled = false, class: className = 'size-6' } = Astro.props;
+
+const dir = join(dirname(createRequire(import.meta.url).resolve('@material-symbols/svg-400/package.json')), 'rounded');
+
+function load(icon: string): string | null {
+  if (!/^[a-z0-9_]+$/.test(icon)) return null;
+  try {
+    return readFileSync(join(dir, `${icon}${filled ? '-fill' : ''}.svg`), 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+let body = '';
+if (!src) {
+  const key = (name ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+  let svg = load(key);
+  if (!svg) {
+    if (key) console.warn(`[MaterialIcon] Unknown icon "${name}", using "${fallback}".`);
+    svg = load(fallback) ?? '';
+  }
+  body = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+}
+---
+
+{src ? (
+  <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" class:list={[className, 'object-contain']} />
+) : (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true" class={className} set:html={body} />
+)}

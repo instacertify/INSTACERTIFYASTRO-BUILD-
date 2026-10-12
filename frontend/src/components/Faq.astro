@@ -1,0 +1,38 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  items: { q: string; a: string }[];
+  /** Plain divided list for use inside a card, instead of a bordered box. */
+  flush?: boolean;
+  openFirst?: boolean;
+}
+
+const { items, flush = false, openFirst = true } = Astro.props;
+---
+
+{flush ? (
+  <div class="divide-y divide-slate-200 border-y border-slate-200">
+    {items.map((item, i) => (
+      <details class="group" open={openFirst && i === 0}>
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-left text-slate-900 hover:text-brand-700 [&::-webkit-details-marker]:hidden">
+          <h3 class="text-base leading-snug font-medium">{item.q}</h3>
+          <Icon name="x" class="size-4 shrink-0 rotate-45 text-slate-400 transition group-open:rotate-0 group-open:text-brand-700" />
+        </summary>
+        <p class="pb-5 text-base leading-[1.65] text-slate-700">{item.a}</p>
+      </details>
+    ))}
+  </div>
+) : (
+  <div class="divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+    {items.map((item, i) => (
+      <details class="group" open={openFirst && i === 0}>
+        <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left font-medium text-slate-900 hover:text-brand-700 [&::-webkit-details-marker]:hidden">
+          <h3 class="text-base font-medium">{item.q}</h3>
+          <Icon name="chevron-down" class="size-5 shrink-0 text-slate-400 transition group-open:rotate-180" />
+        </summary>
+        <p class="max-w-3xl px-5 pb-5 text-base leading-relaxed text-slate-600">{item.a}</p>
+      </details>
+    ))}
+  </div>
+)}

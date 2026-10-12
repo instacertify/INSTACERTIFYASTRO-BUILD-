@@ -1,0 +1,5 @@
+# API and admin host: logins, the admin panel and JSON endpoints do not belong in search results.
+# Uploaded media stays open so images shared from the site still load in previews.
+User-agent: *
+Disallow: /
+Allow: /storage/

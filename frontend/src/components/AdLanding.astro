@@ -1,0 +1,653 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from './Icon.astro';
+import MaterialIcon from './MaterialIcon.astro';
+import LeadForm from './LeadForm.astro';
+import BisFeeFinder from './BisFeeFinder.astro';
+import LogoMarquee from './LogoMarquee.astro';
+import LiteYouTube from './LiteYouTube.astro';
+import HeroBackdrop from './HeroBackdrop.astro';
+import ReviewProof from './ReviewProof.astro';
+import Testimonials from './Testimonials.astro';
+import { getHome, getLandingPage, getLatestPosts, getSite, getTestimonials } from '../lib/content';
+import { responsive } from '../lib/images';
+import { statIcon, stepIcon } from '../lib/stepIcons';
+import { boxClass, iconAlign, rowClass, textClass } from '../lib/iconAlign';
+
+interface Props {
+  path: string;
+}
+
+const [page, site, home, testimonials, audits] = await Promise.all([
+  getLandingPage(Astro.props.path),
+  getSite(),
+  getHome(),
+  getTestimonials(),
+  getLatestPosts('audit', 40),
+]);
+if (!page) return Astro.redirect('/404');
+
+const c = page.content ?? {};
+const hero = c.hero ?? {};
+const seo = page.seo ?? {};
+const trust = c.trust ?? {};
+const headline = hero.headline ?? 'Get certified with Instacertify';
+const cta = hero.cta ?? 'Get my free quote';
+const finder = c.finder?.enabled ? c.finder : null;
+const topic = seo.keyword ?? headline;
+const waText = `Hi Instacertify, I need help with ${topic}.`;
+const waHref = `https://wa.me/${site.contact.whatsapp}?text=${encodeURIComponent(waText)}`;
+const thankYou = `/thank-you?for=${encodeURIComponent(topic)}`;
+const disclaimer =
+  c.disclaimer ??
+  'Instacertify Labs Private Limited is a private consulting company and testing marketplace. We are not a government body and are not affiliated with, endorsed by or acting for any government department, regulator or certification authority. Testing is carried out by independent accredited partner laboratories; we coordinate it on your behalf. Certificates, registrations and licences are issued only by the relevant authority or certification body. Government and laboratory fees are charged at actuals unless your quote says they are included.';
+const telHref = `tel:${site.contact.phoneE164}`;
+/* 48px tall: Google's minimum comfortable tap target. */
+const ctaClass = 'btn min-h-12 bg-cta px-6 text-base font-semibold text-white shadow-sm hover:bg-cta-hover sm:text-[1.0625rem]';
+const waClass = 'btn-whatsapp min-h-12 px-5 text-base font-semibold sm:text-[1.0625rem]';
+/*
+ * Type scale (learnui.design responsive font-size guidelines): body 16px on phones and 17px from tablets up, set on
+ * <main> by the layout; secondary text 1–2px smaller. Headings are semibold so they lead without shouting: page title
+ * 30/40px, sections 24/30px, cards 17/18px.
+ */
+const h2Size = 'text-2xl leading-tight font-semibold tracking-[-0.015em] text-balance sm:text-[1.75rem] lg:text-[1.875rem]';
+const h2Class = `${h2Size} text-slate-950`;
+const h3Size = 'text-[1.0625rem] leading-snug font-semibold sm:text-lg';
+const h3Class = `${h3Size} text-slate-950`;
+const leadClass = 'mt-2.5 text-base leading-relaxed text-slate-600 sm:text-lg sm:leading-relaxed';
+const smallClass = 'text-sm sm:text-[0.9375rem]';
+const sectionClass = 'py-8 sm:py-10 lg:py-12';
+
+const logos = trust.hide_logos ? [] : (home.clientLogos ?? []).filter((l) => l.image);
+const logosTitle = trust.logos_title ?? home.clientLogosTitle ?? 'Trusted by leading brands across the globe';
+
+/* The searched keyword stands out in the headline, so the visitor sees at once that the page matches the ad. */
+const keywordAt = seo.keyword ? headline.toLowerCase().indexOf(seo.keyword.toLowerCase()) : -1;
+const headlineParts = keywordAt >= 0 ? [headline.slice(0, keywordAt), headline.slice(keywordAt, keywordAt + seo.keyword!.length), headline.slice(keywordAt + seo.keyword!.length)] : null;
+
+const rated = testimonials.filter((t) => t.rating > 0);
+const siteRating = Number(site.rating?.value) || 0;
+const rating = siteRating || (rated.length ? Math.round((rated.reduce((sum, t) => sum + t.rating, 0) / rated.length) * 10) / 10 : 0);
+const ratingCount = siteRating ? Number(site.rating?.count) || 0 : rated.length;
+const showRating = rating > 0 && ratingCount > 0 && !trust.hide_rating;
+
+const intro = c.intro?.text ? c.intro : null;
+const introImage = intro?.image ? await responsive(intro.image, [480, 760, 1140]) : null;
+const benefitsImage = c.benefits?.items?.length && c.benefits.image ? await responsive(c.benefits.image, [480, 760, 1140]) : null;
+const checklistImage = c.checklist?.groups?.length && c.checklist.image ? await responsive(c.checklist.image, [480, 760, 1140]) : null;
+
+/*
+ * Only audits relevant to the page are shown: those tagged with the page's certifications (and work types) when the
+ * editor set them, otherwise those whose title shares a keyword word. Generic words don't count as a match.
+ */
+const GENERIC = new Set(['certification', 'certificate', 'registration', 'testing', 'test', 'india', 'indian', 'for', 'the', 'and', 'your', 'product', 'products', 'services', 'service', 'consultant', 'mark', 'import', 'export', 'manufacturers', 'manufacturer']);
+const words = `${seo.keyword ?? ''} ${headline}`
+  .toLowerCase()
+  .split(/[^a-z0-9]+/)
+  .filter((w) => w.length > 2 && !GENERIC.has(w))
+  .flatMap((w) => (w === 'msds' ? [w, 'sds'] : [w]));
+const usableAudits = audits.filter((p) => p.image && !/fmcs/i.test(`${p.title} ${p.slug}`));
+const score = (title: string) => {
+  const inTitle = new Set(title.toLowerCase().split(/[^a-z0-9]+/));
+  return words.some((w) => inTitle.has(w) || inTitle.has(`${w}s`)) ? 1 : 0;
+};
+const work = c.work ?? {};
+const ownPhotos = (work.photos ?? []).filter((p) => p.image).map((p) => ({ image: p.image, alt: p.alt, caption: p.caption }));
+const relevant = (p: (typeof audits)[number]) =>
+  (work.schemes?.length ? !!p.schemes?.some((s) => work.schemes!.includes(s.slug)) : score(p.title) > 0) &&
+  (!work.types?.length || (!!p.workType && work.types.includes(p.workType)));
+const pickedAudits = work.posts?.length
+  ? work.posts.flatMap((slug) => usableAudits.filter((p) => p.slug === slug))
+  : usableAudits.filter(relevant).slice(0, Math.max(0, 3 - ownPhotos.length));
+const workItems = work.hidden
+  ? []
+  : await Promise.all(
+      [...ownPhotos, ...pickedAudits.map((p) => ({ image: p.image!, alt: p.imageAlt ?? p.title, caption: p.title, tag: p.workTypeLabel }))]
+        .slice(0, 6)
+        .map(async (item) => ({ ...item, img: (await responsive(item.image, [400, 760]))! })),
+    );
+
+/* Reviews come from the website-wide testimonials; those that mention this page's service are shown first. */
+const reviewTerms = [...new Set([...words, ...(work.schemes ?? []).flatMap((s) => s.split('-'))])];
+const reviews = c.reviews?.hidden ? [] : testimonials;
+
+const offices = c.offices?.hidden ? [] : (site.offices ?? []).filter((o) => o.address);
+
+const align = {
+  stats: iconAlign(c.stats_icon_align),
+  options: iconAlign(c.options?.icon_align),
+  steps: iconAlign(c.steps?.icon_align),
+  benefits: iconAlign(c.benefits?.icon_align),
+};
+/* Number boxes: icon above the figure on phones, beside it from tablets up. */
+const statsClass = {
+  left: 'flex-col sm:flex-row sm:items-center',
+  center: 'flex-col items-center text-center',
+  right: 'flex-col items-end text-right sm:flex-row-reverse sm:items-center',
+}[align.stats];
+/* Steps run down the left on phones and sit in a row from tablets up. */
+const stepsClass = {
+  left: { li: 'sm:text-left', box: 'sm:mr-auto' },
+  center: { li: 'sm:text-center', box: 'sm:mx-auto' },
+  right: { li: 'sm:text-right', box: 'sm:ml-auto' },
+}[align.steps];
+
+/* Header menu, in page order; a link shows only when its section is on the page. */
+const sections = [
+  finder && { href: '#bis-fees', label: 'Fees' },
+  c.options?.items?.length && { href: '#options', label: 'Options' },
+  c.steps?.items?.length && { href: '#how-it-works', label: 'Process' },
+  reviews.length && { href: '#reviews', label: 'Reviews' },
+  c.checklist?.groups?.length && { href: '#documents', label: 'Documents' },
+  c.faqs?.items?.length && { href: '#faq', label: 'FAQs' },
+  offices.length && { href: '#offices', label: 'Offices' },
+].filter((s): s is { href: string; label: string } => !!s);
+
+const videoUrl = c.video?.url;
+const videoTitle = c.video?.title ?? c.video?.heading ?? headline;
+
+const jsonLd: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: seo.keyword ? seo.keyword.replace(/^\w/, (l) => l.toUpperCase()) : headline,
+    description: seo.description ?? hero.subheadline ?? headline,
+    serviceType: seo.keyword ?? headline,
+    provider: { '@id': `${site.url}/#organization` },
+    areaServed: 'IN',
+    url: `${site.url}${page.url}`,
+  },
+];
+if (c.faqs?.items?.length) {
+  jsonLd.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: c.faqs.items.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })),
+  });
+}
+---
+
+<Layout
+  title={seo.title ?? `${headline} | Instacertify`}
+  description={seo.description ?? hero.subheadline ?? headline}
+  image={seo.image ?? intro?.image}
+  jsonLd={jsonLd}
+  canonical={seo.canonical}
+  seo={seo}
+  modified={page.updatedAt}
+  ogTitle={seo.ogTitle}
+  ogDescription={seo.ogDescription}
+  minimal
+  sections={sections}
+  whatsappText={waText}
+>
+  <section class="relative isolate bg-brand-700 text-white">
+    <HeroBackdrop />
+    <div class="container-page grid gap-7 py-8 sm:py-10 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-center lg:gap-x-12 lg:py-12">
+      <div>
+        <h1 class="text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-white sm:text-[2.25rem] sm:leading-[1.12] lg:text-[2.5rem]">
+          {headlineParts ? <>{headlineParts[0]}<span class="text-accent-400">{headlineParts[1]}</span>{headlineParts[2]}</> : headline}
+        </h1>
+        {hero.subheadline && <p class="mt-4 max-w-2xl text-base leading-relaxed text-brand-100 sm:text-lg sm:leading-relaxed">{hero.subheadline}</p>}
+        {hero.points?.length ? (
+          <ul class="mt-5 space-y-2">
+            {hero.points.map((point) => (
+              <li class="flex items-start gap-2.5">
+                <span class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-accent-500 text-white"><Icon name="check" class="size-3.5" /></span>
+                {point}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {hero.price_note && <p class="mt-5 font-semibold text-accent-200">{hero.price_note}</p>}
+        <div class="mt-5 flex flex-wrap gap-3">
+          <a href="#quote" class={ctaClass} data-track="quote" data-focus-quote>{cta}<Icon name="arrow-right" class="size-5" /></a>
+          <a href={waHref} target="_blank" rel="noopener" class={waClass} data-track="whatsapp"><Icon name="whatsapp" class="size-5" />WhatsApp</a>
+        </div>
+        {showRating && <ReviewProof site={site} testimonials={testimonials} class="mt-5" />}
+        {finder && (
+          <a href="#bis-fees" class="mt-3 inline-flex min-h-11 items-center gap-2 font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white" data-track="fee_finder">
+            <Icon name="search" class="size-5 shrink-0" />{finder.heading || 'Check the BIS fee for your product'}
+          </a>
+        )}
+        {hero.reply_note && (
+          <p class:list={['mt-2 flex items-center gap-2 text-brand-200', smallClass]}><Icon name="clock" class="size-4" />{hero.reply_note}</p>
+        )}
+      </div>
+
+      <div id="quote" class="scroll-mt-20 text-slate-900">
+        <LeadForm
+          id="landing-quote"
+          hero
+          compact
+          servicePath={page.servicePath ?? undefined}
+          title={hero.form_title ?? 'Get a free quote'}
+          subtitle={hero.form_subtitle ?? ''}
+          button={cta}
+          emailOptional
+          buttonClass={ctaClass}
+          successText="A specialist will call or WhatsApp you shortly with the next steps."
+          redirect={thankYou}
+        />
+        {hero.form_note && <p class="mt-3 text-center text-sm text-brand-200">{hero.form_note}</p>}
+      </div>
+    </div>
+  </section>
+
+  {c.stats?.length || logos.length ? (
+    <section class="border-b border-slate-200 bg-white">
+      {logos.length > 0 && (
+        <div class:list={['pt-6 pb-7', c.stats?.length && 'border-b border-slate-100']}>
+          <LogoMarquee logos={logos} title={logosTitle} />
+        </div>
+      )}
+      {c.stats?.length ? (
+        <ul class:list={['container-page grid grid-cols-2 gap-3 py-6 sm:gap-4 sm:py-8', c.stats.length >= 4 ? 'lg:grid-cols-4' : c.stats.length === 3 && 'lg:grid-cols-3']}>
+          {c.stats.map((s) => (
+            <li class:list={['flex gap-2.5 rounded-2xl border border-slate-200 p-4 sm:gap-4 sm:p-5', statsClass]}>
+              <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 sm:size-12">
+                <MaterialIcon name={s.icon || statIcon(s.label)} src={s.iconImage} class="size-6 sm:size-7" />
+              </span>
+              <span class="min-w-0">
+                <span class="block text-[1.375rem] leading-none font-semibold tracking-[-0.015em] text-brand-700 sm:text-[1.625rem]">{s.value}</span>
+                <span class:list={['mt-1.5 block leading-snug font-medium text-slate-600', smallClass]}>{s.label}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  ) : null}
+
+  {finder && <BisFeeFinder finder={finder} site={site} servicePath={page.servicePath} />}
+
+  {intro && (
+    <section class={sectionClass}>
+      <div class:list={['container-page', introImage && 'grid gap-6 lg:grid-cols-2 lg:items-center lg:gap-12']}>
+        <div class:list={[!introImage && 'max-w-3xl']}>
+          <h2 class={h2Class}>{intro.heading ?? 'About the service'}</h2>
+          {intro.text!.split(/\n\s*\n/).map((para, i) => <p class:list={[i === 0 ? 'mt-4' : 'mt-3', 'leading-relaxed text-slate-700']}>{para}</p>)}
+          {intro.points?.length ? (
+            <ul class:list={['mt-6 grid gap-3', !introImage && 'sm:grid-cols-2 sm:gap-x-8']}>
+              {intro.points.map((p) => (
+                <li class="flex items-start gap-3 font-medium text-slate-900"><Icon name="check-circle" class="mt-0.5 size-5 shrink-0 text-emerald-600" />{p}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+        {introImage && (
+          <figure>
+            <img
+              src={introImage.src}
+              srcset={introImage.srcset}
+              sizes="(min-width: 1024px) 38rem, calc(100vw - 2rem)"
+              width={introImage.width}
+              height={introImage.height}
+              alt={intro.image_alt ?? ''}
+              loading="lazy"
+              decoding="async"
+              class="aspect-[4/3] w-full rounded-2xl bg-slate-100 object-cover"
+            />
+            {intro.image_caption && <figcaption class:list={['mt-3 text-slate-500', smallClass]}>{intro.image_caption}</figcaption>}
+          </figure>
+        )}
+      </div>
+    </section>
+  )}
+
+  {c.options?.items?.length ? (
+    <section id="options" class:list={[sectionClass, intro && 'border-t border-slate-200']}>
+      <div class="container-page">
+        <div class="max-w-2xl">
+          <h2 class={h2Class}>{c.options.heading ?? 'Which option do you need?'}</h2>
+          {c.options.intro && <p class={leadClass}>{c.options.intro}</p>}
+        </div>
+        <div class:list={['mt-6 grid gap-4 sm:gap-5', c.options.items.length > 2 ? 'lg:grid-cols-3' : 'md:grid-cols-2']}>
+          {c.options.items.map((o) => (
+            <article class="flex flex-col rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-6">
+              <div class:list={['flex gap-4 sm:gap-5', rowClass[align.options], align.options !== 'center' && 'items-start']}>
+                {o.image ? (
+                  <img src={o.image} alt={o.image_alt || `${o.title} mark`} loading="lazy" decoding="async" class="size-20 shrink-0 object-contain sm:size-24" />
+                ) : o.icon || o.iconImage ? (
+                  <span class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><MaterialIcon name={o.icon} src={o.iconImage} class="size-8" /></span>
+                ) : null}
+                <div class="min-w-0">
+                  <h3 class={h3Class}>{o.title}</h3>
+                  {o.audience && <p class="mt-1.5 text-slate-600">{o.audience}</p>}
+                </div>
+              </div>
+              {o.image && o.image_caption && <p class:list={['mt-4 leading-relaxed text-slate-500', smallClass, textClass[align.options]]}>{o.image_caption}</p>}
+              {(o.timeline || o.price) && (
+                <dl class="mt-5 grid grid-cols-2 gap-4 border-y border-slate-200 py-4">
+                  {o.timeline && (
+                    <div>
+                      <dt class="text-sm font-semibold text-slate-600">Timeline</dt>
+                      <dd class="mt-1 font-semibold text-slate-900">{o.timeline}</dd>
+                    </div>
+                  )}
+                  {o.price && (
+                    <div>
+                      <dt class="text-sm font-semibold text-slate-600">{c.options.price_label ?? 'Consulting'}</dt>
+                      <dd class="mt-1 font-semibold text-slate-900">{o.price}</dd>
+                    </div>
+                  )}
+                </dl>
+              )}
+              {o.points?.length ? (
+                <ul class="mt-5 space-y-2.5">
+                  {o.points.map((p) => (
+                    <li class="flex items-start gap-2.5 text-slate-700"><Icon name="check" class="mt-0.5 size-5 shrink-0 text-emerald-600" />{p}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <div class="mt-auto pt-6">
+                <a href="#quote" class:list={[ctaClass, 'w-full']} data-track="quote" data-focus-quote>
+                  Get my {o.title} quote<Icon name="arrow-right" class="size-4" />
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null}
+
+  {c.compare?.good?.length ? (
+    <section class:list={[sectionClass, 'border-t border-slate-200']}>
+      <div class="container-page">
+        <div class="max-w-3xl">
+          <h2 class={h2Class}>{c.compare.heading ?? 'What we do differently'}</h2>
+          {c.compare.intro && <p class={leadClass}>{c.compare.intro}</p>}
+        </div>
+        <div class:list={['mt-6 grid gap-6', c.compare.bad?.length && 'md:grid-cols-2 md:gap-0 md:divide-x md:divide-slate-200']}>
+          {c.compare.bad?.length ? (
+            <div class="md:pr-10">
+              <h3 class:list={[h3Size, 'text-slate-500']}>{c.compare.bad_title ?? 'How it usually goes'}</h3>
+              <ul class="mt-4 space-y-3.5">
+                {c.compare.bad.map((item) => (
+                  <li class="flex items-start gap-3 text-slate-600"><Icon name="x" class="mt-0.5 size-5 shrink-0 text-slate-400" />{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <div class:list={[c.compare.bad?.length && 'md:pl-10']}>
+            <h3 class:list={[h3Size, 'text-brand-700']}>{c.compare.good_title ?? 'How we do it'}</h3>
+            <ul class="mt-4 space-y-3.5">
+              {c.compare.good.map((item) => (
+                <li class="flex items-start gap-3 font-medium text-slate-900"><Icon name="check-circle" class="mt-0.5 size-5 shrink-0 text-emerald-600" />{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  ) : null}
+
+  {c.steps?.items?.length ? (
+    <section id="how-it-works" class:list={[sectionClass, 'border-t border-slate-200 surface-tint']}>
+      <div class="container-page">
+        <h2 class={h2Class}>{c.steps.heading ?? 'How it works'}</h2>
+        <ol class:list={['mt-6 grid gap-5 sm:grid-cols-2 sm:gap-6', c.steps.items.length >= 4 && 'lg:grid-cols-4', c.steps.items.length === 3 && 'lg:grid-cols-3']}>
+          {c.steps.items.map((s, i) => (
+            <li class:list={['relative flex gap-4 sm:block', stepsClass.li]}>
+              {i < c.steps.items.length - 1 && <span aria-hidden="true" class="absolute top-14 -bottom-6 left-6 w-px bg-slate-300 sm:hidden" />}
+              <span class:list={['relative flex size-12 shrink-0 items-center justify-center rounded-xl bg-white text-brand-700 ring-1 ring-slate-200', stepsClass.box]}>
+                <MaterialIcon name={s.icon || stepIcon(s.title)} src={s.iconImage} class="size-7" />
+                <span class="absolute -top-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full bg-cta text-xs font-bold text-white ring-2 ring-white">{i + 1}</span>
+              </span>
+              <div class="min-w-0 pt-2.5 sm:pt-0">
+                <h3 class:list={[h3Class, 'sm:mt-4']}>{s.title}</h3>
+                {s.text && <p class="mt-1.5 text-slate-600">{s.text}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  ) : null}
+
+  {workItems.length > 0 && (
+    <section class:list={[sectionClass, 'border-t border-slate-200']}>
+      <div class="container-page">
+        <div class="max-w-2xl">
+          <h2 class={h2Class}>{work.heading ?? 'Recent work by our team'}</h2>
+          <p class={leadClass}>{work.intro ?? 'Factory audits, inspections and certification projects we have handled, in India and abroad.'}</p>
+        </div>
+        <ul class="-mx-4 mt-6 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+          {workItems.map((item) => (
+            <li class="w-[80%] shrink-0 snap-start sm:w-auto">
+              <figure>
+                <img
+                  src={item.img.src}
+                  srcset={item.img.srcset}
+                  sizes="(min-width: 1024px) 25rem, (min-width: 640px) 50vw, 80vw"
+                  width={item.img.width}
+                  height={item.img.height}
+                  alt={item.alt}
+                  loading="lazy"
+                  decoding="async"
+                  class="aspect-[4/3] w-full rounded-xl bg-slate-100 object-cover"
+                />
+                {item.caption && (
+                  <figcaption class="mt-3">
+                    {'tag' in item && item.tag && <span class="block text-sm font-semibold text-brand-700">{item.tag}</span>}
+                    <span class="mt-0.5 line-clamp-2 font-semibold text-slate-900">{item.caption}</span>
+                  </figcaption>
+                )}
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {videoUrl && (
+    <section class:list={[sectionClass, 'border-t border-slate-200 surface-tint']}>
+      <div class="container-page grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] lg:items-center lg:gap-12">
+        <div>
+          <h2 class={h2Class}>{c.video?.heading ?? 'See how it works'}</h2>
+          {c.video?.text && <p class={leadClass}>{c.video.text}</p>}
+        </div>
+        <LiteYouTube url={videoUrl} title={videoTitle} />
+      </div>
+    </section>
+  )}
+
+  {reviews.length ? (
+    <section id="reviews" class:list={[sectionClass, 'border-t border-slate-200']}>
+      <div class="container-page">
+        <div class="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
+          <h2 class={h2Class}>{c.reviews?.heading ?? 'What clients say'}</h2>
+          {showRating && (
+            <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-slate-700">
+              <span class="flex gap-0.5 text-amber-400" aria-hidden="true">{Array.from({ length: Math.round(rating) }).map(() => <Icon name="star" class="size-5" />)}</span>
+              <span><strong class="text-slate-950">{rating.toFixed(1)} out of 5</strong> from {ratingCount.toLocaleString('en-IN')} reviews</span>
+              {site.rating?.url && (
+                <a href={site.rating.url} target="_blank" rel="noopener" class="tap font-semibold text-accent-600 underline underline-offset-4 hover:text-accent-700" data-track="reviews">Read them all</a>
+              )}
+            </p>
+          )}
+        </div>
+        <div class="mt-6"><Testimonials items={reviews} terms={reviewTerms} limit={30} large scroll /></div>
+      </div>
+    </section>
+  ) : null}
+
+  {c.benefits?.items?.length ? (
+    <section class:list={[sectionClass, 'border-t border-slate-200']}>
+      <div class:list={['container-page', benefitsImage && 'grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-12']}>
+        {benefitsImage && (
+          <img
+            src={benefitsImage.src}
+            srcset={benefitsImage.srcset}
+            sizes="(min-width: 1024px) 30rem, calc(100vw - 2rem)"
+            width={benefitsImage.width}
+            height={benefitsImage.height}
+            alt={c.benefits.image_alt ?? ''}
+            loading="lazy"
+            decoding="async"
+            class="order-2 aspect-[16/10] w-full rounded-2xl bg-slate-100 object-cover lg:order-1 lg:aspect-[4/5]"
+          />
+        )}
+        <div class="order-1 lg:order-2">
+          <h2 class={h2Class}>{c.benefits.heading ?? 'Why choose Instacertify'}</h2>
+          <ul class:list={['mt-6 grid gap-5 sm:grid-cols-2 sm:gap-6', !benefitsImage && 'lg:grid-cols-4']}>
+            {c.benefits.items.map((b) => (
+              <li class={textClass[align.benefits]}>
+                <span class:list={['flex size-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700', boxClass[align.benefits]]}><MaterialIcon name={b.icon} src={b.iconImage} class="size-7" /></span>
+                <h3 class:list={[h3Class, 'mt-3']}>{b.title}</h3>
+                {b.text && <p class="mt-1.5 text-slate-600">{b.text}</p>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  ) : null}
+
+  {c.checklist?.groups?.length ? (
+    <section id="documents" class:list={[sectionClass, 'border-t border-slate-200 surface-tint']}>
+      <div class="container-page">
+        <div class="max-w-3xl">
+          <h2 class={h2Class}>{c.checklist.heading ?? 'What you’ll need to send us'}</h2>
+          {c.checklist.intro && <p class={leadClass}>{c.checklist.intro}</p>}
+        </div>
+        <div class:list={['mt-6', checklistImage && 'grid gap-6 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start lg:gap-12']}>
+          <div>
+            <div class:list={['grid gap-6', c.checklist.groups.length > 1 && 'md:grid-cols-2']}>
+              {c.checklist.groups.map((g) => (
+                <div>
+                  {g.title && <h3 class={h3Class}>{g.title}</h3>}
+                  <ul class:list={['space-y-3', g.title && 'mt-4']}>
+                    {g.items?.map((item) => (
+                      <li class="flex items-start gap-3 text-slate-700"><Icon name="file" class="mt-0.5 size-5 shrink-0 text-brand-700" />{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            {c.checklist.note && <p class="mt-6 max-w-3xl font-medium text-slate-800">{c.checklist.note}</p>}
+          </div>
+          {checklistImage && (
+            <img
+              src={checklistImage.src}
+              srcset={checklistImage.srcset}
+              sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)"
+              width={checklistImage.width}
+              height={checklistImage.height}
+              alt={c.checklist.image_alt ?? ''}
+              loading="lazy"
+              decoding="async"
+              class="aspect-[16/10] w-full rounded-2xl bg-slate-100 object-cover lg:aspect-[4/3]"
+            />
+          )}
+        </div>
+      </div>
+    </section>
+  ) : null}
+
+  {c.related?.keywords?.length ? (
+    <section class:list={[sectionClass, 'border-t border-slate-200']}>
+      <div class="container-page">
+        <h2 class={h2Class}>{c.related.heading ?? 'Related products'}</h2>
+        {c.related.intro && <p class:list={[leadClass, 'max-w-2xl']}>{c.related.intro}</p>}
+        <ul class="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
+          {c.related.keywords.map((k) => (
+            <li class="flex items-center gap-2 text-slate-800"><Icon name="check" class="size-4 shrink-0 text-brand-700" />{k}</li>
+          ))}
+        </ul>
+        <p class="mt-6 text-slate-600">
+          Product not listed?{' '}
+          <a href="#quote" class="font-semibold text-accent-600 underline underline-offset-4 hover:text-accent-700" data-track="quote" data-focus-quote>{c.related.ask ?? 'Ask us – the check is free'}</a>
+        </p>
+      </div>
+    </section>
+  ) : null}
+
+  {c.faqs?.items?.length ? (
+    <section id="faq" class:list={[sectionClass, 'border-t border-slate-200 surface-tint']}>
+      <div class="container-page grid gap-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-12">
+        <div class="lg:sticky lg:top-24 lg:self-start">
+          <h2 class={h2Class}>{c.faqs.heading ?? 'Common questions'}</h2>
+          <p class={leadClass}>{c.faqs.intro ?? 'Straight answers to what buyers ask before they enquire.'}</p>
+          <div class="mt-6 hidden border-t border-slate-200 pt-5 lg:block">
+            <p class="font-semibold text-slate-950">Still have a question?</p>
+            <p class="mt-1 text-slate-600">Ask a specialist – the first check is free.</p>
+            <div class="mt-4 flex flex-col gap-2.5 font-semibold">
+              <a href={telHref} class="inline-flex items-center gap-2 text-brand-700 hover:underline" data-track="call"><Icon name="phone" class="size-4" />{site.contact.phone}</a>
+              <a href={waHref} target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-emerald-700 hover:underline" data-track="whatsapp"><Icon name="whatsapp" class="size-4" />Chat on WhatsApp</a>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-3">
+          {c.faqs.items.map((f, i) => (
+            <details name="lp-faq" open={i === 0} class="group rounded-2xl border border-slate-200 bg-white transition-colors open:border-brand-300 open:shadow-sm">
+              <summary class="flex cursor-pointer list-none items-start gap-3 p-4 leading-snug font-semibold text-slate-950 sm:gap-4 [&::-webkit-details-marker]:hidden">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-600 tabular-nums transition-colors group-open:bg-brand-700 group-open:text-white" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                <span class="flex-1 pt-0.5">{f.question}</span>
+                <Icon name="chevron-down" class="mt-1 size-5 shrink-0 text-slate-500 transition group-open:rotate-180" />
+              </summary>
+              <p class="-mt-1 px-4 pb-5 pl-[3.75rem] leading-relaxed text-slate-700 sm:px-5 sm:pl-[4.25rem]">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null}
+
+  {offices.length > 0 && (
+    <section id="offices" class:list={[sectionClass, 'border-t border-slate-200']} aria-labelledby="offices-h">
+      <div class="container-page">
+        <div class="max-w-2xl">
+          <h2 id="offices-h" class={h2Class}>{c.offices?.heading ?? 'Our offices'}</h2>
+          <p class={leadClass}>{c.offices?.intro ?? 'Prefer to meet in person? Visit one of our offices, or call and we’ll come to you.'}</p>
+        </div>
+        <ul class:list={['mt-6 grid gap-4 sm:grid-cols-2', offices.length >= 3 && 'lg:grid-cols-3', offices.length >= 4 && 'xl:grid-cols-4']}>
+          {offices.map((o) => (
+            <li class="flex flex-col rounded-2xl border border-slate-200 p-5 sm:p-6">
+              <p class="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-semibold text-slate-950">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700"><Icon name={o.type === 'lab' ? 'flask' : 'map-pin'} class="size-5" /></span>
+                {o.name}
+                {o.typeLabel && <span class="text-sm font-medium text-slate-500">· {o.typeLabel}</span>}
+              </p>
+              <address class:list={['mt-3 leading-relaxed text-slate-700 not-italic', smallClass]}>{o.address}</address>
+              {o.hours && <p class="mt-2 flex items-center gap-2 text-sm text-slate-500"><Icon name="clock" class="size-3.5 shrink-0" />{o.hours}</p>}
+              <div class:list={['mt-auto flex flex-wrap gap-x-5 gap-y-1 pt-4 font-semibold', smallClass]}>
+                <a href={o.mapLink} target="_blank" rel="noopener" class="tap inline-flex items-center gap-1 text-brand-700 hover:underline" data-track="directions">Get directions<Icon name="arrow-right" class="size-3.5" /></a>
+                {o.phone && <a href={`tel:${o.phone.replace(/[^\d+]/g, '')}`} class="tap inline-flex items-center gap-1 text-slate-700 hover:text-brand-700" data-track="call"><Icon name="phone" class="size-3.5" />{o.phone}</a>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <section class="panel-map bg-brand-700 text-white">
+    <div class="container-page py-10 text-center sm:py-12">
+      <h2 class:list={[h2Size, 'text-white']}>{c.closing?.heading ?? 'Start with a free check'}</h2>
+      {c.closing?.text && <p class="mx-auto mt-2.5 max-w-2xl text-base text-brand-100 sm:text-lg">{c.closing.text}</p>}
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a href="#quote" class={ctaClass} data-track="quote" data-focus-quote>{cta}<Icon name="arrow-right" class="size-5" /></a>
+        <a href={waHref} target="_blank" rel="noopener" class={waClass} data-track="whatsapp"><Icon name="whatsapp" class="size-5" />WhatsApp</a>
+        <a href={telHref} class="btn min-h-12 border-2 border-white/70 px-5 text-base font-semibold text-white hover:bg-white hover:text-brand-700 sm:text-[1.0625rem]" data-track="call"><Icon name="phone" class="size-5" />{site.contact.phone}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-t border-slate-200 bg-white" aria-labelledby="declaration-h">
+    <div class="container-page max-w-4xl py-6 sm:py-8">
+      <h2 id="declaration-h" class="flex items-center gap-2 text-sm font-semibold text-slate-800"><Icon name="shield" class="size-4 shrink-0 text-brand-700" />Declaration</h2>
+      <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">{disclaimer}</p>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>('[data-focus-quote]').forEach((a) =>
+    a.addEventListener('click', () => {
+      setTimeout(() => document.querySelector<HTMLInputElement>('#quote input[name="name"]')?.focus({ preventScroll: true }), 400);
+    }),
+  );
+</script>

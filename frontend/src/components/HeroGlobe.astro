@@ -1,0 +1,68 @@
+---
+export interface GlobeMarket {
+  mark: string;
+  country: string;
+  lat: number;
+  lng: number;
+  /** Where the label sits relative to the point, so neighbours do not overlap. */
+  side?: 'top' | 'left' | 'right' | 'bottom';
+  /** The market every arc starts from. */
+  home?: boolean;
+}
+
+interface Props {
+  markets: GlobeMarket[];
+  /** Testing services carried round the globe on an orbit; a few ride at once and the rest take turns. */
+  tests?: string[];
+  dark: boolean;
+  label: string;
+}
+
+const { markets, tests = [], dark, label } = Astro.props;
+const testSlots = tests.slice(0, 10);
+---
+
+<div class="relative mx-auto aspect-square w-full max-w-[34rem] touch-pan-y select-none max-lg:hidden lg:-my-10" role="img" aria-label={label} data-globe data-tone={dark ? 'dark' : 'light'} data-tests={JSON.stringify(tests)}>
+  <canvas class="absolute inset-0 size-full cursor-grab active:cursor-grabbing" data-globe-canvas></canvas>
+  {/* Label text is drawn with ::after so contrast audits do not sample it mid-fade; the aria-label above carries the same information. */}
+  <ul aria-hidden="true" class="pointer-events-none absolute inset-0">
+    {testSlots.map((name) => (
+      <li class="globe-test absolute top-0 left-0 opacity-0 transition-opacity duration-300 motion-reduce:transition-none">
+        <span
+          class:list={[
+            'flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[0.6875rem] font-medium whitespace-nowrap sm:text-xs',
+            dark ? 'border-sky-200/35 bg-[#0d2538]/85 text-sky-50' : 'border-brand-200 bg-white/90 text-brand-800',
+          ]}
+        >
+          <span class:list={['size-1.5 shrink-0 rounded-full', dark ? 'bg-sky-300' : 'bg-brand-600']}></span>
+          <span data-test-name data-label={name} class="after:content-[attr(data-label)]"></span>
+        </span>
+      </li>
+    ))}
+    {markets.map((m) => (
+      <li class="globe-tag absolute top-0 left-0 opacity-0 transition-opacity duration-300 motion-reduce:transition-none" data-lat={m.lat} data-lng={m.lng} data-home={m.home ? '' : undefined} data-side={m.side ?? 'top'}>
+        <span
+          class:list={[
+            'flex items-center gap-1.5 rounded-md px-2 py-1 text-xs whitespace-nowrap shadow-sm sm:text-[0.8125rem]',
+            m.home ? 'bg-cta text-white' : 'border border-slate-200 bg-white text-slate-900',
+          ]}
+        >
+          <span data-label={m.mark} class="font-bold after:content-[attr(data-label)]"></span>
+          <span data-label={m.country} class:list={['after:content-[attr(data-label)]', m.home ? 'text-white' : 'text-slate-500']}></span>
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  // The globe only shows beside the headline on wide screens, so phones never download it.
+  const wide = matchMedia('(min-width: 64rem)');
+  const boot = () => {
+    if (!wide.matches) return;
+    wide.removeEventListener('change', boot);
+    import('../lib/hero-globe').then(({ startGlobe }) => document.querySelectorAll<HTMLElement>('[data-globe]').forEach(startGlobe));
+  };
+  boot();
+  wide.addEventListener('change', boot);
+</script>
