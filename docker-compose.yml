@@ -35,12 +35,6 @@ x-laravel-env: &laravel-env
   LEAD_WEBHOOK_SECRET: ${LEAD_WEBHOOK_SECRET:-}
   ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@instacertify.com}
   ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
-  AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-instacertify}
-  AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
-  AWS_DEFAULT_REGION: us-east-1
-  AWS_BUCKET: instacertify
-  AWS_ENDPOINT: http://minio:9000
-  AWS_USE_PATH_STYLE_ENDPOINT: "true"
   MEILISEARCH_HOST: http://meilisearch:7700
   MEILISEARCH_KEY: ${MEILI_MASTER_KEY:?set MEILI_MASTER_KEY in .env}
   # Admin edits go live through the builder service.
@@ -165,17 +159,6 @@ services:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       MEILI_ENV: production
     volumes: [meili_data:/meili_data]
-    restart: unless-stopped
-
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-instacertify}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_PROMETHEUS_AUTH_TYPE: public
-    ports: ["127.0.0.1:9001:9001"]
-    volumes: [minio_data:/data]
     restart: unless-stopped
 
   mailpit:
@@ -317,7 +300,6 @@ volumes:
   pg_data:
   redis_data:
   meili_data:
-  minio_data:
   matomo_db:
   matomo_data:
   prometheus_data:

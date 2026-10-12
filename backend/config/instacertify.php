@@ -9,7 +9,7 @@ return [
     // Where the admin "Preview" button opens drafts; the preview server sits behind the site's own domain in production.
     'preview_url' => env('PREVIEW_URL'),
 
-    // "public" locally; "s3" points at MinIO in Docker/production.
+    // Uploaded images live in storage/app/public (the app_storage volume in Docker).
     'media_disk' => env('MEDIA_DISK', 'public'),
 
     'legacy' => [

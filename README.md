@@ -56,7 +56,6 @@ A build that fails, or comes out with far fewer pages than the live site (e.g. t
 | https://localhost | Website |
 | https://api.localhost/admin | Admin (leads, services, industries, testimonials) |
 | http://localhost:8025 | Mailpit (captured emails) |
-| http://localhost:9001 | MinIO console |
 
 Optional profiles add the rest of the stack:
 
