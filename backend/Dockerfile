@@ -2,7 +2,8 @@
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY backend/composer.json backend/composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
+# This stage lacks the app's PHP extensions; the final stage checks them with check-platform-reqs.
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --ignore-platform-reqs
 
 FROM dunglas/frankenphp:1-php8.3-alpine
 RUN install-php-extensions pdo_pgsql redis intl zip gd bcmath pcntl opcache
@@ -16,7 +17,8 @@ WORKDIR /app
 COPY backend/ ./
 COPY content/ /content/
 COPY --from=vendor /app/vendor ./vendor
-RUN composer dump-autoload --optimize --no-dev \
+RUN composer check-platform-reqs --no-dev \
+    && composer dump-autoload --optimize --no-dev \
     && php artisan filament:assets \
     && chown -R www-data:www-data storage bootstrap/cache
 
