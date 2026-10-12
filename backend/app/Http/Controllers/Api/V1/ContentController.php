@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Models\Setting;
 use App\Models\Testimonial;
 use App\Support\Careers;
+use App\Support\ContactBoxes;
 use App\Support\FooterMenu;
 use App\Support\HeaderMenu;
 use App\Support\HomePage;
@@ -38,6 +39,7 @@ class ContentController extends Controller
         $site['process'] = HomePage::process($site['home']);
         $site['privacy'] = Arr::only(Privacy::settings(), ['version', 'grievanceOfficer', 'grievanceEmail', 'applicationMonths', 'consentLogMonths', 'ipDays']);
         $site['careers'] = Careers::settings();
+        $site['contactBoxes'] = ContactBoxes::settings();
         $site['offices'] = Office::published()->orderBy('sort')->orderBy('id')->get()
             ->map(fn (Office $office) => [
                 'name' => $office->name,

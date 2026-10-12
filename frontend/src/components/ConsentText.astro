@@ -1,0 +1,15 @@
+---
+interface Props {
+  /** Consent wording from the admin; the words "Privacy Policy" become the link to the policy. */
+  text: string;
+}
+
+const { text } = Astro.props;
+const at = text.search(/privacy policy/i);
+---
+
+{at >= 0 ? (
+  <span>{text.slice(0, at)}<a href="/privacy-policy" class="underline">{text.slice(at, at + 14)}</a>{text.slice(at + 14)}</span>
+) : (
+  <span>{text} <a href="/privacy-policy" class="underline">Privacy Policy</a></span>
+)}

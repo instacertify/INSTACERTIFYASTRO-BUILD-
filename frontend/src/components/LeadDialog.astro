@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import LeadForm from './LeadForm.astro';
+import { getContactBoxes } from '../lib/content';
 import { responsive } from '../lib/images';
 import type { Site } from '../lib/types';
 
@@ -12,6 +13,7 @@ interface Props {
 
 const { site, auto: allowAuto = true } = Astro.props;
 const popup = site.popup ?? {};
+const words = (await getContactBoxes()).popup;
 const auto = allowAuto && popup.enabled ? { delay: Math.max(5, Number(popup.delay) || 25) } : null;
 const side = await responsive(popup.image, [480, 720, 960, 1200]);
 const focus = { left: 'object-left', right: 'object-right' }[popup.imageFocus ?? ''] ?? 'object-center';
@@ -60,9 +62,9 @@ const sizes = `(min-width: 1024px) ${drawn(20)}, ${drawn(17)}`;
         />
       </div>
       <p class="mt-4 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
-        Prefer to talk? <a href={`tel:${site.contact.phoneE164}`} class="font-semibold text-brand-700 hover:underline">{site.contact.phone}</a>
+        {words.talk} <a href={`tel:${site.contact.phoneE164}`} class="font-semibold text-brand-700 hover:underline">{site.contact.phone}</a>
         {' '}or{' '}
-        <a href={`https://wa.me/${site.contact.whatsapp}`} target="_blank" rel="noopener" class="font-semibold text-[#128C4B] hover:underline">WhatsApp</a>
+        <a href={`https://wa.me/${site.contact.whatsapp}`} target="_blank" rel="noopener" class="font-semibold text-[#128C4B] hover:underline">{words.whatsapp}</a>
       </p>
     </div>
   </div>

@@ -3,14 +3,15 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import LeadForm from '../components/LeadForm.astro';
-import { getServices, getSite } from '../lib/content';
+import { getContactBoxes, getServices, getSite } from '../lib/content';
 import { breadcrumbSchema } from '../lib/breadcrumbs';
 
-const [site, services] = await Promise.all([getSite(), getServices()]);
+const [site, services, boxes] = await Promise.all([getSite(), getServices(), getContactBoxes()]);
+const page = boxes.contactPage;
 const channels = [
-  { icon: 'phone' as const, title: 'Call us', value: site.contact.phone, href: `tel:${site.contact.phoneE164}`, track: 'call' },
-  { icon: 'whatsapp' as const, title: 'WhatsApp', value: 'Chat with a specialist', href: `https://wa.me/${site.contact.whatsapp}`, track: 'whatsapp' },
-  { icon: 'mail' as const, title: 'Email', value: site.contact.email, href: `mailto:${site.contact.email}`, track: 'email' },
+  { icon: 'phone' as const, title: page.callLabel, value: site.contact.phone, href: `tel:${site.contact.phoneE164}`, track: 'call' },
+  { icon: 'whatsapp' as const, title: page.whatsappLabel, value: page.whatsappText, href: `https://wa.me/${site.contact.whatsapp}`, track: 'whatsapp' },
+  { icon: 'mail' as const, title: page.emailLabel, value: site.contact.email, href: `mailto:${site.contact.email}`, track: 'email' },
 ];
 const offices = site.offices ?? [];
 const officeNames = offices.length <= 4
@@ -38,8 +39,8 @@ const branchSchema = offices.filter((o) => o.type !== 'head').map((o) => ({
 ---
 
 <Layout
-  title="Contact Instacertify – Free Certification Assessment & Quote"
-  description="Get a free product certification assessment within 24 hours. Call +91 99991 18039, WhatsApp, or send your requirement — BIS, WPC, CE, FCC and 120+ approvals."
+  title={page.seoTitle}
+  description={page.seoDescription}
   jsonLd={[breadcrumbSchema(site.url, [{ label: 'Contact' }], 'contact'), ...branchSchema]}
 >
   <section class="surface-tint">
@@ -47,11 +48,11 @@ const branchSchema = offices.filter((o) => o.type !== 'head').map((o) => ({
       <div class="grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:gap-14">
         <div>
           <Breadcrumbs items={[{ label: 'Contact' }]} />
-          <h1 class="mt-5 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">Get a free certification assessment</h1>
-          <p class="mt-4 text-lg text-slate-600">Tell us about your product. Within one business day a specialist will send you the applicable standards, document list, cost and timeline — no obligation.</p>
+          <h1 class="mt-5 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{page.heading}</h1>
+          <p class="mt-4 text-lg text-slate-600">{page.intro}</p>
 
           <ul class="mt-8 space-y-3">
-            {['Exact standards & schemes for your product', 'Itemised quote — govt, lab and our fee', 'Realistic timeline in writing'].map((t) => (
+            {page.points.map((t) => (
               <li class="flex gap-3 text-slate-700"><Icon name="check-circle" class="size-5 shrink-0 text-emerald-600" />{t}</li>
             ))}
           </ul>
@@ -80,7 +81,7 @@ const branchSchema = offices.filter((o) => o.type !== 'head').map((o) => ({
           <li class="card flex h-full items-center gap-3 p-4">
             <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><Icon name="clock" /></span>
             <span class="min-w-0">
-              <span class="block text-xs text-slate-500">Office hours</span>
+              <span class="block text-xs text-slate-500">{page.hoursLabel}</span>
               <span class="block text-[0.9375rem] font-semibold text-slate-900">{site.contact.hours}</span>
             </span>
           </li>
@@ -92,8 +93,8 @@ const branchSchema = offices.filter((o) => o.type !== 'head').map((o) => ({
   {offices.length > 0 && (
     <section class="section-tight border-t border-slate-200" aria-labelledby="offices-h">
       <div class="container-page">
-        <h2 id="offices-h" class="text-2xl section-title sm:text-3xl">Our offices</h2>
-        <p class="mt-2 max-w-2xl text-slate-600">Meet our certification specialists in person — {officeNames}. Hover over an office to see it on the map.</p>
+        <h2 id="offices-h" class="text-2xl section-title sm:text-3xl">{page.officesHeading}</h2>
+        <p class="mt-2 max-w-2xl text-slate-600">{page.officesIntro.replaceAll('{offices}', officeNames)}</p>
 
         <div class="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]" data-offices>
           <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">

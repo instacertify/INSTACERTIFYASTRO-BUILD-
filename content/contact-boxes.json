@@ -1,0 +1,100 @@
+{
+  "form": {
+    "namePlaceholder": "Your full name",
+    "phonePlaceholder": "+91 98xxx xxxxx",
+    "emailPlaceholder": "you@company.com",
+    "consent": "I agree to be contacted about this enquiry as per the Privacy Policy.",
+    "marketing": "Send me occasional regulatory updates (optional).",
+    "successWhatsapp": "Need it faster? WhatsApp us"
+  },
+  "contactPage": {
+    "seoTitle": "Contact Instacertify – Free Certification Assessment & Quote",
+    "seoDescription": "Get a free product certification assessment within 24 hours. Call +91 99991 18039, WhatsApp, or send your requirement — BIS, WPC, CE, FCC and 120+ approvals.",
+    "heading": "Get a free certification assessment",
+    "intro": "Tell us about your product. Within one business day a specialist will send you the applicable standards, document list, cost and timeline — no obligation.",
+    "points": [
+      "Exact standards & schemes for your product",
+      "Itemised quote — govt, lab and our fee",
+      "Realistic timeline in writing"
+    ],
+    "stepOne": "Your requirement",
+    "stepTwo": "Contact details",
+    "requirementLabel": "What do you need?",
+    "manufacturerLabel": "You are a",
+    "timelineLabel": "Timeline",
+    "continue": "Continue",
+    "companyLabel": "Company",
+    "messageLabel": "Anything else?",
+    "messagePlaceholder": "Models, target markets, deadlines…",
+    "consent": "I agree to Instacertify using these details to contact me about this enquiry, as set out in the Privacy Policy. I can withdraw consent anytime.",
+    "marketing": "Also send me occasional regulatory updates (optional).",
+    "back": "Back",
+    "callLabel": "Call us",
+    "whatsappLabel": "WhatsApp",
+    "whatsappText": "Chat with a specialist",
+    "emailLabel": "Email",
+    "hoursLabel": "Office hours",
+    "officesHeading": "Our offices",
+    "officesIntro": "Meet our certification specialists in person — {offices}. Hover over an office to see it on the map."
+  },
+  "cta": {
+    "heading": "Not sure which certification you need?",
+    "text": "Send us the product name and the countries you sell in. A specialist replies with the standards that apply, the documents to prepare, the lab cost and the timeline. The assessment is free.",
+    "points": [
+      "The list of approvals comes to you in writing",
+      "We reply within 1 business day",
+      "Testing, certification and registrations handled by one team"
+    ],
+    "whatsapp": "WhatsApp us",
+    "button": "Get a free assessment"
+  },
+  "popup": {
+    "talk": "Prefer to talk?",
+    "whatsapp": "WhatsApp"
+  },
+  "expert": {
+    "heading": "Talk to an expert",
+    "call": "Call us",
+    "chat": "Chat"
+  },
+  "feeFinder": {
+    "gateText": "Share your details to see the BIS fee for your business size, the other BIS charges and the testing cost.",
+    "turnoverHint": "Annual turnover, as per your Udyam (MSME) registration.",
+    "button": "Show my BIS fees",
+    "thanks": "Thank you – a specialist will call or WhatsApp you shortly.",
+    "disclaimer": "Fees as published by BIS. Your written quote confirms every amount before you pay.",
+    "whatsapp": "Discuss on WhatsApp",
+    "noMatch": "Some products are covered under a different name.",
+    "ask": "Ask us – the check is free"
+  },
+  "newsletter": {
+    "placeholder": "you@company.com",
+    "button": "Subscribe",
+    "note": "We'll email to confirm. Unsubscribe anytime."
+  },
+  "footerLocation": {
+    "text": "Find our office or meet us at a trade fair near you.",
+    "button": "View location"
+  },
+  "thankYou": {
+    "heading": "Thank you – we’ve got your enquiry",
+    "text": "A compliance specialist will call or WhatsApp you shortly",
+    "whatsapp": "Need it faster? WhatsApp us",
+    "stepsHeading": "What happens next",
+    "steps": [
+      { "icon": "mark_email_read", "title": "We read your enquiry", "text": "A compliance specialist checks your product and the route it needs. Not a call centre." },
+      { "icon": "phone_in_talk", "title": "We call or WhatsApp you", "text": "Usually within 30 minutes in office hours, with the route, the cost and a realistic timeline." },
+      { "icon": "handshake", "title": "You decide", "text": "Nothing is filed, booked or charged until you have the quote in writing and say yes." }
+    ],
+    "handyHeading": "Keep these handy for the call",
+    "handyIntro": "Don’t worry if you don’t have them all. It just makes the first call quicker.",
+    "handy": [
+      "Product name and model number",
+      "HS code, if you know it",
+      "Photos of the product and its label",
+      "Any test reports or certificates you already hold",
+      "The country or marketplace you are selling into"
+    ],
+    "emailPrompt": "Prefer email? Write to"
+  }
+}

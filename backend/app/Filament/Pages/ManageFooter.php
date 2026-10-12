@@ -83,6 +83,7 @@ class ManageFooter extends Page
                         }),
                 ]),
             Section::make('Newsletter box')
+                ->description('The sign-up field, button and note are worded under Website → Contact boxes → Footer.')
                 ->statePath('newsletter')
                 ->columns(2)
                 ->schema([

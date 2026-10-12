@@ -1,5 +1,6 @@
 import siteJson from '../../../content/site.json';
 import homeJson from '../../../content/home.json';
+import contactBoxesJson from '../../../content/contact-boxes.json';
 import catalogJson from '../../../content/catalog.json';
 import industriesJson from '../../../content/industries.json';
 import testimonialsJson from '../../../content/testimonials.json';
@@ -99,6 +100,20 @@ function localService(item: (typeof catalogJson)[number]): Service {
 
 export async function getSite(): Promise<Site> {
   return (await api<Site>('site')) ?? (siteJson as Site);
+}
+
+export type ContactBoxes = typeof contactBoxesJson;
+
+/** Wording on and around the enquiry forms (Admin → Website → Contact boxes) over content/contact-boxes.json. */
+export async function getContactBoxes(): Promise<ContactBoxes> {
+  const saved = ((await getSite()).contactBoxes ?? {}) as Record<string, Record<string, unknown> | undefined>;
+  const boxes = structuredClone(contactBoxesJson) as unknown as Record<string, Record<string, unknown>>;
+  for (const [box, fields] of Object.entries(boxes)) {
+    for (const [key, value] of Object.entries(saved[box] ?? {})) {
+      if (key in fields && value !== null && value !== '') fields[key] = value;
+    }
+  }
+  return boxes as unknown as ContactBoxes;
 }
 
 /** Home page content: saved admin settings layered over content/home.json, section by section. */

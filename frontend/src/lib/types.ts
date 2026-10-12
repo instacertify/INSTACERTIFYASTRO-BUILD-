@@ -92,6 +92,8 @@ export interface Site {
     imageAlt?: string | null;
     imageFocus?: 'left' | 'center' | 'right' | null;
   };
+  /** Admin → Website → Contact boxes, merged over the defaults by the API; read it through getContactBoxes(). */
+  contactBoxes?: Record<string, Record<string, unknown> | undefined>;
   autolinksEnabled?: boolean;
   autolinksMax?: number | string | null;
   autolinks?: AutolinkRule[];

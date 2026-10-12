@@ -1,10 +1,13 @@
 ---
+import { getContactBoxes } from '../lib/content';
+
 interface Props {
   id?: string;
   class?: string;
 }
 
 const { id = 'newsletter', class: className = 'mt-4' } = Astro.props;
+const { newsletter } = await getContactBoxes();
 ---
 
 <form data-lead-form="newsletter" data-endpoint="subscribers" class={className}>
@@ -13,10 +16,10 @@ const { id = 'newsletter', class: className = 'mt-4' } = Astro.props;
   </div>
   <label for={`${id}-email`} class="sr-only">Email address</label>
   <div class="flex gap-2">
-    <input id={`${id}-email`} name="email" type="email" required placeholder="you@company.com" autocomplete="email" class="min-h-11 w-full min-w-0 rounded-lg border border-white/15 bg-white/5 px-3.5 text-base text-white lg:text-sm placeholder:text-brand-200 focus:border-accent-400 focus:outline-none" />
-    <button type="submit" class="btn-primary shrink-0 px-4">Subscribe</button>
+    <input id={`${id}-email`} name="email" type="email" required placeholder={newsletter.placeholder} autocomplete="email" class="min-h-11 w-full min-w-0 rounded-lg border border-white/15 bg-white/5 px-3.5 text-base text-white lg:text-sm placeholder:text-brand-200 focus:border-accent-400 focus:outline-none" />
+    <button type="submit" class="btn-primary shrink-0 px-4">{newsletter.button}</button>
   </div>
-  <p class="mt-2 text-xs text-brand-200">We'll email to confirm. Unsubscribe anytime. <a href="/privacy-policy" class="underline hover:text-white">Privacy Policy</a></p>
+  <p class="mt-2 text-xs text-brand-200">{newsletter.note} <a href="/privacy-policy" class="underline hover:text-white">Privacy Policy</a></p>
   <p data-form-error role="status" class="mt-2 text-xs text-red-300 data-[success=true]:text-emerald-300"></p>
 </form>
 

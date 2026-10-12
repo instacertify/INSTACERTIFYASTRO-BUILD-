@@ -11,7 +11,7 @@ import ReviewProof from './ReviewProof.astro';
 import CtaBand from './CtaBand.astro';
 import LogoMarquee from './LogoMarquee.astro';
 import ServiceSection from './ServiceSection.astro';
-import { getHome, getService, getServices, getSite, getTestCategories, getTestimonials, servicesByPaths } from '../lib/content';
+import { getContactBoxes, getHome, getService, getServices, getSite, getTestCategories, getTestimonials, servicesByPaths } from '../lib/content';
 import { breadcrumbSchema, trailFor } from '../lib/breadcrumbs';
 import { createAutolinker } from '../lib/autolink';
 import { fixHeadings } from '../lib/outline';
@@ -24,7 +24,7 @@ interface Props {
 }
 
 const { path } = Astro.props;
-const [service, all, site, home, testimonials, testCategories] = await Promise.all([getService(path), getServices(), getSite(), getHome(), getTestimonials(), getTestCategories()]);
+const [service, all, site, home, testimonials, testCategories, { expert }] = await Promise.all([getService(path), getServices(), getSite(), getHome(), getTestimonials(), getTestCategories(), getContactBoxes()]);
 if (!service) throw new Error(`Service not found: ${path}`);
 
 const d = service.detail && !Array.isArray(service.detail) ? service.detail : {};
@@ -555,11 +555,11 @@ if (d.faqs?.length) {
           <LeadForm id={`svc-${service.slug}`} servicePath={service.path} />
 
           <div class="card rounded-[1.25rem] p-5">
-            <p class="text-base font-bold text-slate-950">Talk to an expert</p>
+            <p class="text-base font-bold text-slate-950">{expert.heading}</p>
             <p class="mt-1 text-sm text-slate-500">{site.contact.hours}</p>
             <div class="mt-4 grid grid-cols-2 gap-2.5">
-              <a href={`tel:${site.contact.phoneE164}`} class="btn-ghost px-3" data-track="call"><Icon name="phone" class="size-4" />Call us</a>
-              <a href={whatsapp} target="_blank" rel="noopener" class="btn-whatsapp px-3" data-track="whatsapp"><Icon name="whatsapp" class="size-4" />Chat</a>
+              <a href={`tel:${site.contact.phoneE164}`} class="btn-ghost px-3" data-track="call"><Icon name="phone" class="size-4" />{expert.call}</a>
+              <a href={whatsapp} target="_blank" rel="noopener" class="btn-whatsapp px-3" data-track="whatsapp"><Icon name="whatsapp" class="size-4" />{expert.chat}</a>
             </div>
           </div>
         </div>

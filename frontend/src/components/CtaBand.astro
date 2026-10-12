@@ -1,22 +1,18 @@
 ---
 import Icon from './Icon.astro';
 import LeadForm from './LeadForm.astro';
-import { getSite } from '../lib/content';
+import { getContactBoxes, getSite } from '../lib/content';
 
 interface Props {
+  /** Overrides the heading from Admin → Website → Contact boxes. */
   title?: string;
   text?: string;
   /** A form already on the page: phones get a button to it instead of a second form. */
   formAnchor?: string;
 }
 
-const site = await getSite();
-const {
-  title = 'Not sure which certification you need?',
-  text = 'Send us the product name and the countries you sell in. A specialist replies with the standards that apply, the documents to prepare, the lab cost and the timeline. The assessment is free.',
-  formAnchor,
-} = Astro.props;
-const points = ['The list of approvals comes to you in writing', site.contact.responseTime || 'We reply within 1 business day', 'Testing, certification and registrations handled by one team'];
+const [site, { cta }] = await Promise.all([getSite(), getContactBoxes()]);
+const { title = cta.heading, text = cta.text, formAnchor } = Astro.props;
 ---
 
 <section class="panel-map bg-brand-700 py-12 sm:py-16" aria-labelledby="cta-band-h">
@@ -24,20 +20,22 @@ const points = ['The list of approvals comes to you in writing', site.contact.re
     <div>
       <h2 id="cta-band-h" class="text-2xl font-bold text-white sm:text-3xl">{title}</h2>
       <p class="mt-3 max-w-xl leading-[1.65] text-brand-100">{text}</p>
-      <ul class="mt-6 space-y-2.5 text-sm text-brand-50">
-        {points.map((p) => (
-          <li class="flex items-start gap-2.5"><Icon name="check" class="mt-0.5 size-4 shrink-0 text-accent-400" />{p}</li>
-        ))}
-      </ul>
+      {cta.points.length > 0 && (
+        <ul class="mt-6 space-y-2.5 text-sm text-brand-50">
+          {cta.points.map((p) => (
+            <li class="flex items-start gap-2.5"><Icon name="check" class="mt-0.5 size-4 shrink-0 text-accent-400" />{p}</li>
+          ))}
+        </ul>
+      )}
       <div class="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold">
         <a href={`tel:${site.contact.phoneE164}`} class="tap inline-flex items-center gap-2 text-white hover:text-accent-200" data-track="call">
           <Icon name="phone" class="size-4" />{site.contact.phone}
         </a>
         <a href={`https://wa.me/${site.contact.whatsapp}`} target="_blank" rel="noopener" class="tap inline-flex items-center gap-2 text-white hover:text-accent-200" data-track="whatsapp">
-          <Icon name="whatsapp" class="size-4" />WhatsApp us
+          <Icon name="whatsapp" class="size-4" />{cta.whatsapp}
         </a>
       </div>
-      {formAnchor && <a href={formAnchor} class="btn-primary mt-7 w-full sm:w-auto lg:hidden" data-track="quote">Get a free assessment <Icon name="arrow-right" class="size-4" /></a>}
+      {formAnchor && <a href={formAnchor} class="btn-primary mt-7 w-full sm:w-auto lg:hidden" data-track="quote">{cta.button} <Icon name="arrow-right" class="size-4" /></a>}
     </div>
     <div class:list={[formAnchor && 'max-lg:hidden']}>
       <LeadForm id="cta" grid />
