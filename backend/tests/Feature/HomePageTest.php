@@ -80,6 +80,26 @@ class HomePageTest extends TestCase
         $this->assertFalse($home['clientLogosEnabled']);
     }
 
+    public function test_an_empty_logo_strip_gets_the_imported_logos_back_and_edited_strips_are_kept(): void
+    {
+        $logos = [['name' => 'Oppo', 'image' => 'logos/oppo.webp', 'url' => null], ['name' => 'No image', 'image' => null]];
+        Setting::create(['key' => 'site', 'value' => ['clientLogos' => $logos]]);
+        Setting::create(['key' => 'home', 'value' => ['clientLogos' => [], 'hero' => ['title' => 'Kept']]]);
+        $migration = require database_path('migrations/2026_10_13_010000_restore_home_client_logos.php');
+
+        $migration->up();
+
+        $value = Setting::find('home')->value;
+        $this->assertSame([$logos[0]], $value['clientLogos']);
+        $this->assertSame('Kept', $value['hero']['title']);
+
+        $own = [['name' => 'Chosen', 'image' => 'logos/chosen.webp']];
+        Setting::find('home')->update(['value' => ['clientLogos' => $own]]);
+        $migration->up();
+
+        $this->assertSame($own, Setting::find('home')->value['clientLogos']);
+    }
+
     public function test_lists_are_replaced_and_sections_merged(): void
     {
         $merged = HomePage::merge(
