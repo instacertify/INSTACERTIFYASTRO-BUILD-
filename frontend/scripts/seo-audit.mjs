@@ -36,7 +36,7 @@ if (existsSync(join(DIST, 'redirects.caddy'))) {
   }
 }
 
-const sitemapFiles = readdirSync(DIST).filter((f) => /^sitemap-\d+\.xml$/.test(f));
+const sitemapFiles = readdirSync(DIST).filter((f) => /^sitemap(-\d+)?\.xml$/.test(f));
 const sitemapUrls = new Set(sitemapFiles.flatMap((f) => locs(readFileSync(join(DIST, f), 'utf8'))).map(norm));
 
 // ------------------------------------------------------------ legacy coverage

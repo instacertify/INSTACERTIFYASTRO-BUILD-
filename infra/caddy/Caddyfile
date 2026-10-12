@@ -63,8 +63,8 @@ http://:2020 {
 	@internal path /redirects.caddy
 	respond @internal 404
 
-	# Search Console has the legacy sitemap URL registered.
-	rewrite /sitemap.xml /sitemap-index.xml
+	# The page list is built as /sitemap.xml (scripts/sitemap-file.mjs); keep the old chunk name working.
+	redir /sitemap-0.xml /sitemap.xml 301
 
 	# Admin previews of unsaved drafts (noindex, links expire); everything else is the static build.
 	@preview path /preview/* /_preview/*

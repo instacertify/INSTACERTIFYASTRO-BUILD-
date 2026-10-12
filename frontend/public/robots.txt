@@ -48,4 +48,4 @@ Disallow: /*?PHPSESSID=
 Disallow: /*&PHPSESSID=
 Disallow: /*;jsessionid=
 
-Sitemap: https://instacertify.com/sitemap-index.xml
+Sitemap: https://instacertify.com/sitemap.xml

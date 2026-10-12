@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/inline-landing-css.mjs && node scripts/precompress.mjs",
+    "build": "astro build && node scripts/sitemap-file.mjs && node scripts/inline-landing-css.mjs && node scripts/precompress.mjs",
     "preview": "astro preview",
     "build:preview": "astro build --config astro.preview.config.mjs",
     "serve:preview": "node dist-preview/server/entry.mjs",
