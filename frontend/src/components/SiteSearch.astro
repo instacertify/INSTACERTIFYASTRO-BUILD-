@@ -15,8 +15,8 @@ interface Props {
 
 const { id, dark = false, suggestions = [], suggest = true, value, class: className } = Astro.props;
 const listId = `${id}-results`;
-const short = 'Product, HSN code or standard';
-const wide = 'Search a product, HSN code, IS standard or certification';
+const short = 'Product, HSN or standard';
+const wide = 'Search a product, HSN code or standard';
 ---
 
 <div class:list={['relative', className]} data-site-search data-suggest={suggest ? undefined : 'false'}>
@@ -97,6 +97,7 @@ const wide = 'Search a product, HSN code, IS standard or certification';
     const place = () => {
       if (list.hidden) return;
       const box = form.getBoundingClientRect();
+      if (box.bottom < 80) return close();
       const bottom = (window.visualViewport?.height ?? innerHeight) - 12;
       list.style.top = `${box.bottom + 8}px`;
       list.style.left = `${box.left}px`;
@@ -119,9 +120,14 @@ const wide = 'Search a product, HSN code, IS standard or certification';
     };
     const open = () => {
       if (!list.childElementCount) return;
+      const wasHidden = list.hidden;
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
       place();
+      // Short screens and phone keyboards leave little room under the box: bring it up under the sticky header.
+      const box = form.getBoundingClientRect();
+      const room = (window.visualViewport?.height ?? innerHeight) - box.bottom;
+      if (wasHidden && room < 300 && box.top > 96) scrollBy({ top: Math.min(box.top - 96, 300 - room), behavior: 'smooth' });
     };
     function setActive(index: number) {
       options[active]?.removeAttribute('aria-selected');

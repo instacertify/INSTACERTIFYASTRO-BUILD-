@@ -69,20 +69,25 @@ function matches(e: Prepared, word: string): boolean {
   return word.length >= 4 && /\d/.test(word) && e.compact.includes(word);
 }
 
-/** Every entry containing all the words, best first. */
+/** Words people add that the page may not use ("CE certification" should still find "CE Marking"); they only rank. */
+const OPTIONAL = new Set(['certification', 'certificate', 'certified', 'registration', 'approval', 'licence', 'license', 'mark', 'marking', 'for', 'of', 'the', 'in']);
+
+/** Every entry containing all the words (apart from OPTIONAL ones), best first. */
 export function searchEntries(list: Prepared[], query: string): SearchEntry[] {
   const q = normalize(query);
   if (!q) return [];
   const words = q.split(' ');
+  const required = words.some((w) => !OPTIONAL.has(w)) ? words.filter((w) => !OPTIONAL.has(w)) : words;
 
   const hits: { e: Prepared; score: number }[] = [];
   for (const e of list) {
-    if (!words.every((w) => matches(e, w))) continue;
+    if (!required.every((w) => matches(e, w))) continue;
     let score = e.title === q ? 100 : e.title.startsWith(q) ? 60 : e.title.includes(q) ? 40 : 0;
     for (const w of words) {
-      if (e.titleWords.includes(w)) score += 12;
-      else if (w.length >= 3 && e.titleWords.some((tw) => tw.startsWith(w))) score += 8;
-      else if (e.title.includes(w)) score += 4;
+      const weight = OPTIONAL.has(w) ? 0.5 : 1;
+      if (e.titleWords.includes(w)) score += 12 * weight;
+      else if (w.length >= 3 && e.titleWords.some((tw) => tw.startsWith(w))) score += 8 * weight;
+      else if (w.length >= 3 && e.title.includes(w)) score += 4 * weight;
     }
     hits.push({ e, score: score + WEIGHT[e.g] - Math.min(e.title.length, 120) / 40 });
   }
