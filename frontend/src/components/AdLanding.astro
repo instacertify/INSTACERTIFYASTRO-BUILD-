@@ -221,7 +221,7 @@ if (c.faqs?.items?.length) {
           hero
           compact
           servicePath={page.servicePath ?? undefined}
-          title={hero.form_title ?? 'Get a free quote'}
+          title={hero.form_title || undefined}
           subtitle={hero.form_subtitle ?? ''}
           button={cta}
           emailOptional

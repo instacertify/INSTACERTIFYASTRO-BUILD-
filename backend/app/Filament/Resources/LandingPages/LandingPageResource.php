@@ -107,7 +107,7 @@ class LandingPageResource extends Resource
                             TextInput::make('cta')->label('Main button text')->maxLength(40)->placeholder('Get my free quote')
                                 ->helperText('Used on the top button, the form button and the closing button.'),
                             Section::make('Enquiry form')->compact()->columns(2)->columnSpanFull()->schema([
-                                TextInput::make('form_title')->label('Form heading')->maxLength(80)->placeholder('Get a free quote'),
+                                TextInput::make('form_title')->label('Form heading')->maxLength(80)->placeholder('Free Expert Assessment'),
                                 TextInput::make('form_note')->label('Line under the form')->maxLength(80)->helperText('Optional. Leave empty to show nothing under the form.'),
                                 TextInput::make('form_subtitle')->label('Text under the form heading')->maxLength(140)->columnSpanFull()
                                     ->placeholder('Itemised quote with fees, testing and timeline. No obligation.'),

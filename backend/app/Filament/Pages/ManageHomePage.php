@@ -115,7 +115,8 @@ class ManageHomePage extends Page
                             ->itemLabel(fn (array $state) => $state['title'] ?? null)
                             ->visible(fn ($get) => ! $get('showForm')),
                         Grid::make(2)->visible(fn ($get) => (bool) $get('showForm'))->schema([
-                            TextInput::make('formTitle')->label('Form title')->maxLength(70),
+                            TextInput::make('formTitle')->label('Form title')->maxLength(70)
+                                ->helperText('Leave empty to use the heading from Settings → Site settings → Enquiry form.'),
                             TextInput::make('formSubtitle')->label('Form subtitle')->maxLength(120),
                         ]),
                     ]),

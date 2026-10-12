@@ -75,6 +75,13 @@ export interface Site {
   rating?: { value?: number | string | null; count?: number | string | null; url?: string | null } | null;
   process: { title: string; text: string; icon?: string | null; iconImage?: string | null }[];
   home?: Partial<Home>;
+  leadForm?: Partial<Record<
+    | 'title' | 'subtitle' | 'button' | 'privacyNote'
+    | 'nameLabel' | 'phoneLabel' | 'emailLabel' | 'productLabel' | 'productPlaceholder'
+    | 'contactTitle' | 'contactSubtitle' | 'contactButton'
+    | 'successTitle' | 'successText',
+    string | null
+  >>;
   popup?: {
     enabled?: boolean;
     title?: string | null;

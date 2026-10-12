@@ -70,7 +70,7 @@ const jsonLd = faqs.length
               </div>
               {c.show_form !== false && (
                 <div id="enquire" class="text-slate-700">
-                  <LeadForm id={`landing-${page.path}`} title={txt(c.lead_form_title) || 'Get a free assessment'} subtitle={txt(c.lead_form_offer) || site.contact.responseTime} />
+                  <LeadForm id={`landing-${page.path}`} title={txt(c.lead_form_title) || undefined} subtitle={txt(c.lead_form_offer) || undefined} />
                 </div>
               )}
             </div>

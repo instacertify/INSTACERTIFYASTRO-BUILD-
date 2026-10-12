@@ -1,5 +1,6 @@
 ---
 import Icon from './Icon.astro';
+import { getSite } from '../lib/content';
 import type { Service } from '../lib/types';
 
 interface Props {
@@ -34,21 +35,33 @@ const {
   variant = 'compact',
   servicePath,
   services = [],
-  title = 'Talk to a specialist',
-  subtitle = 'Free assessment. We reply within 1 business day.',
   grid = false,
-  button = 'Get free assessment',
   bare = false,
   caps = false,
   emailOptional = false,
   buttonClass = 'btn-primary',
-  successText = 'A certification specialist will contact you within 1 business day, usually much sooner.',
   redirect,
   hero = false,
   compact = false,
 } = Astro.props;
 
 const full = variant === 'full';
+const site = await getSite();
+const copy = site.leadForm ?? {};
+const title = Astro.props.title || (full && copy.contactTitle) || copy.title || 'Free Expert Assessment';
+const subtitle = Astro.props.subtitle ?? ((full && copy.contactSubtitle) || copy.subtitle || (full ? 'Takes under a minute. Two quick steps.' : 'Free assessment. We reply within 1 business day.'));
+const button = Astro.props.button || copy.button || 'Get free assessment';
+const contactButton = copy.contactButton || 'Get my free quote';
+const successTitle = copy.successTitle || "Thank you — we've got it.";
+const successText = Astro.props.successText || copy.successText || 'A certification specialist will contact you within 1 business day, usually much sooner.';
+const privacyNote = copy.privacyNote;
+const labels = {
+  name: copy.nameLabel || (full ? 'Full name' : 'Name'),
+  phone: copy.phoneLabel || 'Phone / WhatsApp',
+  email: copy.emailLabel || (full ? 'Work email' : 'Email'),
+  product: copy.productLabel || (full ? 'Product' : 'Product or requirement'),
+  productPlaceholder: copy.productPlaceholder || (full ? 'e.g. 20W USB-C charger' : 'e.g. Bluetooth speaker, BIS + WPC'),
+};
 const requirements = { testing: 'Testing', certification: 'Certification', inspection: 'Inspection', other: 'Other' };
 const requirementFor = (s: Service) => (s.kind === 'testing' ? 'testing' : /inspection/i.test(s.path) ? 'inspection' : 'certification');
 // Lets "/contact?service=…" links keep the service and pre-pick what the visitor needs.
@@ -103,8 +116,8 @@ const presetRequirement = services.find((s) => s.path === servicePath);
             <input type="hidden" name="service_path" value={servicePath ?? ''} />
           </div>
           <div>
-            <label class="label" for={`${id}-product`}>Product</label>
-            <input id={`${id}-product`} name="product" class="field" placeholder="e.g. 20W USB-C charger" maxlength="190" />
+            <label class="label" for={`${id}-product`}>{labels.product}</label>
+            <input id={`${id}-product`} name="product" class="field" placeholder={labels.productPlaceholder} maxlength="190" />
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
@@ -135,7 +148,7 @@ const presetRequirement = services.find((s) => s.path === servicePath);
           <legend class="sr-only">Contact details</legend>
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
-              <label class="label" for={`${id}-name`}>Full name</label>
+              <label class="label" for={`${id}-name`}>{labels.name}</label>
               <input id={`${id}-name`} name="name" class="field" autocomplete="name" required minlength="2" />
               <p data-error-for="name" class="mt-1 text-sm text-red-600 empty:hidden" />
             </div>
@@ -144,12 +157,12 @@ const presetRequirement = services.find((s) => s.path === servicePath);
               <input id={`${id}-company`} name="company" class="field" autocomplete="organization" />
             </div>
             <div>
-              <label class="label" for={`${id}-phone`}>Phone / WhatsApp</label>
+              <label class="label" for={`${id}-phone`}>{labels.phone}</label>
               <input id={`${id}-phone`} name="phone" type="tel" class="field" autocomplete="tel" inputmode="tel" required pattern="\+?[0-9 \-]{8,20}" title="Mobile number with country code, e.g. +91 98765 43210" placeholder="+91 98xxx xxxxx" />
               <p data-error-for="phone" class="mt-1 text-sm text-red-600 empty:hidden" />
             </div>
             <div>
-              <label class="label" for={`${id}-email`}>Work email</label>
+              <label class="label" for={`${id}-email`}>{labels.email}</label>
               <input id={`${id}-email`} name="email" type="email" class="field" autocomplete="email" required placeholder="you@company.com" />
               <p data-error-for="email" class="mt-1 text-sm text-red-600 empty:hidden" />
             </div>
@@ -167,10 +180,9 @@ const presetRequirement = services.find((s) => s.path === servicePath);
             <input type="checkbox" name="marketing_opt_in" value="1" class="mt-0.5 size-4 rounded border-slate-300 accent-brand-700" />
             <span>Also send me occasional regulatory updates (optional).</span>
           </label>
-          <p class="text-xs text-slate-500">We record your IP address with your enquiry to block spam and as proof of your consent.</p>
           <div class="flex gap-3">
             <button type="button" class="btn-ghost" data-back>Back</button>
-            <button type="submit" class="btn-primary flex-1">Get my free quote</button>
+            <button type="submit" class="btn-primary flex-1">{contactButton}</button>
           </div>
         </fieldset>
       </>
@@ -178,23 +190,23 @@ const presetRequirement = services.find((s) => s.path === servicePath);
       <>
         <div class:list={[grid || hero ? 'grid gap-4 sm:grid-cols-2' : 'space-y-4']}>
           <div>
-            <label class="label" for={`${id}-name`}>Name</label>
+            <label class="label" for={`${id}-name`}>{labels.name}</label>
             <input id={`${id}-name`} name="name" class="field" autocomplete="name" required minlength="2" placeholder="Your full name" />
             <p data-error-for="name" class="mt-1 text-sm text-red-600 empty:hidden" />
           </div>
           <div>
-            <label class="label" for={`${id}-phone`}>Phone / WhatsApp</label>
+            <label class="label" for={`${id}-phone`}>{labels.phone}</label>
             <input id={`${id}-phone`} name="phone" type="tel" class="field" autocomplete="tel" inputmode="tel" required pattern="\+?[0-9 \-]{8,20}" title="Mobile number with country code, e.g. +91 98765 43210" placeholder="+91 98xxx xxxxx" />
             <p data-error-for="phone" class="mt-1 text-sm text-red-600 empty:hidden" />
           </div>
           <div class:list={[hero && 'sm:col-span-2']}>
-            <label class="label" for={`${id}-email`}>Email{emailOptional && <span class="font-normal text-slate-500"> (optional)</span>}</label>
+            <label class="label" for={`${id}-email`}>{labels.email}{emailOptional && <span class="font-normal text-slate-500"> (optional)</span>}</label>
             <input id={`${id}-email`} name="email" type="email" class="field" autocomplete="email" required={!emailOptional} placeholder="you@company.com" />
             <p data-error-for="email" class="mt-1 text-sm text-red-600 empty:hidden" />
           </div>
           <div class:list={[hero && 'sm:col-span-2']}>
-            <label class="label" for={`${id}-product`}>Product or requirement</label>
-            <input id={`${id}-product`} name="product" class="field" maxlength="190" placeholder="e.g. Bluetooth speaker, BIS + WPC" />
+            <label class="label" for={`${id}-product`}>{labels.product}</label>
+            <input id={`${id}-product`} name="product" class="field" maxlength="190" placeholder={labels.productPlaceholder} />
           </div>
         </div>
         <div class:list={['space-y-1.5 text-slate-600', hero ? 'text-[0.8125rem] leading-snug' : 'text-xs']}>
@@ -209,7 +221,7 @@ const presetRequirement = services.find((s) => s.path === servicePath);
           </label>
         </div>
         <button type="submit" class:list={[buttonClass, 'w-full']}>{button} <Icon name="arrow-right" class="size-4" /></button>
-        <p class:list={['flex items-center justify-center gap-1.5 text-center text-slate-500', hero ? 'text-[0.8125rem]' : 'text-xs']}><Icon name="shield" class="size-3.5 shrink-0" />Your details stay private. We log your IP to block spam.</p>
+        {privacyNote && <p class:list={['flex items-center justify-center gap-1.5 text-center text-slate-500', hero ? 'text-[0.8125rem]' : 'text-xs']}><Icon name="shield" class="size-3.5 shrink-0" />{privacyNote}</p>}
       </>
     )}
 
@@ -220,9 +232,9 @@ const presetRequirement = services.find((s) => s.path === servicePath);
     <div class="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
       <Icon name="check-circle" class="size-8" />
     </div>
-    <p class="mt-4 text-lg font-semibold text-slate-900">Thank you — we've got it.</p>
+    <p class="mt-4 text-lg font-semibold text-slate-900">{successTitle}</p>
     <p class="mt-1 text-sm text-slate-600">{successText}</p>
-    <a href="https://wa.me/919999118039" class="btn-whatsapp mt-5" target="_blank" rel="noopener"><Icon name="whatsapp" class="size-5" />Need it faster? WhatsApp us</a>
+    <a href={`https://wa.me/${site.contact.whatsapp}`} class="btn-whatsapp mt-5" target="_blank" rel="noopener"><Icon name="whatsapp" class="size-5" />Need it faster? WhatsApp us</a>
   </div>
 </div>
 

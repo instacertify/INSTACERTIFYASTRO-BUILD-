@@ -264,7 +264,7 @@ const eventName = (title: string) => {
 
       {heroForm ? (
         <div id="quote">
-          <LeadForm id="hero" title={hero.formTitle || 'Get a free certification assessment'} subtitle={hero.formSubtitle ?? undefined} />
+          <LeadForm id="hero" title={hero.formTitle || undefined} subtitle={hero.formSubtitle || undefined} />
         </div>
       ) : globeMarkets.length > 0 && (
         <HeroGlobe

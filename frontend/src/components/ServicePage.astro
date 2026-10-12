@@ -242,7 +242,7 @@ if (d.faqs?.length) {
         )}
       </div>
 
-      <LeadForm id={`svc-hero-${service.slug}`} servicePath={service.path} title={`Get a free ${shortName} assessment`} subtitle={site.contact.responseTime} />
+      <LeadForm id={`svc-hero-${service.slug}`} servicePath={service.path} />
     </div>
   </section>
 
@@ -551,7 +551,7 @@ if (d.faqs?.length) {
         )}
 
         <div id="enquire" class="scroll-mt-36 space-y-5 lg:sticky lg:top-36">
-          <LeadForm id={`svc-${service.slug}`} servicePath={service.path} title={`Ask about ${shortName}`} subtitle={site.contact.responseTime} />
+          <LeadForm id={`svc-${service.slug}`} servicePath={service.path} />
 
           <div class="card rounded-[1.25rem] p-5">
             <p class="text-base font-bold text-slate-950">Talk to an expert</p>

@@ -150,9 +150,9 @@ class ManageSite extends Page
                 Tab::make('Popup')->icon('heroicon-o-window')->columns(2)->statePath('popup')->schema([
                     Toggle::make('enabled')->label('Open the enquiry popup automatically')->columnSpanFull()
                         ->helperText('Desktop only: opens after the delay or when the visitor moves to leave. Never shown again for 7 days once closed, or 30 days after an enquiry. The "Get a free quote" buttons always open it.'),
-                    TextInput::make('title')->placeholder('Which certifications does your product need?'),
-                    TextInput::make('subtitle')->placeholder('A specialist from our team will connect with you shortly.'),
-                    TextInput::make('button')->label('Button text')->placeholder('Get my free assessment'),
+                    TextInput::make('title')->placeholder('Same as the Enquiry form tab'),
+                    TextInput::make('subtitle')->placeholder('Same as the Enquiry form tab'),
+                    TextInput::make('button')->label('Button text')->placeholder('Same as the Enquiry form tab'),
                     TextInput::make('delay')->label('Delay (seconds)')->numeric()->minValue(5)->default(25),
                     Section::make('Side image')->compact()->columns(2)->columnSpanFull()
                         ->description('Shown to the left of the form on tablets, laptops and monitors. Hidden on phones so the form fits the screen. Leave empty for the form on its own.')
@@ -170,6 +170,34 @@ class ManageSite extends Page
                                     ->helperText('The panel is tall and narrow, so the sides of most photos are trimmed. Pick the side with the person or product that must stay visible.'),
                             ]),
                         ]),
+                ]),
+                Tab::make('Enquiry form')->icon('heroicon-o-chat-bubble-left-right')->statePath('leadForm')->schema([
+                    Text::make('The enquiry form shown on service, article, standard, event and industry pages, at the foot of most pages and on the contact page. Leave a field empty to use the wording shown in grey. The homepage hero, the popup and ad landing pages can set their own heading.'),
+                    Section::make('Heading and button')->compact()->columns(2)->schema([
+                        TextInput::make('title')->label('Heading')->placeholder('Free Expert Assessment')->maxLength(70),
+                        TextInput::make('button')->label('Button text')->placeholder('Get free assessment')->maxLength(40),
+                        TextInput::make('subtitle')->label('Line under the heading')->placeholder('Free assessment. We reply within 1 business day.')->maxLength(160)->columnSpanFull(),
+                        TextInput::make('privacyNote')->label('Note under the button (optional)')->placeholder('e.g. No spam, ever.')->maxLength(160)->columnSpanFull()
+                            ->helperText('Leave empty to show nothing. Data handling is explained in the Privacy Policy linked from the consent checkbox.'),
+                    ]),
+                    Section::make('Field labels')->compact()->columns(2)->collapsed()->schema([
+                        TextInput::make('nameLabel')->label('Name')->placeholder('Name')->maxLength(40),
+                        TextInput::make('phoneLabel')->label('Phone')->placeholder('Phone / WhatsApp')->maxLength(40),
+                        TextInput::make('emailLabel')->label('Email')->placeholder('Email')->maxLength(40),
+                        TextInput::make('productLabel')->label('Product')->placeholder('Product or requirement')->maxLength(40),
+                        TextInput::make('productPlaceholder')->label('Example shown in the product field')->placeholder('e.g. Bluetooth speaker, BIS + WPC')->maxLength(80)->columnSpanFull(),
+                    ]),
+                    Section::make('Contact page')->compact()->columns(2)->collapsed()
+                        ->description('The two-step form on /contact. Empty fields use the heading and line above.')
+                        ->schema([
+                            TextInput::make('contactTitle')->label('Heading')->placeholder('Free Expert Assessment')->maxLength(70),
+                            TextInput::make('contactButton')->label('Button text')->placeholder('Get my free quote')->maxLength(40),
+                            TextInput::make('contactSubtitle')->label('Line under the heading')->placeholder('Takes under a minute. Two quick steps.')->maxLength(160)->columnSpanFull(),
+                        ]),
+                    Section::make('After sending')->compact()->collapsed()->schema([
+                        TextInput::make('successTitle')->label('Thank-you heading')->placeholder('Thank you — we\'ve got it.')->maxLength(70),
+                        Textarea::make('successText')->label('Thank-you message')->rows(2)->placeholder('A certification specialist will contact you within 1 business day, usually much sooner.')->maxLength(300),
+                    ]),
                 ]),
                 Tab::make('Internal links')->icon('heroicon-o-link')->schema([
                     Toggle::make('autolinksEnabled')->label('Automatically link keywords in articles and service pages')->default(true)
