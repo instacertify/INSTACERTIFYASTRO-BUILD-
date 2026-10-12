@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['slug', 'name', 'icon', 'icon_image', 'image', 'summary', 'intro', 'highlights', 'service_paths', 'certification_text', 'testing_paths', 'test_categories', 'testing_text', 'seo', 'is_published', 'sort'])]
+#[Fillable(['slug', 'name', 'icon', 'icon_image', 'image', 'summary', 'intro', 'highlights', 'service_paths', 'certification_text', 'testing_paths', 'test_categories', 'testing_text', 'seo', 'is_published', 'sort', 'show_client_logos'])]
 class Industry extends Model
 {
     use Audited, HasSeo;
@@ -22,6 +22,7 @@ class Industry extends Model
             'testing_paths' => 'array',
             'test_categories' => 'array',
             'is_published' => 'boolean',
+            'show_client_logos' => 'boolean',
         ];
     }
 

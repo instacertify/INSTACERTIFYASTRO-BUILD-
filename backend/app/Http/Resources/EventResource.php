@@ -37,6 +37,7 @@ class EventResource extends JsonResource
             'updatedAt' => $this->updated_at?->toIso8601String(),
             'content' => $this->when($full, fn () => RichContent::render($this->content)),
             'seo' => $this->when($full, fn () => $this->seoMeta($this->title, $this->excerpt ?: $this->content)),
+            'showClientLogos' => $this->when($full, fn () => (bool) $this->show_client_logos),
         ];
     }
 }

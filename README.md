@@ -44,8 +44,8 @@ Deploying an update is the same `docker compose up -d --build`: the app migrates
 
 The website is static. The `builder` service rebuilds it from the API and publishes it to the `site` volume that Caddy serves:
 
-- about a minute after any content, image, menu or setting is saved (saves close together are published once),
-- every night at 03:30 (so expired vacancies and past events drop off),
+- a few seconds after any content, image, menu or setting actually changes (a save that changes nothing publishes nothing; saves close together are published once),
+- when a date changes what the site shows: a scheduled post, page or vacancy goes live, an event ends, a vacancy closes or a standard becomes mandatory (`site:publish-due`, checked every minute; there is no blanket nightly rebuild),
 - on every start of the builder (i.e. every deploy),
 - from **Admin → Settings → Publish website**, which also shows the last publish and any error.
 

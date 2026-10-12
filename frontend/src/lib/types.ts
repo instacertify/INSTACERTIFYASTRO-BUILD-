@@ -252,6 +252,8 @@ export interface Service {
   detail?: ServiceDetail | null;
   updatedAt?: string | null;
   seo?: Seo;
+  /** The "Trusted by" client logo strip after the content, ticked per page in the admin. */
+  showClientLogos?: boolean;
 }
 
 export interface Industry {
@@ -270,6 +272,8 @@ export interface Industry {
   /** Option 2: lab tests, plus the product-testing industries that list every test. */
   testing: { text?: string | null; services: Service[]; categories: { slug: string; label: string; url: string; count: number }[] };
   seo?: Seo;
+  /** The "Trusted by" client logo strip after the content, ticked per page in the admin. */
+  showClientLogos?: boolean;
 }
 
 export interface Testimonial {
@@ -329,6 +333,8 @@ export interface Post {
   content?: string | null;
   faqs?: { q: string; a: string }[];
   seo?: Seo;
+  /** The "Trusted by" client logo strip after the content, ticked per page in the admin. */
+  showClientLogos?: boolean;
 }
 
 export interface EventItem {
@@ -353,6 +359,8 @@ export interface EventItem {
   updatedAt?: string | null;
   content?: string | null;
   seo?: Seo;
+  /** The "Trusted by" client logo strip after the content, ticked per page in the admin. */
+  showClientLogos?: boolean;
 }
 
 export type RegulationStatus = 'mandatory' | 'upcoming' | 'deferred' | 'cdsco' | 'voluntary' | 'rescinded';
@@ -426,6 +434,8 @@ export interface Standard {
   image?: string | null;
   imageAlt?: string | null;
   seo?: Seo;
+  /** The "Trusted by" client logo strip after the content, ticked per page in the admin. */
+  showClientLogos?: boolean;
   updatedAt?: string | null;
 }
 
@@ -452,6 +462,8 @@ export interface PageRecord {
   content?: string | null;
   blocks?: ({ sections?: Record<string, any>[] } & AboutBlocks) | null;
   seo?: Seo;
+  /** The "Trusted by" client logo strip after the content, ticked per page in the admin. */
+  showClientLogos?: boolean;
 }
 
 /** Sections of the "About us" page template; each is hidden when it has no items. */

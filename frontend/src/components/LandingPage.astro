@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ClientLogoBand from './ClientLogoBand.astro';
 import Icon from './Icon.astro';
 import LeadForm from './LeadForm.astro';
 import Faq from './Faq.astro';
@@ -269,4 +270,5 @@ const jsonLd = faqs.length
       </div>
     </section>
   )}
+  <ClientLogoBand show={page.showClientLogos} />
 </Layout>

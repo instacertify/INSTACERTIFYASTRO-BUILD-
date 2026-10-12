@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ClientLogoBand from './ClientLogoBand.astro';
 import Breadcrumbs from './Breadcrumbs.astro';
 import Icon from './Icon.astro';
 import MaterialIcon from './MaterialIcon.astro';
@@ -120,5 +121,6 @@ const reasonsAlign = iconAlign(blocks.reasons_icon_align);
     </section>
   )}
 
+  <ClientLogoBand show={page.showClientLogos} />
   <CtaBand />
 </Layout>

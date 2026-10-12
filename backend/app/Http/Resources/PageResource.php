@@ -26,6 +26,7 @@ class PageResource extends JsonResource
             'content' => $this->when($full, fn () => RichContent::render($this->content)),
             'blocks' => $this->when($full, fn () => Images::iconUrls($this->data)),
             'seo' => $this->when($full, fn () => $this->seoMeta($this->title, $this->excerpt ?: $this->content)),
+            'showClientLogos' => $this->when($full, fn () => (bool) $this->show_client_logos),
         ];
     }
 }

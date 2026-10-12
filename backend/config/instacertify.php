@@ -34,6 +34,6 @@ return [
     'frontend_rebuild_hook' => env('FRONTEND_REBUILD_HOOK'),
     'site_publish_token' => env('SITE_PUBLISH_TOKEN'),
     // Saves within this many seconds of each other go live in one rebuild.
-    'publish_delay' => 60,
+    'publish_delay' => 5,
 
 ];

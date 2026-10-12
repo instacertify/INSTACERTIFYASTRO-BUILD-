@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ClientLogoBand from './ClientLogoBand.astro';
 import Breadcrumbs from './Breadcrumbs.astro';
 import Icon from './Icon.astro';
 import LeadForm from './LeadForm.astro';
@@ -115,5 +116,6 @@ const jsonLd = [
     </section>
   )}
 
+  <ClientLogoBand show={event.showClientLogos} />
   <CtaBand />
 </Layout>

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Industries\Schemas;
 
+use App\Filament\Components\ClientLogosToggle;
 use App\Filament\Components\IconPicker;
 use App\Filament\Components\ImageUpload;
 use App\Filament\Components\SeoSection;
@@ -39,6 +40,7 @@ class IndustryForm
                     ->columnSpan(1)
                     ->schema([
                         Toggle::make('is_published')->default(true),
+                        ClientLogosToggle::make(),
                         IconPicker::make(),
                         ImageUpload::icon('icon_image', 'icons/industries'),
                         TextInput::make('sort')->numeric()->default(0),

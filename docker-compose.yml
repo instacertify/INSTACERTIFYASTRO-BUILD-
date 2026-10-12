@@ -69,7 +69,7 @@ services:
     restart: unless-stopped
 
   # Builds the static site from the admin's content and publishes it to the "site" volume: on every start (deploy),
-  # about a minute after content is saved, nightly, and from Admin → Settings → Publish website.
+  # seconds after content changes, when a date passes (site:publish-due), and from Admin → Settings → Publish website.
   builder:
     build:
       context: .

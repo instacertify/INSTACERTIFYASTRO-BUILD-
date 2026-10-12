@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'legacy_id', 'path', 'template', 'title', 'excerpt', 'content', 'data', 'image',
-    'status', 'published_at', 'sort', 'seo',
+    'status', 'published_at', 'sort', 'seo', 'show_client_logos',
 ])]
 class Page extends Model
 {
@@ -26,7 +26,7 @@ class Page extends Model
 
     protected function casts(): array
     {
-        return ['data' => 'array'];
+        return ['data' => 'array', 'show_client_logos' => 'boolean'];
     }
 
     public function url(): string

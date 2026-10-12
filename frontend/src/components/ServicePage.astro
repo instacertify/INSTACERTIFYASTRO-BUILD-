@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ClientLogoBand from './ClientLogoBand.astro';
 import Icon from './Icon.astro';
 import MaterialIcon from './MaterialIcon.astro';
 import Breadcrumbs from './Breadcrumbs.astro';
@@ -565,6 +566,8 @@ if (d.faqs?.length) {
       </aside>
     </div>
   </div>
+
+  <ClientLogoBand show={service.showClientLogos && !showLogos} />
 
   <section id="reviews" class="section-tight scroll-mt-24 border-t border-slate-200 surface-tint">
     <div class="container-page">

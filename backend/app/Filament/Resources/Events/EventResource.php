@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Events;
 
+use App\Filament\Components\ClientLogosToggle;
 use App\Filament\Components\DiscoverFields;
 use App\Filament\Components\ImageUpload;
 use App\Filament\Components\SeoSection;
@@ -83,6 +84,7 @@ class EventResource extends Resource
                     Section::make('Publishing')->schema([
                         ToggleButtons::make('status')->options(Event::STATUSES)->inline()->default('draft')->required()
                             ->colors(['draft' => 'gray', 'published' => 'success']),
+                        ClientLogosToggle::make(),
                         Select::make('industry_category_id')->label('Industry')
                             ->relationship('industryCategory', 'name')->searchable()->preload()
                             ->helperText('Leave empty on a new event and it is picked from the title.'),

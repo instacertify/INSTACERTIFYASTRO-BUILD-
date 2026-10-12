@@ -2,13 +2,20 @@
 
 namespace Tests\Feature;
 
+use App\Console\Commands\PublishDueContent;
 use App\Filament\Pages\ManagePublishing;
 use App\Jobs\PublishWebsite;
+use App\Models\Event;
 use App\Models\Lead;
 use App\Models\Page;
+use App\Models\Post;
+use App\Models\Scheme;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\Vacancy;
 use Filament\Actions\Testing\TestAction;
+use Illuminate\Bus\UniqueLock;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -43,6 +50,71 @@ class PublishingTest extends TestCase
 
         Setting::updateOrCreate(['key' => 'site'], ['value' => ['name' => 'Instacertify']]);
         Queue::assertPushed(PublishWebsite::class);
+    }
+
+    public function test_saving_without_a_change_leaves_the_website_alone(): void
+    {
+        $this->configure();
+        Queue::fake();
+        $page = Page::create(['title' => 'About', 'path' => 'about', 'status' => 'published']);
+        $site = Setting::create(['key' => 'site', 'value' => ['name' => 'Instacertify']]);
+        Queue::fake();
+
+        $page->save();
+        $this->travel(1)->minute();
+        $page->touch();
+        $site->update(['value' => ['name' => 'Instacertify']]);
+        Queue::assertNotPushed(PublishWebsite::class);
+
+        $page->update(['title' => 'About us']);
+        Queue::assertPushedTimes(PublishWebsite::class, 1);
+        // One publish waits at a time; let this one start so the next change queues another.
+        (new UniqueLock(app(Repository::class)))->release(new PublishWebsite);
+        $site->update(['value' => ['name' => 'Instacertify India']]);
+        Queue::assertPushedTimes(PublishWebsite::class, 2);
+    }
+
+    public function test_picking_schemes_alone_publishes(): void
+    {
+        $this->configure();
+        Queue::fake();
+        $scheme = Scheme::create(['name' => 'Test scheme']);
+        $post = Post::create(['type' => 'blog', 'title' => 'CRS update', 'slug' => 'crs-update', 'content' => '<p>x</p>', 'status' => 'published']);
+        $post->schemes()->detach();
+        Queue::fake();
+
+        $post->schemes()->sync([$scheme->id]);
+        Queue::assertPushed(PublishWebsite::class);
+
+        Queue::fake();
+        $post->schemes()->sync([]);
+        Queue::assertPushed(PublishWebsite::class);
+    }
+
+    public function test_dates_publish_only_when_they_change_what_the_website_shows(): void
+    {
+        $this->configure();
+        Queue::fake();
+        $this->travelTo('2026-10-13 10:00:00');
+        Event::create(['title' => 'Fair', 'slug' => 'fair', 'starts_at' => '2026-10-11 09:00', 'ends_at' => '2026-10-13 18:00', 'status' => 'published']);
+        Event::create(['title' => 'Webinar', 'slug' => 'webinar', 'starts_at' => '2026-10-20 09:00', 'status' => 'published']);
+        Post::create(['type' => 'blog', 'title' => 'Scheduled', 'slug' => 'scheduled', 'content' => '<p>x</p>', 'status' => 'published', 'published_at' => '2026-10-14 06:00']);
+        Vacancy::create(['title' => 'Executive', 'slug' => 'executive', 'department' => 'Certification', 'summary' => 'x', 'description' => '<p>x</p>', 'status' => 'open', 'closes_at' => '2026-10-15']);
+        Queue::fake();
+
+        $this->artisan('site:publish-due')->expectsOutputToContain('First check')->assertSuccessful();
+        $this->travelTo('2026-10-13 23:59:00');
+        $this->artisan('site:publish-due')->expectsOutputToContain('Nothing on the website has changed')->assertSuccessful();
+        Queue::assertNotPushed(PublishWebsite::class);
+
+        $this->travelTo('2026-10-14 00:01:00');
+        $this->artisan('site:publish-due')->expectsOutputToContain('1 events ended')->assertSuccessful();
+        Queue::assertPushedTimes(PublishWebsite::class, 1);
+
+        $this->assertSame(['1 scheduled articles went live'], PublishDueContent::due(now(), now()->setTime(7, 0)));
+        $this->assertSame(['1 vacancies closed'], PublishDueContent::due(now()->setDate(2026, 10, 15), now()->setDate(2026, 10, 16)));
+        $this->assertSame([], PublishDueContent::due(now()->setDate(2026, 10, 16), now()->setDate(2026, 10, 20)));
+        $this->assertSame(['1 events ended'], PublishDueContent::due(now()->setDate(2026, 10, 20), now()->setDate(2026, 10, 21)));
     }
 
     public function test_nothing_is_queued_where_publishing_is_not_set_up(): void

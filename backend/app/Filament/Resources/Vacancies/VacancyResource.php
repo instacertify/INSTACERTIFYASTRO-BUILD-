@@ -92,7 +92,7 @@ class VacancyResource extends Resource
                         DateTimePicker::make('published_at')->label('Posted on')->seconds(false)
                             ->helperText('Set automatically when you open the vacancy.'),
                         DatePicker::make('closes_at')->label('Applications close on')
-                            ->helperText('Optional. The vacancy disappears from the website after this date (the site is republished every night).'),
+                            ->helperText('Optional. The vacancy disappears from the website once this day is over.'),
                         TextInput::make('sort')->numeric()->default(0)->helperText('Lower numbers are listed first.'),
                     ]),
                     Section::make('Hiring team')

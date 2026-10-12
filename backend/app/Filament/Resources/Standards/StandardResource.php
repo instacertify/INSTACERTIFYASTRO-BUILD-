@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Standards;
 
+use App\Filament\Components\ClientLogosToggle;
 use App\Filament\Components\FaqRepeater;
 use App\Filament\Components\ImageUpload;
 use App\Filament\Components\SeoSection;
@@ -115,6 +116,7 @@ class StandardResource extends Resource
                         Select::make('standard_category_id')->label('Category')->relationship('category', 'title')->required()->preload(),
                         ToggleButtons::make('status')->options(Standard::STATUSES)->inline()->default('published')->required()
                             ->colors(['draft' => 'gray', 'published' => 'success']),
+                        ClientLogosToggle::make(),
                         TextInput::make('path')->disabled()->dehydrated(false)->prefix('/'),
                         Select::make('scheme')->options(Standard::SCHEMES),
                         Select::make('regulation_status')->label('Regulation')->options(Standard::REGULATION)

@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'legacy_id', 'source', 'standard_category_id', 'title', 'slug', 'path', 'scheme', 'regulation_status', 'mandatory_from',
     'mandatory_since', 'sector', 'industry_category_id', 'description', 'products_title', 'products', 'facts', 'faqs', 'image', 'image_alt', 'status',
-    'published_at', 'sort', 'seo',
+    'published_at', 'sort', 'seo', 'show_client_logos',
 ])]
 class Standard extends Model
 {
@@ -45,7 +45,7 @@ class Standard extends Model
 
     protected function casts(): array
     {
-        return ['products' => 'array', 'facts' => 'array', 'faqs' => 'array', 'mandatory_from' => 'date'];
+        return ['products' => 'array', 'facts' => 'array', 'faqs' => 'array', 'mandatory_from' => 'date', 'show_client_logos' => 'boolean'];
     }
 
     protected static function booted(): void

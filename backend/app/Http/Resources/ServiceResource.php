@@ -30,6 +30,7 @@ class ServiceResource extends JsonResource
             'hasDetail' => ! empty($this->detail),
             'detail' => $this->when($full, fn () => Images::urlsFor(RichContent::render($this->detail ?: null), ['iconImage'])),
             'seo' => $this->when($full, fn () => $this->seoMeta($this->title, $this->summary)),
+            'showClientLogos' => $this->when($full, fn () => (bool) $this->show_client_logos),
             'updatedAt' => $this->when($full, fn () => $this->updated_at?->toIso8601String()),
         ];
     }

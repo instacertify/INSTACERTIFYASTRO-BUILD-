@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Posts;
 
+use App\Filament\Components\ClientLogosToggle;
 use App\Filament\Components\DiscoverFields;
 use App\Filament\Components\FaqRepeater;
 use App\Filament\Components\ImageUpload;
@@ -130,6 +131,7 @@ class PostResource extends Resource
                                 ->colors(['draft' => 'gray', 'published' => 'success']),
                             DateTimePicker::make('published_at')->label('Publish date')->seconds(false)
                                 ->helperText('Set a future date to schedule.'),
+                            ClientLogosToggle::make(),
                             Select::make('category_id')->label('Category')
                                 ->relationship('category', 'name', fn (Builder $query, Get $get) => $query->where('type', $get('type')))
                                 ->createOptionForm([

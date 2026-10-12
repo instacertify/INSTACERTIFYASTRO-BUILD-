@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Pages;
 
+use App\Filament\Components\ClientLogosToggle;
 use App\Filament\Components\IconAlign;
 use App\Filament\Components\IconPicker;
 use App\Filament\Components\ImageUpload;
@@ -61,6 +62,7 @@ class PageResource extends Resource
                     ToggleButtons::make('status')->options(Page::STATUSES)->inline()->default('published')->required()
                         ->colors(['draft' => 'gray', 'published' => 'success']),
                     ImageUpload::make('image', 'pages'),
+                    ClientLogosToggle::make(),
                 ]),
                 self::aboutSections(),
                 Section::make('Structured blocks')

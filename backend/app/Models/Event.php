@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable([
     'legacy_id', 'title', 'slug', 'type', 'industry_category_id', 'starts_at', 'ends_at', 'location', 'url', 'price',
-    'excerpt', 'content', 'image', 'image_alt', 'status', 'published_at', 'seo',
+    'excerpt', 'content', 'image', 'image_alt', 'status', 'published_at', 'seo', 'show_client_logos',
 ])]
 class Event extends Model
 {
@@ -29,7 +29,7 @@ class Event extends Model
 
     protected function casts(): array
     {
-        return ['starts_at' => 'datetime', 'ends_at' => 'datetime'];
+        return ['starts_at' => 'datetime', 'ends_at' => 'datetime', 'show_client_logos' => 'boolean'];
     }
 
     protected static function booted(): void
@@ -53,7 +53,7 @@ class Event extends Model
     /** Certifications exhibitors at this event usually need. */
     public function schemes(): BelongsToMany
     {
-        return $this->belongsToMany(Scheme::class)->orderBy('sort');
+        return $this->belongsToMany(Scheme::class)->using(SchemeLink::class)->orderBy('sort');
     }
 
     public function url(): string

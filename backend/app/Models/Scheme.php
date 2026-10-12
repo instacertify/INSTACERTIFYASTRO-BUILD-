@@ -38,11 +38,11 @@ class Scheme extends Model
 
     public function posts(): BelongsToMany
     {
-        return $this->belongsToMany(Post::class);
+        return $this->belongsToMany(Post::class)->using(SchemeLink::class);
     }
 
     public function events(): BelongsToMany
     {
-        return $this->belongsToMany(Event::class);
+        return $this->belongsToMany(Event::class)->using(SchemeLink::class);
     }
 }

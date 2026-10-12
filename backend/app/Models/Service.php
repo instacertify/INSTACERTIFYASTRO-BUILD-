@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'legacy_id', 'path', 'slug', 'title', 'kind', 'region', 'group', 'test_categories', 'summary', 'icon', 'image',
-    'detail', 'seo', 'is_featured', 'is_published', 'sort',
+    'detail', 'seo', 'is_featured', 'is_published', 'sort', 'show_client_logos',
 ])]
 class Service extends Model
 {
@@ -79,6 +79,7 @@ class Service extends Model
             'test_categories' => 'array',
             'is_featured' => 'boolean',
             'is_published' => 'boolean',
+            'show_client_logos' => 'boolean',
         ];
     }
 

@@ -1,13 +1,12 @@
 <?php
 
-use App\Jobs\PublishWebsite;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('privacy:prune')->dailyAt('03:15')->withoutOverlapping();
-// Drops expired vacancies and past events from the static site even when nobody edits anything.
-Schedule::job(new PublishWebsite)->dailyAt('03:30');
+// Republishes only when a date changes what the website shows, e.g. an event ends or a scheduled post goes live.
+Schedule::command('site:publish-due')->everyMinute()->withoutOverlapping();
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

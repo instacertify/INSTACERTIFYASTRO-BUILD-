@@ -14,6 +14,7 @@ use App\Support\MailSettings;
 use App\Support\SitePublisher;
 use Filament\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Queue;
@@ -64,13 +65,26 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
-        foreach ([...$policies[ContentPolicy::class], Models\Vacancy::class] as $model) {
-            $model::saved(fn () => SitePublisher::queue());
+        // Listeners must not return false: that stops the listeners after them (e.g. the activity log).
+        // A save that changes nothing (e.g. pressing Save twice) leaves the website as it is.
+        $changed = fn (Model $model): bool => array_diff(array_keys($model->getChanges()), [$model->getUpdatedAtColumn()]) !== [];
+        foreach ([...$policies[ContentPolicy::class], Models\Vacancy::class, Models\SchemeLink::class] as $model) {
+            $model::created(fn () => SitePublisher::queue());
+            $model::updated(function (Model $record) use ($changed): void {
+                if ($changed($record)) {
+                    SitePublisher::queue();
+                }
+            });
             $model::deleted(fn () => SitePublisher::queue());
         }
         // The email account is the only setting the website does not show.
-        Models\Setting::saved(function (Models\Setting $setting): void {
+        Models\Setting::created(function (Models\Setting $setting): void {
             if ($setting->key !== 'mail') {
+                SitePublisher::queue();
+            }
+        });
+        Models\Setting::updated(function (Models\Setting $setting) use ($changed): void {
+            if ($setting->key !== 'mail' && $changed($setting)) {
                 SitePublisher::queue();
             }
         });

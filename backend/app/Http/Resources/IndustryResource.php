@@ -42,6 +42,7 @@ class IndustryResource extends JsonResource
             ],
             // No description fallback: the page builds a fuller one from the summary and highlights.
             'seo' => $this->seoMeta("{$this->name} testing & certification"),
+            'showClientLogos' => (bool) $this->show_client_logos,
         ];
     }
 }

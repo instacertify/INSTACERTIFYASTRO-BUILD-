@@ -49,6 +49,7 @@ class StandardResource extends JsonResource
             'image' => $this->when($full, fn () => Images::url($this->image)),
             'imageAlt' => $this->when($full, fn () => $this->image_alt),
             'seo' => $this->when($full, fn () => $this->seoMeta($this->title, $this->description)),
+            'showClientLogos' => $this->when($full, fn () => (bool) $this->show_client_logos),
             'updatedAt' => $this->when($full, fn () => $this->updated_at?->toIso8601String()),
         ];
     }

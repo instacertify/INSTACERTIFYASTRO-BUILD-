@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable([
     'legacy_id', 'type', 'work_type', 'title', 'slug', 'excerpt', 'content', 'image', 'image_alt',
-    'category_id', 'industry_category_id', 'author_id', 'reading_time', 'faqs', 'status', 'published_at', 'seo',
+    'category_id', 'industry_category_id', 'author_id', 'reading_time', 'faqs', 'status', 'published_at', 'seo', 'show_client_logos',
 ])]
 class Post extends Model
 {
@@ -38,7 +38,7 @@ class Post extends Model
 
     protected function casts(): array
     {
-        return ['faqs' => 'array'];
+        return ['faqs' => 'array', 'show_client_logos' => 'boolean'];
     }
 
     protected static function booted(): void
@@ -86,6 +86,6 @@ class Post extends Model
     /** Certifications an audit or case study covers. */
     public function schemes(): BelongsToMany
     {
-        return $this->belongsToMany(Scheme::class)->orderBy('sort');
+        return $this->belongsToMany(Scheme::class)->using(SchemeLink::class)->orderBy('sort');
     }
 }

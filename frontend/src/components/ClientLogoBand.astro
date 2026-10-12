@@ -1,0 +1,18 @@
+---
+import LogoMarquee from './LogoMarquee.astro';
+import { getHome } from '../lib/content';
+
+interface Props {
+  /** The page's "Show client logos after the content" tick. */
+  show?: boolean;
+}
+
+const home = Astro.props.show ? await getHome() : null;
+const logos = (home?.clientLogos ?? []).filter((l) => l.image);
+---
+
+{logos.length > 0 && (
+  <div class="border-t border-slate-200 bg-white py-8 sm:py-10">
+    <LogoMarquee logos={logos} title={home?.clientLogosTitle || 'Trusted by Leading Brands Across the Globe'} />
+  </div>
+)}

@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ClientLogoBand from './ClientLogoBand.astro';
 import Breadcrumbs from './Breadcrumbs.astro';
 import Icon from './Icon.astro';
 import CtaBand from './CtaBand.astro';
@@ -133,6 +134,7 @@ const description = [seo.description, page.excerpt].find((d) => d && d.length >=
     </div>
   )}
 
+  <ClientLogoBand show={page.showClientLogos} />
   <CtaBand />
 </Layout>
 

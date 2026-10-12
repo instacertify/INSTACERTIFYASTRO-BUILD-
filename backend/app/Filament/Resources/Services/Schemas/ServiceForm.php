@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Services\Schemas;
 
+use App\Filament\Components\ClientLogosToggle;
 use App\Filament\Components\FaqRepeater;
 use App\Filament\Components\IconPicker;
 use App\Filament\Components\ImageUpload;
@@ -59,6 +60,7 @@ class ServiceForm
                     ->schema([
                         Toggle::make('is_published')->label('Live on website')->default(true),
                         Toggle::make('is_featured')->helperText('Shown on the homepage and in menus.'),
+                        ClientLogosToggle::make(),
                         ImageUpload::make('icon', 'services/icons')->label('Logo / mark')->imageEditor(false),
                     ]),
                 Tabs::make('Page content')

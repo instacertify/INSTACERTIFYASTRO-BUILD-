@@ -39,6 +39,7 @@ class PostResource extends JsonResource
             'content' => $this->when($full, fn () => RichContent::render($this->content)),
             'faqs' => $this->when($full, fn () => $this->faqs ?? []),
             'seo' => $this->when($full, fn () => $this->seoMeta($this->title, $this->excerpt ?: $this->content)),
+            'showClientLogos' => $this->when($full, fn () => (bool) $this->show_client_logos),
         ];
     }
 }

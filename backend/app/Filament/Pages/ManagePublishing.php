@@ -61,8 +61,8 @@ class ManagePublishing extends Page
             Section::make('How changes go live')
                 ->icon(Heroicon::OutlinedInformationCircle)
                 ->schema([
-                    Text::make('Everything you save in the admin — pages, blog posts, images, menus, settings — goes live automatically about a minute after you save. Rebuilding the website then takes a few more minutes. Changes saved close together go live together.'),
-                    Text::make('The website is also republished every night, so expired vacancies and past events drop off on their own. Use “Publish now” to start straight away.'),
+                    Text::make('Every change you save in the admin — pages, blog posts, images, menus, settings — starts publishing a few seconds after you save. Rebuilding the website then takes a few minutes. Saving without changing anything leaves the website as it is.'),
+                    Text::make('Nothing else changes the website, except dates you set: it republishes on its own when a scheduled post or vacancy goes live, an event ends, a vacancy closes or a standard becomes mandatory. Use “Publish now” to republish straight away.'),
                 ]),
             Section::make('Status')
                 ->icon(Heroicon::OutlinedSignal)

@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ClientLogoBand from './ClientLogoBand.astro';
 import Breadcrumbs from './Breadcrumbs.astro';
 import Faq from './Faq.astro';
 import Icon, { type IconKey } from './Icon.astro';
@@ -362,5 +363,6 @@ if (standard.faqs?.length) {
     </aside>
   </div>
 
+  <ClientLogoBand show={standard.showClientLogos} />
   <CtaBand />
 </Layout>
