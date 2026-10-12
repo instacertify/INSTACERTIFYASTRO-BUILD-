@@ -147,6 +147,8 @@ export interface Home {
     buttonLabel?: string | null;
     buttonLink?: string | null;
     showPhone?: boolean;
+    /** Site search under the headline instead of the main button and phone number. */
+    showSearch?: boolean;
     /** Shown beside the headline when the enquiry form is off. */
     pillars?: { title: string; text?: string | null; icon?: string | null; iconImage?: string | null; image?: string | null }[];
     showForm?: boolean;

@@ -9,6 +9,8 @@ import Faq from '../components/Faq.astro';
 import CtaBand from '../components/CtaBand.astro';
 import LogoMarquee from '../components/LogoMarquee.astro';
 import HeroGlobe, { type GlobeMarket } from '../components/HeroGlobe.astro';
+import SiteSearch from '../components/SiteSearch.astro';
+import { SEARCH_SUGGESTIONS } from '../lib/siteSearch';
 import { KINDS, REGIONS, eventPlace, formatDate, getEvents, getHome, getIndustries, getLatestPosts, getServices, getSite, getTestimonials, serviceIcon } from '../lib/content';
 import { responsive } from '../lib/images';
 import { stepIcon } from '../lib/stepIcons';
@@ -245,14 +247,18 @@ const eventName = (title: string) => {
         </h1>
         {hero.intro && <p class:list={['mt-6 max-w-xl text-lg leading-relaxed', dark ? 'text-brand-100' : 'text-slate-700']}>{hero.intro}</p>}
 
-        <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-          {hero.buttonLabel && (
-            <a href={hero.buttonLink || '/contact'} class="btn-primary h-12 px-6 text-base" data-track="quote" data-open-lead={heroForm ? undefined : ''}>
-              {hero.buttonLabel} <Icon name="arrow-right" class="size-4" />
-            </a>
-          )}
-          {hero.showPhone !== false && <a href={`tel:${site.contact.phoneE164}`} class="btn-ghost h-12 px-6 text-base" data-track="call"><Icon name="phone" class="size-4" />{site.contact.phone}</a>}
-        </div>
+        {hero.showSearch !== false ? (
+          <SiteSearch id="hero-search" dark={dark} suggestions={SEARCH_SUGGESTIONS} class="mt-7 max-w-xl" />
+        ) : (
+          <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+            {hero.buttonLabel && (
+              <a href={hero.buttonLink || '/contact'} class="btn-primary h-12 px-6 text-base" data-track="quote" data-open-lead={heroForm ? undefined : ''}>
+                {hero.buttonLabel} <Icon name="arrow-right" class="size-4" />
+              </a>
+            )}
+            {hero.showPhone !== false && <a href={`tel:${site.contact.phoneE164}`} class="btn-ghost h-12 px-6 text-base" data-track="call"><Icon name="phone" class="size-4" />{site.contact.phone}</a>}
+          </div>
+        )}
 
       </div>
 

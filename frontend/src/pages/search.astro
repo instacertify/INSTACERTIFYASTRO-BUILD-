@@ -1,0 +1,149 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteSearch from '../components/SiteSearch.astro';
+import { SEARCH_SUGGESTIONS } from '../lib/siteSearch';
+---
+
+<Layout title="Search | Instacertify" description="Search Instacertify's certifications, testing services, standards, products, HSN codes and guides." noindex>
+  <section class="border-b border-slate-200 bg-slate-50">
+    <div class="container-page py-8 sm:py-12">
+      <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Search</h1>
+      <p class="mt-2 max-w-2xl text-slate-600">Certifications, testing, standards, products with their HSN codes, and our guides and news.</p>
+      <SiteSearch id="search-page" suggest={false} suggestions={SEARCH_SUGGESTIONS} class="mt-6 max-w-2xl" />
+    </div>
+  </section>
+
+  <section class="container-page py-8 sm:py-10" data-search-page>
+    <p class="text-slate-600" data-search-hint>Type a product (“power bank”), an HSN code (“8504”), an IS number (“IS 13252”) or a certification (“BIS CRS”).</p>
+    <p class="text-slate-600" data-search-loading hidden>Searching…</p>
+    <div hidden data-search-results>
+      <h2 class="text-xl font-bold" aria-live="polite" data-search-heading></h2>
+      <div class="-mx-4 mt-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <div class="flex min-w-max gap-1 border-b border-slate-200" role="group" aria-label="Show results of one type" data-search-tabs></div>
+      </div>
+      <div class="mt-2" data-search-list></div>
+    </div>
+    <div hidden class="mt-6 max-w-2xl rounded-2xl border border-slate-200 p-6" data-search-empty>
+      <p class="text-lg font-semibold text-slate-900">Nothing matched. Check the spelling, or try fewer or shorter words.</p>
+      <p class="mt-2 text-slate-600">Tell us the product and the markets you sell in. A specialist replies within 24 hours with the approvals, standards and timeline that apply.</p>
+      <a href="/contact" class="btn-primary mt-5 h-12 px-6" data-track="quote" data-open-lead>Ask which approvals you need</a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { SEARCH_GROUPS, groupEntries, highlight, loadSearchIndex, searchEntries, type SearchEntry, type SearchGroup } from '../lib/siteSearch';
+
+  const PREVIEW = 5;
+  const LIMIT = 100;
+  const input = document.querySelector<HTMLInputElement>('#search-page')!;
+  const page = document.querySelector<HTMLElement>('[data-search-page]')!;
+  const $ = <T extends HTMLElement>(name: string) => page.querySelector<T>(`[data-search-${name}]`)!;
+  const [hint, loading, results, heading, tabs, list, empty] = ['hint', 'loading', 'results', 'heading', 'tabs', 'list', 'empty'].map((n) => $(n));
+
+  const params = new URLSearchParams(location.search);
+  input.value = params.get('q') ?? '';
+  let filter = (params.get('type') ?? '') as SearchGroup | '';
+  let run = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className: string, ...content: (Node | string)[]) => {
+    const node = document.createElement(tag);
+    node.className = className;
+    node.append(...content);
+    return node;
+  };
+
+  const item = (e: SearchEntry, query: string) =>
+    el('li', '', (() => {
+      const a = el('a', 'block rounded-lg px-3 py-3 hover:bg-slate-50 sm:px-4', el('span', 'block leading-snug font-semibold text-brand-700', highlight(e.t, query)), ...(e.d ? [el('span', 'mt-1 block text-sm text-slate-600', e.d)] : []));
+      a.href = e.u;
+      return a;
+    })());
+
+  function tab(label: string, count: number, value: SearchGroup | '') {
+    const button = el('button', 'min-h-11 border-b-2 border-transparent px-3 text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 aria-pressed:border-brand-700 aria-pressed:text-brand-700', `${label} `, el('span', 'text-slate-500', `${count}`));
+    button.type = 'button';
+    button.setAttribute('aria-pressed', String(filter === value));
+    button.addEventListener('click', () => {
+      filter = value;
+      render();
+    });
+    return button;
+  }
+
+  async function render() {
+    const query = input.value.trim();
+    const current = ++run;
+    const url = new URL(location.href);
+    url.search = query ? new URLSearchParams({ q: query, ...(filter && { type: filter }) }).toString() : '';
+    history.replaceState(null, '', url);
+
+    if (!query) {
+      hint.hidden = false;
+      results.hidden = empty.hidden = loading.hidden = true;
+      return;
+    }
+    hint.hidden = true;
+    loading.hidden = false;
+    let index;
+    try {
+      index = await loadSearchIndex();
+    } catch {
+      loading.textContent = 'Search is not available right now. Please try again in a moment.';
+      return;
+    }
+    if (current !== run) return;
+    loading.hidden = true;
+
+    const hits = searchEntries(index, query);
+    const groups = groupEntries(hits);
+    if (filter && !groups.some(([g]) => g === filter)) filter = '';
+    empty.hidden = hits.length > 0;
+    results.hidden = hits.length === 0;
+    if (!hits.length) return;
+
+    heading.textContent = `${hits.length} result${hits.length === 1 ? '' : 's'} for “${query}”`;
+    const order = (Object.keys(SEARCH_GROUPS) as SearchGroup[]).filter((g) => groups.some(([h]) => h === g));
+    tabs.replaceChildren(tab('All', hits.length, ''), ...order.map((g) => tab(SEARCH_GROUPS[g].label, groups.find(([h]) => h === g)![1].length, g)));
+
+    if (filter) {
+      const entries = groups.find(([g]) => g === filter)![1];
+      list.replaceChildren(
+        el('ul', 'mt-2 divide-y divide-slate-100', ...entries.slice(0, LIMIT).map((e) => item(e, query))),
+        ...(entries.length > LIMIT ? [el('p', 'mt-4 text-sm text-slate-600', `Showing the best ${LIMIT} of ${entries.length}. Add a word to narrow the list.`)] : []),
+      );
+      return;
+    }
+
+    list.replaceChildren(
+      ...groups.map(([group, entries]) => {
+        const more = entries.length - PREVIEW;
+        const section = el('section', 'mt-8 first:mt-6', el('h3', 'text-lg font-bold text-slate-900', SEARCH_GROUPS[group].label), el('ul', 'mt-1 divide-y divide-slate-100', ...entries.slice(0, PREVIEW).map((e) => item(e, query))));
+        if (more > 0) {
+          const button = el('button', 'tap mt-2 px-3 text-sm font-semibold text-brand-700 hover:underline sm:px-4', `Show all ${entries.length} ${SEARCH_GROUPS[group].label.toLowerCase()}`);
+          button.type = 'button';
+          button.addEventListener('click', () => {
+            filter = group;
+            render();
+            tabs.scrollIntoView({ block: 'nearest' });
+          });
+          section.append(button);
+        }
+        return section;
+      }),
+    );
+  }
+
+  input.closest('form')!.addEventListener('submit', (event) => {
+    event.preventDefault();
+    filter = '';
+    render();
+  });
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    filter = '';
+    timer = setTimeout(render, 120);
+  });
+  render();
+</script>

@@ -1,0 +1,231 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  id: string;
+  /** Over the dark hero photo. */
+  dark?: boolean;
+  /** Example searches linked under the box. */
+  suggestions?: string[];
+  /** False on /search, which lists the results on the page instead of under the box. */
+  suggest?: boolean;
+  value?: string;
+  class?: string;
+}
+
+const { id, dark = false, suggestions = [], suggest = true, value, class: className } = Astro.props;
+const listId = `${id}-results`;
+const short = 'Product, HSN code or standard';
+const wide = 'Search a product, HSN code, IS standard or certification';
+---
+
+<div class:list={['relative', className]} data-site-search data-suggest={suggest ? undefined : 'false'}>
+  <form action="/search" method="get" role="search">
+    <label for={id} class="sr-only">Search certifications, testing, standards, products, HSN codes and guides</label>
+    <div class="flex items-center rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-slate-300 transition-shadow focus-within:ring-2 focus-within:ring-brand-500">
+      <Icon name="search" class="ml-2 size-5 shrink-0 text-slate-400" />
+      <input
+        id={id}
+        name="q"
+        type="search"
+        value={value}
+        role={suggest ? 'combobox' : undefined}
+        aria-autocomplete={suggest ? 'list' : undefined}
+        aria-expanded={suggest ? 'false' : undefined}
+        aria-controls={suggest ? listId : undefined}
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="search"
+        placeholder={short}
+        data-placeholder={short}
+        data-wide-placeholder={wide}
+        class="h-12 min-w-0 flex-1 bg-transparent px-2.5 text-base text-slate-900 placeholder:text-slate-500 focus:outline-none [&::-webkit-search-cancel-button]:cursor-pointer"
+      />
+      <button type="submit" class="btn-primary h-12 shrink-0 px-4 sm:px-6" aria-label="Search">
+        <Icon name="search" class="size-5 sm:hidden" /><span class="hidden sm:inline">Search</span>
+      </button>
+    </div>
+  </form>
+  {suggest && (
+    <div
+      id={listId}
+      role="listbox"
+      aria-label="Search suggestions"
+      hidden
+      class="fixed z-50 max-h-[34rem] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white pb-1 text-left shadow-xl"
+    ></div>
+  )}
+  <p class="sr-only" aria-live="polite" data-search-status></p>
+  {suggestions.length > 0 && (
+    <p class:list={['mt-3 text-sm leading-relaxed', dark ? 'text-brand-100' : 'text-slate-600']}>
+      Try{' '}
+      {suggestions.map((s, i) => (
+        <>
+          {i > 0 && <span aria-hidden="true">·</span>}{' '}
+          <a href={`/search?q=${encodeURIComponent(s)}`} class:list={['tap font-medium underline-offset-4 hover:underline', dark ? 'text-white' : 'text-brand-700']}>{s}</a>{' '}
+        </>
+      ))}
+    </p>
+  )}
+</div>
+
+<script>
+  import { SEARCH_GROUPS, groupEntries, highlight, loadSearchIndex, searchEntries } from '../lib/siteSearch';
+
+  const PER_GROUP = 3;
+  const MAX_GROUPS = 5;
+  const wide = matchMedia('(min-width: 640px)');
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-site-search]')) {
+    const input = root.querySelector('input')!;
+    const setPlaceholder = () => (input.placeholder = (wide.matches ? input.dataset.widePlaceholder : input.dataset.placeholder) ?? '');
+    setPlaceholder();
+    wide.addEventListener('change', setPlaceholder);
+
+    const list = root.querySelector<HTMLElement>('[role="listbox"]');
+    if (!list || root.dataset.suggest === 'false') continue;
+    const status = root.querySelector<HTMLElement>('[data-search-status]')!;
+    let options: HTMLAnchorElement[] = [];
+    let active = -1;
+    let run = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const form = root.querySelector('form')!;
+
+    // Fixed to the viewport so the hero's overflow clipping cannot cut the list off; kept above a phone keyboard.
+    const place = () => {
+      if (list.hidden) return;
+      const box = form.getBoundingClientRect();
+      const bottom = (window.visualViewport?.height ?? innerHeight) - 12;
+      list.style.top = `${box.bottom + 8}px`;
+      list.style.left = `${box.left}px`;
+      list.style.width = `${box.width}px`;
+      list.style.maxHeight = `${Math.max(176, Math.min(bottom - box.bottom - 8, 544))}px`;
+    };
+    let frame = 0;
+    const reposition = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(place);
+    };
+    addEventListener('scroll', reposition, { capture: true, passive: true });
+    addEventListener('resize', reposition, { passive: true });
+    window.visualViewport?.addEventListener('resize', reposition, { passive: true });
+
+    const close = () => {
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      setActive(-1);
+    };
+    const open = () => {
+      if (!list.childElementCount) return;
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+      place();
+    };
+    function setActive(index: number) {
+      options[active]?.removeAttribute('aria-selected');
+      active = index;
+      const option = options[index];
+      if (option) {
+        option.setAttribute('aria-selected', 'true');
+        input.setAttribute('aria-activedescendant', option.id);
+        option.scrollIntoView({ block: 'nearest' });
+      } else {
+        input.removeAttribute('aria-activedescendant');
+      }
+    }
+    const option = (href: string, className: string, ...content: (Node | string)[]) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.id = `${list.id}-${options.length}`;
+      a.setAttribute('role', 'option');
+      a.tabIndex = -1;
+      a.className = `block px-4 py-2.5 hover:bg-brand-50 aria-selected:bg-brand-50 ${className}`;
+      a.append(...content);
+      options.push(a);
+      return a;
+    };
+    const span = (className: string, ...content: (Node | string)[]) => {
+      const s = document.createElement('span');
+      s.className = className;
+      s.append(...content);
+      return s;
+    };
+
+    async function render() {
+      const query = input.value;
+      const current = ++run;
+      if (!query.trim()) {
+        list.replaceChildren();
+        options = [];
+        status.textContent = '';
+        return close();
+      }
+      let index;
+      try {
+        index = await loadSearchIndex();
+      } catch {
+        return;
+      }
+      if (current !== run) return;
+
+      const hits = searchEntries(index, query);
+      options = [];
+      active = -1;
+      const nodes: Node[] = [];
+      groupEntries(hits).slice(0, MAX_GROUPS).forEach(([group, entries], gi) => {
+        const wrap = document.createElement('div');
+        wrap.setAttribute('role', 'group');
+        wrap.setAttribute('aria-labelledby', `${list.id}-g${gi}`);
+        const head = span('block px-4 pt-3 pb-1 text-xs font-semibold text-slate-500', SEARCH_GROUPS[group].label, entries.length > PER_GROUP ? ` (${entries.length})` : '');
+        head.id = `${list.id}-g${gi}`;
+        head.setAttribute('role', 'presentation');
+        wrap.append(head);
+        for (const e of entries.slice(0, PER_GROUP)) {
+          wrap.append(option(e.u, '', span('block leading-snug font-medium text-slate-900', highlight(e.t, query)), ...(e.d ? [span('mt-0.5 block text-sm text-slate-500', e.d)] : [])));
+        }
+        nodes.push(wrap);
+      });
+      const all = `/search?q=${encodeURIComponent(query.trim())}`;
+      nodes.push(
+        hits.length
+          ? option(all, 'mt-1 border-t border-slate-100 py-3 font-semibold text-brand-700', `See all ${hits.length} result${hits.length === 1 ? '' : 's'}`)
+          : option('/contact', 'py-3 text-sm text-slate-600', 'Nothing found for that. ', span('font-semibold text-brand-700', 'Ask our team which approvals your product needs')),
+      );
+      list.replaceChildren(...nodes);
+      status.textContent = hits.length ? `${hits.length} results. Use the arrow keys to browse.` : 'No results.';
+      if (document.activeElement === input) open();
+    }
+
+    input.addEventListener('focus', () => {
+      loadSearchIndex().catch(() => {});
+      open();
+    });
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(render, 80);
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (!options.length) return;
+        event.preventDefault();
+        open();
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        setActive(active === -1 && step < 0 ? options.length - 1 : (active + step + options.length) % options.length);
+      } else if (event.key === 'Enter' && active >= 0 && !list.hidden) {
+        event.preventDefault();
+        options[active].click();
+      } else if (event.key === 'Escape' && !list.hidden) {
+        event.preventDefault();
+        close();
+      }
+    });
+    root.addEventListener('focusout', (event) => {
+      if (!root.contains(event.relatedTarget as Node | null)) close();
+    });
+    document.addEventListener('pointerdown', (event) => {
+      if (!root.contains(event.target as Node)) close();
+    });
+  }
+</script>

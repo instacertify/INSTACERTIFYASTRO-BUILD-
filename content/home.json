@@ -11,6 +11,7 @@
     "buttonLabel": "Get a free assessment",
     "buttonLink": "/contact",
     "showPhone": true,
+    "showSearch": true,
     "pillars": [
       {
         "title": "Be tested",

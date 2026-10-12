@@ -90,9 +90,13 @@ class ManageHomePage extends Page
                             ->helperText('Each sentence starts a new line, e.g. “Be tested. Be certified.”'),
                         TextInput::make('highlight')->label('Coloured end of the headline')->maxLength(60)->helperText('Shown on its own line in the accent colour, underlined.'),
                         Textarea::make('intro')->rows(3)->maxLength(300)->columnSpanFull(),
-                        TextInput::make('buttonLabel')->label('Main button text')->required()->maxLength(40),
+                        Toggle::make('showSearch')->label('Show the site search bar under the headline')->live()->columnSpanFull()
+                            ->helperText('Visitors search certifications, testing, standards, products, HSN codes and guides. It takes the place of the main button and phone number here.'),
+                        TextInput::make('buttonLabel')->label('Main button text')->required()->maxLength(40)
+                            ->helperText(fn ($get) => $get('showSearch') ? 'Still shown under “How it works” further down the page.' : null),
                         TextInput::make('buttonLink')->label('Main button link')->required()->placeholder('/contact'),
-                        Toggle::make('showPhone')->label('Show the phone number button next to it')->columnSpanFull(),
+                        Toggle::make('showPhone')->label('Show the phone number button next to it')->columnSpanFull()
+                            ->visible(fn ($get) => ! $get('showSearch')),
                     ]),
                     Section::make('Beside the headline')->compact()->schema([
                         Toggle::make('showForm')->label('Show the enquiry form instead of the photo slides')
