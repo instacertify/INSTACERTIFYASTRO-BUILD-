@@ -75,6 +75,8 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       target: builder
+    # Reaps the npm/astro processes each build leaves behind (node as PID 1 does not).
+    init: true
     environment:
       API_URL: http://app:80
       PUBLIC_API_URL: https://${API_DOMAIN:-api.localhost}
@@ -94,6 +96,7 @@ services:
       args:
         API_URL: http://app:80
         PUBLIC_API_URL: https://${API_DOMAIN:-api.localhost}
+    init: true
     depends_on: [app]
     restart: unless-stopped
 

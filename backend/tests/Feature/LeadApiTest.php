@@ -11,6 +11,7 @@ use App\Notifications\NewLeadNotification;
 use App\Support\Privacy;
 use Database\Seeders\ContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
@@ -73,6 +74,27 @@ class LeadApiTest extends TestCase
         config(['trustedproxy.proxies' => '10.0.0.1']);
         $this->postJson('/api/v1/leads', $this->payload(), ['REMOTE_ADDR' => '10.0.0.1', 'HTTP_X_FORWARDED_FOR' => '198.51.100.7'])->assertCreated();
         $this->assertSame('198.51.100.7', Lead::latest('id')->first()->ip);
+    }
+
+    public function test_lead_email_says_where_the_enquiry_came_from(): void
+    {
+        Queue::fake();
+        config(['instacertify.frontend_url' => 'https://instacertify.com']);
+        $this->travelTo('2026-10-12 18:30:00');
+
+        $this->postJson('/api/v1/leads', $this->payload([
+            'referrer' => 'https://www.google.com/',
+            'utm_medium' => 'cpc',
+            'utm_campaign' => 'bis-crs',
+            'gclid' => 'abc123',
+        ]), ['REMOTE_ADDR' => '203.0.113.9'])->assertCreated();
+
+        $lines = implode("\n", (new NewLeadNotification(Lead::sole()))->toMail(new AnonymousNotifiable)->introLines);
+        $this->assertStringContainsString('**Submitted on page:** https://instacertify.com/certification/india/bis-crs-mark-certification', $lines);
+        $this->assertStringContainsString('**Came from:** https://www.google.com/', $lines);
+        $this->assertStringContainsString('**Campaign:** source google, medium cpc, campaign bis-crs, Google Ads click', $lines);
+        $this->assertStringContainsString('**IP address:** 203.0.113.9', $lines);
+        $this->assertStringContainsString('**Submitted at:** 13 Oct 2026, 12:00 am IST', $lines);
     }
 
     public function test_admin_sees_lead_ip_and_notes(): void
