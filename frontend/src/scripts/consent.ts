@@ -191,10 +191,24 @@ function loadMicrosoftAds(c: Choices) {
   if (!c.marketing) expire(['_uet']);
 }
 
+/**
+ * GA4 event to the property set in the admin and to any Google tag inside the Tag Manager container; a tag loaded by
+ * Tag Manager ignores events that are not addressed to it. Waits up to 10 s for the container to arrive.
+ */
+function gaEvent(name: string, params: Record<string, unknown>, tries = 0) {
+  const targets = new Set(Object.keys(w.google_tag_manager ?? {}).filter((key) => /^G-[A-Z0-9]+$/.test(key)));
+  if (tracking.gtm && !tracking.ga && !targets.size && tries < 20) {
+    setTimeout(() => gaEvent(name, params, tries + 1), 500);
+    return;
+  }
+  if (tracking.ga) targets.add(tracking.ga);
+  if (targets.size) window.gtag?.('event', name, { ...params, send_to: [...targets] });
+}
+
 /** Conversion for every ad platform the visitor has allowed; Tag Manager picks up the dataLayer event. */
 export function trackLead(form?: string) {
   if (loaded.has('google')) {
-    if (tracking.ga) window.gtag?.('event', 'generate_lead', { form_name: form });
+    gaEvent('generate_lead', { form_name: form });
     if (tracking.ads && tracking.adsLabel && hasConsent('marketing')) window.gtag?.('event', 'conversion', { send_to: `${tracking.ads}/${tracking.adsLabel}` });
     w.dataLayer.push({ event: 'generate_lead', form_name: form });
   }
@@ -212,7 +226,7 @@ export function trackContact(kind: ContactKind, url: string) {
   const event = `click_${kind}`;
   const marketing = hasConsent('marketing');
   if (loaded.has('google')) {
-    if (tracking.ga) window.gtag?.('event', event, { link_url: url });
+    gaEvent(event, { link_url: url });
     const label = kind === 'call' ? tracking.adsCallLabel : kind === 'whatsapp' ? tracking.adsWhatsappLabel : undefined;
     if (tracking.ads && label && marketing) window.gtag?.('event', 'conversion', { send_to: `${tracking.ads}/${label}` });
   }
