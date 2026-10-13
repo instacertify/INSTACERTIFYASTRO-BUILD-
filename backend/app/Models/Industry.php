@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\Audited;
 use App\Models\Concerns\HasSeo;
+use App\Models\Concerns\StripsTrackingParams;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['slug', 'name', 'icon', 'icon_image', 'image', 'summary', 'intro', 'highlights', 'service_paths', 'certification_text', 'testing_paths', 'test_categories', 'testing_text', 'seo', 'is_published', 'sort', 'show_client_logos'])]
 class Industry extends Model
 {
-    use Audited, HasSeo;
+    use Audited, HasSeo, StripsTrackingParams;
 
     protected function casts(): array
     {

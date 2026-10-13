@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Audited;
+use App\Models\Concerns\StripsTrackingParams;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['question', 'answer', 'category', 'sort', 'is_published'])]
 class Faq extends Model
 {
-    use Audited;
+    use Audited, StripsTrackingParams;
 
     public const CATEGORIES = [
         'general' => 'General',

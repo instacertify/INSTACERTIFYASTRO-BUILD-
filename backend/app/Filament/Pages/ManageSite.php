@@ -11,6 +11,7 @@ use App\Support\Careers;
 use App\Support\Images;
 use App\Support\Privacy;
 use App\Support\TestCategories;
+use App\Support\TrackingParams;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -365,6 +366,7 @@ class ManageSite extends Page
     private static function socialField(string $name, string $label, string $example, array $hosts): TextInput
     {
         return TextInput::make($name)->label($label)->url()->maxLength(255)->placeholder($example)
+            ->dehydrateStateUsing(fn (?string $state) => TrackingParams::profileUrl($state))
             ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail) use ($label, $hosts) {
                 $host = strtolower((string) parse_url((string) $value, PHP_URL_HOST));
                 $matches = collect($hosts)->contains(fn ($h) => $host === $h || str_ends_with($host, ".{$h}"));

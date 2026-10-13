@@ -107,13 +107,27 @@ class AdminPanelTest extends TestCase
         Livewire::test(ManageSite::class)
             ->set('data.social.youtube', 'https://www.youtube.com/@instacertify')
             ->set('data.social.pinterest', null)
+            ->set('data.social.twitter', 'https://x.com/instacertify?s=11')
             ->call('save')
             ->assertHasNoErrors();
 
         $this->assertSame('https://www.youtube.com/@instacertify', Setting::get('site')['social']['youtube']);
+        $this->assertSame('https://x.com/instacertify', Setting::get('site')['social']['twitter']);
         $this->getJson('/api/v1/site')
             ->assertJsonPath('data.social.youtube', 'https://www.youtube.com/@instacertify')
             ->assertJsonPath('data.social.pinterest', null);
+    }
+
+    public function test_content_is_saved_without_tracking_tags_on_links(): void
+    {
+        $author = Author::create(['name' => 'Priya Sharma', 'slug' => 'priya-sharma']);
+        $post = Post::create(['type' => 'blog', 'title' => 'CRS', 'slug' => 'crs', 'status' => 'draft', 'author_id' => $author->id,
+            'content' => '<p><a href="https://www.crsbis.in/BIS/about-crs.do?utm_source=chatgpt.com" target="_blank">CRS BIS</a></p>']);
+
+        $this->assertSame('<p><a href="https://www.crsbis.in/BIS/about-crs.do" target="_blank">CRS BIS</a></p>', $post->fresh()->content);
+
+        $post->update(['content' => '<p><a href="https://bis.gov.in/?fbclid=IwAR0">BIS</a></p>']);
+        $this->assertSame('<p><a href="https://bis.gov.in/">BIS</a></p>', $post->fresh()->content);
     }
 
     public function test_roles_limit_what_each_team_member_can_open(): void

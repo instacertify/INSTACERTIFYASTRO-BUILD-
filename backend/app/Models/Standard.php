@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\Audited;
 use App\Models\Concerns\HasSeo;
 use App\Models\Concerns\Publishable;
+use App\Models\Concerns\StripsTrackingParams;
 use App\Support\Standards\IsNumber;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,7 +20,7 @@ use Illuminate\Support\Carbon;
 ])]
 class Standard extends Model
 {
-    use Audited, HasSeo, Publishable;
+    use Audited, HasSeo, Publishable, StripsTrackingParams;
 
     public const SCHEMES = [
         'isi' => 'BIS ISI mark (Scheme-I)',

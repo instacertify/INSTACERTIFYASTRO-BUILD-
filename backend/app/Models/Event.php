@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\Audited;
 use App\Models\Concerns\HasSeo;
 use App\Models\Concerns\Publishable;
+use App\Models\Concerns\StripsTrackingParams;
 use App\Models\Concerns\TracksDiscoverReadiness;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 ])]
 class Event extends Model
 {
-    use Audited, HasSeo, Publishable, TracksDiscoverReadiness;
+    use Audited, HasSeo, Publishable, StripsTrackingParams, TracksDiscoverReadiness;
 
     public const TYPES = [
         'conference' => 'Trade fair / conference',

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\Audited;
 use App\Models\Concerns\HasSeo;
+use App\Models\Concerns\StripsTrackingParams;
 use App\Support\TestCategories;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Service extends Model
 {
-    use Audited, HasSeo;
+    use Audited, HasSeo, StripsTrackingParams;
 
     public const KINDS = [
         'certification' => 'Certification',

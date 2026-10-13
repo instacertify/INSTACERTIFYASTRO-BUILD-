@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\Audited;
 use App\Models\Concerns\HasSeo;
 use App\Models\Concerns\Publishable;
+use App\Models\Concerns\StripsTrackingParams;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Page extends Model
 {
-    use Audited, HasSeo, Publishable;
+    use Audited, HasSeo, Publishable, StripsTrackingParams;
 
     public const TEMPLATES = [
         'default' => 'Standard page',
