@@ -79,7 +79,7 @@ class AuditTrail
         }
 
         $page = self::settingLabel($setting->key, $changed->all());
-        $show = fn (string $key, mixed $value) => Str::endsWith(strtolower($key), 'password') && filled($value) ? '(hidden)' : $value;
+        $show = fn (string $key, mixed $value) => Str::endsWith(strtolower($key), ['password', 'token', 'secret']) && filled($value) ? '(hidden)' : $value;
 
         activity('settings')
             ->event($setting->wasRecentlyCreated ? 'created' : 'updated')
@@ -152,6 +152,7 @@ class AuditTrail
         return match (true) {
             $key === 'home' => 'Home page',
             $key === 'mail' => 'Email & notifications',
+            $key === 'conversions' => 'Conversion APIs',
             $key === 'site' && collect($changed)->every(fn ($field) => Str::startsWith($field, 'nav.') || $field === 'nav') => 'Header menu',
             $key === 'site' && collect($changed)->every(fn ($field) => Str::startsWith($field, 'footer.') || $field === 'footer') => 'Footer',
             $key === 'site' => 'Site settings',

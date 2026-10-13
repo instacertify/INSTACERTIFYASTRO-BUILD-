@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // Conversions API version (YYYYMM). Empty: two months back, which LinkedIn keeps accepting for about a year.
+    'linkedin' => [
+        'version' => env('LINKEDIN_API_VERSION'),
+    ],
+
 ];

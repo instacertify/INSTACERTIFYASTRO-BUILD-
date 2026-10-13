@@ -35,6 +35,8 @@ export interface Tracking {
   linkedin?: string;
   linkedinLead?: string;
   uet?: string;
+  /** GA4 measurement ID the server sends generate_lead to; the browser then leaves that event out. */
+  gaServer?: string;
 }
 
 export function trackingConfig(site: Site): Tracking {
@@ -51,6 +53,7 @@ export function trackingConfig(site: Site): Tracking {
     linkedin: i.linkedinPartner ?? undefined,
     linkedinLead: i.linkedinPartner ? (i.linkedinLeadConversion ?? undefined) : undefined,
     uet: i.microsoftAds ?? undefined,
+    gaServer: i.serverSide?.ga4 ?? undefined,
   };
   return Object.fromEntries(Object.entries(config).filter(([, v]) => v)) as Tracking;
 }

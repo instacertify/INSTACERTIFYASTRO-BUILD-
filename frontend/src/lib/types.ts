@@ -56,6 +56,8 @@ export interface Integrations {
   ahrefsVerification?: string | null;
   /** Files a tool asks to find at the top of the site, e.g. google1234abcd.html. */
   verificationFiles?: { name?: string | null; content?: string | null }[] | Record<string, { name?: string | null; content?: string | null }> | null;
+  /** Admin → Conversion APIs: which platforms the server also reports enquiries to (ga4 holds the measurement ID). */
+  serverSide?: { ga4?: string | null; uet?: boolean; linkedin?: boolean } | null;
 }
 
 export interface Site {

@@ -1,4 +1,4 @@
-import { type ContactKind, hasConsent, onConsent, prefStorage, trackContact, trackLead } from './consent';
+import { type ContactKind, conversionContext, hasConsent, onConsent, prefStorage, trackContact, trackLead } from './consent';
 
 const API_URL = (import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
 const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'gclid'] as const;
@@ -107,6 +107,8 @@ function initForm(form: HTMLFormElement) {
     data.referrer = sessionStorage.getItem('first_referrer') ?? undefined;
     for (const key of UTM_KEYS) data[key] = sessionStorage.getItem(key) ?? undefined;
     for (const key of Object.keys(data)) if (data[key] === '') delete data[key];
+    const eventId = crypto.randomUUID();
+    data.tracking = conversionContext(eventId);
 
     submit.disabled = true;
     const originalLabel = submit.innerHTML;
@@ -132,7 +134,7 @@ function initForm(form: HTMLFormElement) {
       if (!res.ok) throw new Error(String(res.status));
 
       track('form_submit', form.dataset.leadForm);
-      trackLead(form.dataset.leadForm);
+      trackLead(form.dataset.leadForm, eventId);
       prefStorage().setItem('ic_lead_sent', String(Date.now()));
       form.dispatchEvent(new CustomEvent('lead:sent'));
       if (form.dataset.redirect) {

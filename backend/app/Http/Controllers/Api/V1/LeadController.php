@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLeadRequest;
 use App\Jobs\ProcessNewLead;
+use App\Jobs\SendServerConversion;
 use App\Jobs\SyncLeadToWebhook;
 use App\Models\Lead;
+use App\Support\ConversionApis;
 use App\Support\Privacy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
@@ -32,6 +34,12 @@ class LeadController extends Controller
         if (config('instacertify.leads.webhook_url')) {
             rescue(function () use ($lead) {
                 SyncLeadToWebhook::dispatch($lead);
+            });
+        }
+        $context = $request->conversionContext();
+        foreach (ConversionApis::platformsFor($context) as $platform) {
+            rescue(function () use ($lead, $platform, $context) {
+                SendServerConversion::dispatch($lead, $platform, $context);
             });
         }
 

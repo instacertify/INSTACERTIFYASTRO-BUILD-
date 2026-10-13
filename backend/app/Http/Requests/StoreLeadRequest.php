@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Lead;
 use App\Models\Service;
+use App\Support\ConversionApis;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -69,6 +70,12 @@ class StoreLeadRequest extends FormRequest
             'consent' => ['accepted'],
             'marketing_opt_in' => ['nullable', 'boolean'],
         ];
+    }
+
+    /** Visitor IDs for the server-side conversions; never stored with the lead. */
+    public function conversionContext(): array
+    {
+        return ConversionApis::context($this->input('tracking'));
     }
 
     public function messages(): array

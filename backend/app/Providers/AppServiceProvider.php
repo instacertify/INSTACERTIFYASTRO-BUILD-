@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Activitylog\Models\Activity;
 
 class AppServiceProvider extends ServiceProvider
@@ -44,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(3)->by($request->ip()),
             Limit::perDay(15)->by($request->ip()),
         ]);
+        RateLimiter::for('integrations', fn (Request $request) => Limit::perMinute(120)
+            ->by('key:'.($request->user()?->currentAccessToken()?->getKey() ?? $request->ip())));
 
         $policies = [
             ContentPolicy::class => [
@@ -54,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
                 Models\LandingPage::class, Models\Scheme::class,
             ],
             CrmPolicy::class => [Models\Lead::class, Models\Subscriber::class],
-            AdminPolicy::class => [Models\User::class, Models\ConsentLog::class, Activity::class],
+            AdminPolicy::class => [Models\User::class, Models\ConsentLog::class, Activity::class, PersonalAccessToken::class],
             VacancyPolicy::class => [Models\Vacancy::class],
             JobApplicationPolicy::class => [Models\JobApplication::class],
         ];

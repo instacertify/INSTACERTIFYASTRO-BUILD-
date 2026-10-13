@@ -205,16 +205,49 @@ function gaEvent(name: string, params: Record<string, unknown>, tries = 0) {
   if (targets.size) window.gtag?.('event', name, { ...params, send_to: [...targets] });
 }
 
+const cookie = (name: string) => {
+  const raw = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`))?.slice(name.length + 1);
+  return raw ? decodeURIComponent(raw) : undefined;
+};
+
+/** "GA1.1.123.456" → "123.456", the visitor ID GA4's Measurement Protocol needs. */
+const gaClientId = () => cookie('_ga')?.match(/^GA\d\.\d\.(\d+\.\d+)$/)?.[1];
+
+/**
+ * Visitor IDs sent with an enquiry so the server can report it too (Admin → Conversion APIs), each only with the
+ * matching cookie consent. The event ID is shared with the browser tags, so UET and LinkedIn count the enquiry once.
+ */
+export function conversionContext(eventId: string): Record<string, string | boolean> {
+  const marketing = hasConsent('marketing');
+  const context: Record<string, string | boolean> = { event_id: eventId, page_url: location.origin + location.pathname, ad_consent: marketing };
+  const clientId = hasConsent('analytics') && tracking.gaServer ? gaClientId() : undefined;
+  if (clientId) {
+    context.ga_client_id = clientId;
+    const session = cookie(`_ga_${tracking.gaServer!.replace(/^G-/, '')}`);
+    const id = session?.match(/^GS1\.\d\.(\d+)/)?.[1] ?? session?.match(/^GS2\.\d\.s(\d+)/)?.[1];
+    if (id) context.ga_session_id = id;
+  }
+  if (marketing) {
+    for (const [key, name] of [['uet_vid', '_uetvid'], ['msclkid', '_uetmsclkid'], ['li_fat_id', 'li_fat_id']] as const) {
+      const value = cookie(name);
+      if (value) context[key] = value;
+    }
+  }
+  return context;
+}
+
 /** Conversion for every ad platform the visitor has allowed; Tag Manager picks up the dataLayer event. */
-export function trackLead(form?: string) {
+export function trackLead(form?: string, eventId?: string) {
   if (loaded.has('google')) {
-    gaEvent('generate_lead', { form_name: form });
+    // The server sends it instead when it has the visitor's Analytics ID; GA4 cannot drop a duplicate.
+    if (!(tracking.gaServer && hasConsent('analytics') && gaClientId())) gaEvent('generate_lead', { form_name: form });
     if (tracking.ads && tracking.adsLabel && hasConsent('marketing')) window.gtag?.('event', 'conversion', { send_to: `${tracking.ads}/${tracking.adsLabel}` });
     w.dataLayer.push({ event: 'generate_lead', form_name: form });
   }
   if (loaded.has('meta') && hasConsent('marketing')) w.fbq('track', 'Lead');
-  if (loaded.has('uet') && hasConsent('marketing')) w.uetq.push('event', 'submit_lead_form', {});
-  if (loaded.has('linkedin') && tracking.linkedinLead && hasConsent('marketing')) w.lintrk('track', { conversion_id: Number(tracking.linkedinLead) });
+  const dedupe = eventId ? { event_id: eventId } : {};
+  if (loaded.has('uet') && hasConsent('marketing')) w.uetq.push('event', 'submit_lead_form', dedupe);
+  if (loaded.has('linkedin') && tracking.linkedinLead && hasConsent('marketing')) w.lintrk('track', { conversion_id: Number(tracking.linkedinLead), ...dedupe });
   // Lets Clarity recordings be filtered to the visits that ended in an enquiry.
   if (loaded.has('clarity')) w.clarity('event', 'lead');
 }

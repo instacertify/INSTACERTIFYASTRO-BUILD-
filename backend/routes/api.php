@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\CareersController;
 use App\Http\Controllers\Api\V1\ConsentController;
 use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\EditorialController;
+use App\Http\Controllers\Api\V1\IntegrationLeadController;
 use App\Http\Controllers\Api\V1\LeadController;
 use App\Http\Controllers\Api\V1\PreviewController;
 use App\Http\Controllers\Api\V1\SubscriberController;
@@ -64,4 +65,10 @@ Route::prefix('v1')->name('api.')->group(function () {
     Route::get('subscribers/{subscriber}/unsubscribe', [SubscriberController::class, 'unsubscribe'])
         ->middleware('signed')
         ->name('subscribers.unsubscribe');
+
+    // For outside tools with a key from Admin → Settings → API keys.
+    Route::prefix('integrations')->name('integrations.')->middleware(['auth:sanctum', 'throttle:integrations'])->group(function () {
+        Route::get('leads', [IntegrationLeadController::class, 'index'])->name('leads.index');
+        Route::get('leads/{id}', [IntegrationLeadController::class, 'show'])->where('id', '[0-9a-fA-F-]{36}')->name('leads.show');
+    });
 });
