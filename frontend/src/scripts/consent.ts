@@ -352,12 +352,6 @@ if (root) {
     close();
   });
   root.querySelector('[data-cookie-manage]')?.addEventListener('click', openPreferences);
-  root.querySelector<HTMLButtonElement>('[data-cookie-more]')?.addEventListener('click', (e) => {
-    const more = e.currentTarget as HTMLButtonElement;
-    root.querySelector('#cookie-banner-text')?.classList.remove('max-sm:line-clamp-3');
-    more.setAttribute('aria-expanded', 'true');
-    more.hidden = true;
-  });
   dialog.querySelector('[data-cookie-close]')?.addEventListener('click', () => dialog.close());
   document.addEventListener('click', (e) => {
     if ((e.target as Element).closest?.('[data-cookie-settings]')) {

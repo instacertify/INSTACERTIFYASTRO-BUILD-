@@ -20,44 +20,26 @@ const tracking = import.meta.env.PROD ? trackingConfig(site) : {};
   <section
     data-cookie-banner
     hidden
-    aria-labelledby="cookie-banner-title"
-    class="fixed inset-x-0 bottom-0 z-[55] border-t border-slate-200 bg-white/98 shadow-[0_-8px_30px_rgba(15,23,42,0.12)] backdrop-blur sm:inset-x-auto sm:right-4 sm:bottom-4 sm:max-w-2xl sm:rounded-2xl sm:border"
+    aria-label="Cookie notice"
+    class="fixed inset-x-0 bottom-0 z-[55] border-t border-slate-200 bg-white shadow-[0_-6px_24px_rgba(15,23,42,0.12)] sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-[26rem] sm:rounded-xl sm:border"
   >
-    <div class="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6">
-      <div class="flex items-start justify-between gap-4">
-        <p id="cookie-banner-title" class="flex items-center gap-2 font-semibold text-slate-900">
-          <Icon name="shield" class="size-5 text-brand-700" />
-          <span data-l="en">Your privacy choices</span><span data-l="hi" lang="hi">आपकी गोपनीयता पसंद</span>
-        </p>
-        <div class="flex shrink-0 overflow-hidden rounded-lg border border-slate-200 text-xs font-medium" role="group" aria-label="Language / भाषा">
-          <button type="button" data-cookie-lang="en" aria-pressed="true" class="px-2.5 py-1 aria-pressed:bg-brand-700 aria-pressed:text-white">English</button>
-          <button type="button" data-cookie-lang="hi" aria-pressed="false" class="px-2.5 py-1 aria-pressed:bg-brand-700 aria-pressed:text-white">हिन्दी</button>
-        </div>
-      </div>
-      <p id="cookie-banner-text" class="mt-3 text-sm leading-relaxed text-slate-600 max-sm:line-clamp-3">
-        <span data-l="en">
-          We use strictly necessary cookies to run this website. With your consent we would also use preference and analytics cookies to remember your choices and improve the site{marketing && ', and marketing cookies to measure which of our ads bring enquiries'}.
-          Nothing optional is set until you choose. We record your choice with your IP address as proof of consent. You can change or withdraw consent at any time from <strong>Cookie settings</strong> at the bottom of every page.
-        </span>
-        <span data-l="hi" lang="hi">
-          यह वेबसाइट चलाने के लिए हम केवल अत्यावश्यक कुकीज़ का उपयोग करते हैं। आपकी सहमति से हम आपकी पसंद याद रखने और साइट बेहतर बनाने के लिए पसंद व विश्लेषण कुकीज़ का भी उपयोग करेंगे{marketing && ', और यह मापने के लिए मार्केटिंग कुकीज़ कि हमारे किन विज्ञापनों से पूछताछ आती है'}।
-          आपके चुनने तक कोई वैकल्पिक कुकी नहीं लगाई जाती। सहमति के प्रमाण के रूप में हम आपकी पसंद आपके IP पते के साथ दर्ज करते हैं। आप हर पेज के नीचे <strong>कुकी सेटिंग्स</strong> से कभी भी अपनी सहमति बदल या वापस ले सकते हैं।
-        </span>
+    <div class="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4">
+      <p class="text-xs leading-relaxed text-slate-600 sm:text-[0.8125rem]">
+        <span data-l="en">By clicking “Allow all”, you agree to us storing cookies on your device to remember your preferences and analyse site usage{marketing && ', and to measure which of our ads bring enquiries'}. Nothing optional is set until you choose.</span>
+        <span data-l="hi" lang="hi">“सभी की अनुमति दें” पर क्लिक करके आप सहमत होते हैं कि हम आपकी पसंद याद रखने और साइट के उपयोग का विश्लेषण करने{marketing && ', तथा यह मापने के लिए कि हमारे किन विज्ञापनों से पूछताछ आती है,'} आपके डिवाइस पर कुकीज़ रखें। आपके चुनने तक कोई वैकल्पिक कुकी नहीं लगाई जाती।</span>
         {' '}<a href="/cookie-policy" class="font-medium text-brand-700 underline"><span data-l="en">Cookie Policy</span><span data-l="hi" lang="hi">कुकी नीति</span></a>
-        {' · '}<a href="/privacy-policy" class="font-medium text-brand-700 underline"><span data-l="en">Privacy Policy</span><span data-l="hi" lang="hi">गोपनीयता नीति</span></a>
+        {' · '}<a href="/privacy-policy" class="font-medium text-brand-700 underline"><span data-l="en">Privacy Statement</span><span data-l="hi" lang="hi">गोपनीयता नीति</span></a>
+        {' · '}<span role="group" aria-label="Language / भाषा"><button type="button" data-cookie-lang="hi" aria-pressed="false" lang="hi" class="font-medium text-brand-700 underline aria-pressed:hidden">हिन्दी</button><button type="button" data-cookie-lang="en" aria-pressed="true" class="font-medium text-brand-700 underline aria-pressed:hidden">English</button></span>
       </p>
-      <button type="button" data-cookie-more aria-controls="cookie-banner-text" aria-expanded="false" class="tap text-sm font-medium text-brand-700 underline sm:hidden">
-        <span data-l="en">Read more</span><span data-l="hi" lang="hi">और पढ़ें</span>
-      </button>
-      <div class="mt-3 grid grid-cols-2 gap-2 sm:mt-4 sm:grid-cols-3">
-        <button type="button" data-cookie-reject class="btn border border-brand-700 bg-white px-2 text-center text-sm leading-tight text-brand-700 hover:bg-brand-50 sm:px-5">
-          <span data-l="en">Reject non-essential</span><span data-l="hi" lang="hi">वैकल्पिक अस्वीकार करें</span>
+      <div class="mt-2.5 flex items-center gap-2">
+        <button type="button" data-cookie-manage class="mr-auto py-2 text-xs font-semibold text-slate-700 underline underline-offset-2 hover:text-brand-700 sm:text-sm">
+          <span data-l="en">Cookie settings</span><span data-l="hi" lang="hi">कुकी सेटिंग्स</span>
         </button>
-        <button type="button" data-cookie-manage class="btn border border-slate-300 bg-white text-sm text-slate-800 hover:bg-slate-50 max-sm:order-last max-sm:col-span-2">
-          <span data-l="en">Choose cookies</span><span data-l="hi" lang="hi">कुकीज़ चुनें</span>
+        <button type="button" data-cookie-reject class="rounded-lg border border-brand-700 bg-white px-3 py-2 text-xs font-semibold text-brand-700 hover:bg-brand-50 sm:text-sm">
+          <span data-l="en">Disable all</span><span data-l="hi" lang="hi">सभी बंद करें</span>
         </button>
-        <button type="button" data-cookie-accept class="btn border border-brand-700 bg-white px-2 text-center text-sm leading-tight text-brand-700 hover:bg-brand-50 sm:px-5">
-          <span data-l="en">Accept all</span><span data-l="hi" lang="hi">सभी स्वीकार करें</span>
+        <button type="button" data-cookie-accept class="rounded-lg border border-brand-700 bg-white px-3 py-2 text-xs font-semibold text-brand-700 hover:bg-brand-50 sm:text-sm">
+          <span data-l="en">Allow all</span><span data-l="hi" lang="hi">सभी की अनुमति दें</span>
         </button>
       </div>
     </div>
@@ -148,9 +130,9 @@ const tracking = import.meta.env.PROD ? trackingConfig(site) : {};
     </div>
 
     <div class="sticky bottom-0 grid gap-2 border-t border-slate-100 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:grid-cols-3 sm:px-7">
-      <button type="button" data-cookie-reject class="btn border border-brand-700 bg-white text-sm text-brand-700 hover:bg-brand-50"><span data-l="en">Reject non-essential</span><span data-l="hi" lang="hi">वैकल्पिक अस्वीकार करें</span></button>
+      <button type="button" data-cookie-reject class="btn border border-brand-700 bg-white text-sm text-brand-700 hover:bg-brand-50"><span data-l="en">Disable all</span><span data-l="hi" lang="hi">सभी बंद करें</span></button>
       <button type="button" data-cookie-save class="btn border border-slate-300 bg-white text-sm text-slate-800 hover:bg-slate-50"><span data-l="en">Save my choices</span><span data-l="hi" lang="hi">मेरी पसंद सहेजें</span></button>
-      <button type="button" data-cookie-accept class="btn border border-brand-700 bg-white text-sm text-brand-700 hover:bg-brand-50"><span data-l="en">Accept all</span><span data-l="hi" lang="hi">सभी स्वीकार करें</span></button>
+      <button type="button" data-cookie-accept class="btn border border-brand-700 bg-white text-sm text-brand-700 hover:bg-brand-50"><span data-l="en">Allow all</span><span data-l="hi" lang="hi">सभी की अनुमति दें</span></button>
     </div>
   </dialog>
 </div>
