@@ -39,7 +39,7 @@ class ManagePayments extends Page
 
     protected static ?string $title = 'Online payments';
 
-    protected ?string $subheading = 'The website\'s /pay page, where clients pay an invoice by card, UPI or net banking. Pick a gateway, paste its API keys and switch payments on. A "Make a payment" button appears in the website footer while payments are on.';
+    protected ?string $subheading = 'The website\'s /pay page, where clients pay an invoice by card, UPI or net banking. Pick a gateway, paste its API keys and switch payments on. The "Pay now" button in the website footer always leads there.';
 
     protected static ?int $navigationSort = 5;
 
@@ -61,7 +61,7 @@ class ManagePayments extends Page
         return $schema->statePath('data')->components([
             Section::make('Payment page')->columns(2)->schema([
                 Toggle::make('enabled')->label('Take payments on the website')->live()->columnSpanFull()
-                    ->helperText('Off: the payment page asks clients to contact you instead, and the footer button is hidden.'),
+                    ->helperText('Off: the payment page asks clients to contact you for bank transfer details instead.'),
                 ToggleButtons::make('gateway')->label('Payment gateway')->options(PaymentSettings::GATEWAYS)->inline()->required()->live(),
                 Select::make('currency')->options(PaymentSettings::CURRENCIES)->required()->native(false)
                     ->helperText('Must be enabled on your gateway account. Razorpay and Stripe India take INR by default; other currencies need international payments switched on.'),
