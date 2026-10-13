@@ -33,6 +33,10 @@ const facts = [
   v.closesAt && { icon: 'calendar', label: 'Apply by', value: formatDate(v.closesAt, { day: 'numeric', month: 'long', year: 'numeric' }) },
 ].filter(Boolean) as { icon: 'map-pin' | 'clock' | 'user' | 'rupee' | 'building' | 'calendar'; label: string; value: string }[];
 
+// Google wants a street and postcode for the job location; the office in the job's city has them.
+const sameCity = (o: { city?: string | null }) => (v.city ? o.city?.trim().toLowerCase() === v.city.trim().toLowerCase() : o.type === 'head');
+const office = (site.offices ?? []).find((o) => o.street && o.country === v.country && sameCity(o));
+
 const jobPosting = {
   '@context': 'https://schema.org',
   '@type': 'JobPosting',
@@ -51,7 +55,14 @@ const jobPosting = {
     : {
         jobLocation: {
           '@type': 'Place',
-          address: { '@type': 'PostalAddress', addressLocality: v.city ?? undefined, addressRegion: v.region ?? undefined, addressCountry: v.country },
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: office?.street,
+            addressLocality: v.city ?? office?.city ?? undefined,
+            addressRegion: v.region ?? office?.region ?? undefined,
+            postalCode: office?.postalCode || undefined,
+            addressCountry: v.country,
+          },
         },
       }),
   baseSalary: v.salary

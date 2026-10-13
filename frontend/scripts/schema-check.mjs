@@ -148,7 +148,11 @@ const checks = {
     if (!remote) {
       const locations = [].concat(node.jobLocation ?? []);
       if (!locations.length) error('Job: missing jobLocation', page);
-      for (const loc of locations) if (!text(loc?.address?.addressCountry)) error('Job: jobLocation without addressCountry', page);
+      for (const loc of locations) {
+        if (!text(loc?.address?.addressCountry)) error('Job: jobLocation without addressCountry', page);
+        if (!text(loc?.address?.streetAddress)) warn('Job: jobLocation without streetAddress (add an office in this city)', page);
+        if (!text(loc?.address?.postalCode)) warn('Job: jobLocation without postalCode (add an office in this city)', page);
+      }
     }
     if (!node.employmentType) warn('Job: no employmentType (recommended)', page);
     if (!node.validThrough) warn('Job: no validThrough (recommended)', page);
