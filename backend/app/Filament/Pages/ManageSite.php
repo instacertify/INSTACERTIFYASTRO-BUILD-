@@ -238,20 +238,24 @@ class ManageSite extends Page
                     Section::make('Advertising & conversions')->compact()->columns(2)->schema([
                         self::trackingId('googleAds', 'Google Ads tag ID', 'AW-123456789', '/^AW-\d{6,15}$/', find: '/AW-\d{6,15}/i')
                             ->helperText('Google Ads → Goals → Conversions → your lead action → Tag setup.'),
-                        TextInput::make('googleAdsLeadLabel')->label('Google Ads lead conversion label')->placeholder('AbC-D_efGhIjKlMnOp')
-                            ->dehydrateStateUsing(fn (?string $state) => filled($state) ? trim(Str::afterLast($state, '/')) : null)
-                            ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail) {
-                                if (filled($value) && ! preg_match('/^[A-Za-z0-9_-]{6,40}$/', trim(Str::afterLast((string) $value, '/')))) {
-                                    $fail('Paste the conversion label, e.g. AbC-D_efGhIjKlMnOp.');
-                                }
-                            })
-                            ->helperText('The part after the slash in "AW-123456789/AbC-D_efG". Counted each time an enquiry form is sent.'),
+                        self::adsLabel('googleAdsLeadLabel', 'Google Ads lead conversion label', 'Counted each time an enquiry form is sent.'),
+                        self::adsLabel('googleAdsCallLabel', 'Google Ads call-click conversion label', 'Optional. Counted each time a visitor taps a phone number.'),
+                        self::adsLabel('googleAdsWhatsappLabel', 'Google Ads WhatsApp-click conversion label', 'Optional. Counted each time a visitor opens WhatsApp from the site.'),
                         self::trackingId('metaPixel', 'Meta (Facebook) Pixel ID', '123456789012345', '/^\d{10,20}$/', find: '/\b(\d{10,20})\b/')
-                            ->helperText('Meta Events Manager → Data sources → your pixel. Sends a "Lead" event when an enquiry is sent.'),
+                            ->helperText('Meta Events Manager → Data sources → your pixel. Sends "Lead" when an enquiry is sent and "Contact" when a visitor taps call, WhatsApp or email.'),
                         self::trackingId('linkedinPartner', 'LinkedIn Insight Tag partner ID', '1234567', '/^\d{4,12}$/', find: '/\b(\d{4,12})\b/')
                             ->helperText('LinkedIn Campaign Manager → Analyze → Insight Tag.'),
+                        self::trackingId('linkedinLeadConversion', 'LinkedIn lead conversion ID', '12345678', '/^\d{4,12}$/', find: '/conversion_id\D{0,5}(\d{4,12})/i')
+                            ->helperText('Optional. Campaign Manager → Analyze → Conversion tracking → your conversion → "Event-specific" method → the conversion ID. Counted each time an enquiry form is sent.'),
                         self::trackingId('microsoftAds', 'Microsoft Advertising (Bing Ads) UET tag ID', '123456789', '/^\d{4,12}$/', find: '/\b(\d{4,12})\b/')
-                            ->helperText('Microsoft Advertising → Tools → UET tag → the tag ID. Sends a "submit_lead_form" event when an enquiry is sent.'),
+                            ->helperText('Microsoft Advertising → Tools → UET tag → the tag ID. Sends "submit_lead_form" when an enquiry is sent and "click_call" / "click_whatsapp" / "click_email" on contact taps; use these as custom-event conversion goals.'),
+                    ]),
+                    Section::make('Search engine indexing')->compact()->columns(2)->schema([
+                        TextInput::make('indexNowKey')->label('IndexNow key')->placeholder('3f9a1c…')->maxLength(128)
+                            ->dehydrateStateUsing(fn (?string $state) => filled($state) ? trim($state) : null)
+                            ->rule('regex:/^[A-Za-z0-9-]{8,128}$/')
+                            ->validationMessages(['regex' => 'Use 8–128 letters, numbers or dashes, e.g. the key Bing Webmaster Tools generates.'])
+                            ->helperText('Bing Webmaster Tools → IndexNow → copy the API key (or make up 32 random letters and numbers). After every publish, new and changed pages are sent to Bing, Yandex and other IndexNow search engines so they are crawled within minutes. Google does not use IndexNow; submit https://instacertify.com/sitemap.xml in Search Console instead.'),
                     ]),
                     Section::make('Site ownership verification')->compact()->columns(2)
                         ->description('Paste the code or the whole <meta> tag the tool gives you; only the code is kept. Not needed if you verified through DNS.')
@@ -345,6 +349,20 @@ class ManageSite extends Page
                     $fail("This does not look like a valid ID. It should look like {$example}.");
                 }
             });
+    }
+
+    private static function adsLabel(string $name, string $label, string $help): TextInput
+    {
+        $clean = fn (?string $state) => filled($state) ? trim(Str::afterLast($state, '/')) : null;
+
+        return TextInput::make($name)->label($label)->placeholder('AbC-D_efGhIjKlMnOp')
+            ->dehydrateStateUsing($clean)
+            ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail) use ($clean) {
+                if (filled($value) && ! preg_match('/^[A-Za-z0-9_-]{6,40}$/', (string) $clean((string) $value))) {
+                    $fail('Paste the conversion label, e.g. AbC-D_efGhIjKlMnOp.');
+                }
+            })
+            ->helperText("The part after the slash in \"AW-123456789/AbC-D_efG\" (Google Ads → Goals → Conversions → the action → Tag setup). {$help}");
     }
 
     private static function verification(string $name, string $label, string $metaName): TextInput

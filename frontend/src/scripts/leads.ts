@@ -1,4 +1,4 @@
-import { hasConsent, onConsent, prefStorage, trackLead } from './consent';
+import { type ContactKind, hasConsent, onConsent, prefStorage, trackContact, trackLead } from './consent';
 
 const API_URL = (import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
 const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'gclid'] as const;
@@ -164,8 +164,21 @@ function initForm(form: HTMLFormElement) {
   });
 }
 
+function contactKind(href: string): ContactKind | null {
+  if (/^tel:/i.test(href)) return 'call';
+  if (/^mailto:/i.test(href)) return 'email';
+  if (/^https?:\/\/(?:wa\.me|api\.whatsapp\.com|(?:www\.)?whatsapp\.com\/send)/i.test(href)) return 'whatsapp';
+  return null;
+}
+
 onConsent(() => rememberAttribution());
 document.querySelectorAll<HTMLFormElement>('form[data-lead-form]').forEach(initForm);
-document.querySelectorAll<HTMLAnchorElement>('[data-track]').forEach((a) =>
-  a.addEventListener('click', () => track(`click_${a.dataset.track}`, location.pathname)),
-);
+// One listener for the whole page, so call / WhatsApp / email links inside article text count too.
+document.addEventListener('click', (event) => {
+  const el = (event.target as Element | null)?.closest?.<HTMLElement>('[data-track], a[href]');
+  if (!el) return;
+  const kind = el instanceof HTMLAnchorElement ? contactKind(el.href) : null;
+  const label = el.dataset.track ?? kind;
+  if (label) track(`click_${label}`, location.pathname);
+  if (kind) trackContact(kind, (el as HTMLAnchorElement).href);
+});

@@ -164,6 +164,11 @@ function loadLinkedIn(c: Choices) {
     loaded.add('linkedin');
     w._linkedin_partner_id = tracking.linkedin;
     w._linkedin_data_partner_ids = [...(w._linkedin_data_partner_ids || []), tracking.linkedin];
+    // Conversions sent before the script arrives wait in this queue.
+    if (!w.lintrk) {
+      w.lintrk = (a: unknown, b: unknown) => w.lintrk.q.push([a, b]);
+      w.lintrk.q = [];
+    }
     addScript('https://snap.licdn.com/li.lms-analytics/insight.min.js');
   }
   if (!c.marketing) expire(['li_fat_id', 'li_sugr']);
@@ -195,6 +200,25 @@ export function trackLead(form?: string) {
   }
   if (loaded.has('meta') && hasConsent('marketing')) w.fbq('track', 'Lead');
   if (loaded.has('uet') && hasConsent('marketing')) w.uetq.push('event', 'submit_lead_form', {});
+  if (loaded.has('linkedin') && tracking.linkedinLead && hasConsent('marketing')) w.lintrk('track', { conversion_id: Number(tracking.linkedinLead) });
+  // Lets Clarity recordings be filtered to the visits that ended in an enquiry.
+  if (loaded.has('clarity')) w.clarity('event', 'lead');
+}
+
+export type ContactKind = 'call' | 'whatsapp' | 'email';
+
+/** A tap on a phone number, WhatsApp or email link: often the visitor's first contact, so counted like a lead. */
+export function trackContact(kind: ContactKind, url: string) {
+  const event = `click_${kind}`;
+  const marketing = hasConsent('marketing');
+  if (loaded.has('google')) {
+    if (tracking.ga) window.gtag?.('event', event, { link_url: url });
+    const label = kind === 'call' ? tracking.adsCallLabel : kind === 'whatsapp' ? tracking.adsWhatsappLabel : undefined;
+    if (tracking.ads && label && marketing) window.gtag?.('event', 'conversion', { send_to: `${tracking.ads}/${label}` });
+  }
+  if (loaded.has('meta') && marketing) w.fbq('track', 'Contact', { content_name: kind });
+  if (loaded.has('uet') && marketing) w.uetq.push('event', event, { event_label: kind });
+  if (loaded.has('clarity')) w.clarity('event', event);
 }
 
 /** @param onPageLoad true on page load: tags then wait for the page; after a click in the banner they start at once. */

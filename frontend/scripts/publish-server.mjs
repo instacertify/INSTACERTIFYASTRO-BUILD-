@@ -12,6 +12,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { cp, mkdir, readdir, readFile, readlink, rename, rm, symlink, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
+import { changedUrls, submit } from './indexnow.mjs';
 
 const SITE_DIR = process.env.SITE_DIR ?? '/site';
 const TOKEN = process.env.PUBLISH_TOKEN ?? '';
@@ -107,7 +108,23 @@ async function publish() {
     await rm(release, { recursive: true, force: true });
     throw error;
   }
+  if (liveId) await notifySearchEngines(join(SITE_DIR, 'releases', liveId, 'sitemap.xml'), join(release, 'sitemap.xml'));
   return pages;
+}
+
+/** IndexNow ping for the pages this release added or changed. Never fails the publish. */
+async function notifySearchEngines(previousSitemap, nextSitemap) {
+  try {
+    const response = await fetch(`${API_URL}/api/v1/site`, { headers: { Accept: 'application/json' } });
+    const key = (await response.json())?.data?.integrations?.indexNowKey?.trim();
+    if (!key || !/^[A-Za-z0-9-]{8,128}$/.test(key) || !existsSync(previousSitemap)) return;
+    const urls = changedUrls(await readFile(previousSitemap, 'utf8'), await readFile(nextSitemap, 'utf8'));
+    if (!urls.length) return;
+    const sent = await submit({ key, siteUrl: urls[0], urls });
+    log(`IndexNow: sent ${sent} new or changed pages`);
+  } catch (error) {
+    log(`IndexNow not sent: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 async function currentRelease() {

@@ -290,4 +290,32 @@ class EmailSettingsTest extends TestCase
             ->call('save')
             ->assertHasErrors(['data.integrations.verificationFiles.a.name', 'data.integrations.verificationFiles.b.name']);
     }
+
+    public function test_contact_conversions_and_indexnow_key_are_saved(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+
+        Livewire::test(ManageSite::class)
+            ->set('data.integrations.googleAds', 'AW-123456789')
+            ->set('data.integrations.googleAdsCallLabel', 'AW-123456789/CaLL_label-1')
+            ->set('data.integrations.googleAdsWhatsappLabel', ' WhAts_App-2 ')
+            ->set('data.integrations.linkedinPartner', '7654321')
+            ->set('data.integrations.linkedinLeadConversion', "<script>window.lintrk('track', { conversion_id: 12345678 });</script>")
+            ->set('data.integrations.indexNowKey', 'a1b2c3d4e5f60718293a4b5c6d7e8f90')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->getJson('/api/v1/site')
+            ->assertJsonPath('data.integrations.googleAdsCallLabel', 'CaLL_label-1')
+            ->assertJsonPath('data.integrations.googleAdsWhatsappLabel', 'WhAts_App-2')
+            ->assertJsonPath('data.integrations.linkedinLeadConversion', '12345678')
+            ->assertJsonPath('data.integrations.indexNowKey', 'a1b2c3d4e5f60718293a4b5c6d7e8f90');
+
+        Livewire::test(ManageSite::class)
+            ->set('data.integrations.googleAdsCallLabel', 'bad label!')
+            ->set('data.integrations.linkedinLeadConversion', 'abc')
+            ->set('data.integrations.indexNowKey', '../key')
+            ->call('save')
+            ->assertHasErrors(['data.integrations.googleAdsCallLabel', 'data.integrations.linkedinLeadConversion', 'data.integrations.indexNowKey']);
+    }
 }

@@ -38,10 +38,15 @@ export interface Integrations {
   googleTag?: string | null;
   googleAds?: string | null;
   googleAdsLeadLabel?: string | null;
+  googleAdsCallLabel?: string | null;
+  googleAdsWhatsappLabel?: string | null;
   clarity?: string | null;
   metaPixel?: string | null;
   linkedinPartner?: string | null;
+  linkedinLeadConversion?: string | null;
   microsoftAds?: string | null;
+  /** Lets the publisher tell Bing, Yandex and other IndexNow engines about new and changed pages. */
+  indexNowKey?: string | null;
   matomoSiteId?: string | number | null;
   googleVerification?: string | null;
   bingVerification?: string | null;

@@ -28,9 +28,12 @@ export interface Tracking {
   ga?: string;
   ads?: string;
   adsLabel?: string;
+  adsCallLabel?: string;
+  adsWhatsappLabel?: string;
   clarity?: string;
   meta?: string;
   linkedin?: string;
+  linkedinLead?: string;
   uet?: string;
 }
 
@@ -41,9 +44,12 @@ export function trackingConfig(site: Site): Tracking {
     ga: i.googleTag ?? undefined,
     ads: i.googleAds ?? undefined,
     adsLabel: i.googleAds ? (i.googleAdsLeadLabel ?? undefined) : undefined,
+    adsCallLabel: i.googleAds ? (i.googleAdsCallLabel ?? undefined) : undefined,
+    adsWhatsappLabel: i.googleAds ? (i.googleAdsWhatsappLabel ?? undefined) : undefined,
     clarity: i.clarity ?? undefined,
     meta: i.metaPixel ?? undefined,
     linkedin: i.linkedinPartner ?? undefined,
+    linkedinLead: i.linkedinPartner ? (i.linkedinLeadConversion ?? undefined) : undefined,
     uet: i.microsoftAds ?? undefined,
   };
   return Object.fromEntries(Object.entries(config).filter(([, v]) => v)) as Tracking;
