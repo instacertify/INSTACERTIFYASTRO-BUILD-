@@ -45,6 +45,11 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(3)->by($request->ip()),
             Limit::perDay(15)->by($request->ip()),
         ]);
+        RateLimiter::for('payments', fn (Request $request) => [
+            Limit::perMinute(5)->by($request->ip()),
+            Limit::perDay(40)->by($request->ip()),
+        ]);
+        RateLimiter::for('payment-checks', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
         RateLimiter::for('integrations', fn (Request $request) => Limit::perMinute(120)
             ->by('key:'.($request->user()?->currentAccessToken()?->getKey() ?? $request->ip())));
 
@@ -56,7 +61,7 @@ class AppServiceProvider extends ServiceProvider
                 Models\Redirect::class, Models\Office::class, Models\IndustryCategory::class,
                 Models\LandingPage::class, Models\Scheme::class,
             ],
-            CrmPolicy::class => [Models\Lead::class, Models\Subscriber::class],
+            CrmPolicy::class => [Models\Lead::class, Models\Subscriber::class, Models\Payment::class],
             AdminPolicy::class => [Models\User::class, Models\ConsentLog::class, Activity::class, PersonalAccessToken::class],
             VacancyPolicy::class => [Models\Vacancy::class],
             JobApplicationPolicy::class => [Models\JobApplication::class],

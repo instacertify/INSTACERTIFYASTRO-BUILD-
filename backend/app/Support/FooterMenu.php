@@ -7,6 +7,8 @@ use App\Models\Setting;
 /** The website footer: link columns, newsletter box and bottom bar, stored as `footer` in the site settings. */
 class FooterMenu
 {
+    public const PAY_PATH = '/pay';
+
     public const DEFAULTS = [
         'newsletter' => [
             'show' => true,
@@ -36,16 +38,16 @@ class FooterMenu
     {
         $footer = self::withDefaults($footer);
         $newsletter = $footer['newsletter'];
+        $columns = collect($footer['columns'])
+            ->filter(fn ($column) => is_array($column) && filled($column['title'] ?? null) && empty($column['hidden']))
+            ->map(fn (array $column) => ['title' => trim($column['title']), 'links' => self::links($column['links'] ?? [])])
+            ->all();
+        [$columns, $bottomLinks] = self::withPaymentLink($columns, self::links($footer['bottomLinks']));
 
         return [
-            'columns' => collect($footer['columns'])
-                ->filter(fn ($column) => is_array($column) && filled($column['title'] ?? null) && empty($column['hidden']))
-                ->map(fn (array $column) => ['title' => trim($column['title']), 'links' => self::links($column['links'] ?? [])])
-                ->filter(fn (array $column) => $column['links'] !== [])
-                ->values()
-                ->all(),
+            'columns' => collect($columns)->filter(fn (array $column) => $column['links'] !== [])->values()->all(),
             'portals' => self::links($footer['portals']),
-            'bottomLinks' => self::links($footer['bottomLinks']),
+            'bottomLinks' => $bottomLinks,
             'newsletter' => $newsletter['show'] ? ['title' => trim($newsletter['title']), 'text' => trim($newsletter['text'])] : null,
             'copyright' => trim($footer['copyright']),
         ];
@@ -66,6 +68,28 @@ class FooterMenu
             'newsletter' => [...self::DEFAULTS['newsletter'], ...$newsletter, 'show' => (bool) ($newsletter['show'] ?? true)],
             'copyright' => filled($footer['copyright'] ?? null) ? $footer['copyright'] : self::DEFAULTS['copyright'],
         ];
+    }
+
+    /**
+     * The payment page is linked only while online payments are on: added to the bottom bar,
+     * unless the footer already links to it somewhere (which keeps the admin's own label and place).
+     *
+     * @param  list<array{title: string, links: list<array{label: string, href: string}>}>  $columns
+     * @param  list<array{label: string, href: string}>  $bottomLinks
+     * @return array{0: list<array<string, mixed>>, 1: list<array{label: string, href: string}>}
+     */
+    private static function withPaymentLink(array $columns, array $bottomLinks): array
+    {
+        $isPay = fn (array $link) => rtrim((string) strtok($link['href'], '?#'), '/') === self::PAY_PATH;
+
+        if (! PaymentSettings::enabled()) {
+            $without = fn (array $links) => array_values(array_filter($links, fn (array $link) => ! $isPay($link)));
+
+            return [array_map(fn (array $column) => [...$column, 'links' => $without($column['links'])], $columns), $without($bottomLinks)];
+        }
+        $linked = collect($columns)->pluck('links')->flatten(1)->merge($bottomLinks)->contains($isPay);
+
+        return [$columns, $linked ? $bottomLinks : [...$bottomLinks, ['label' => 'Make a payment', 'href' => self::PAY_PATH]]];
     }
 
     /**

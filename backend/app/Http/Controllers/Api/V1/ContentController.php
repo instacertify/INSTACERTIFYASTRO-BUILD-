@@ -17,6 +17,7 @@ use App\Support\FooterMenu;
 use App\Support\HeaderMenu;
 use App\Support\HomePage;
 use App\Support\Images;
+use App\Support\PaymentSettings;
 use App\Support\Privacy;
 use App\Support\TestCategories;
 use Illuminate\Http\JsonResponse;
@@ -41,6 +42,7 @@ class ContentController extends Controller
         $site['privacy'] = Arr::only(Privacy::settings(), ['version', 'grievanceOfficer', 'grievanceEmail', 'applicationMonths', 'consentLogMonths', 'ipDays']);
         $site['careers'] = Careers::settings();
         $site['contactBoxes'] = ContactBoxes::settings();
+        $site['payments'] = PaymentSettings::forSite();
         $site['integrations'] = [...($site['integrations'] ?? []), 'serverSide' => ConversionApis::publicFlags()];
         $site['offices'] = Office::published()->orderBy('sort')->orderBy('id')->get()
             ->map(fn (Office $office) => [

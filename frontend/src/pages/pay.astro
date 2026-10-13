@@ -1,0 +1,144 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { getSite } from '../lib/content';
+
+const site = await getSite();
+const pay = site.payments ?? {
+  enabled: false,
+  gateway: null,
+  testMode: false,
+  currency: 'INR',
+  minAmount: 100,
+  maxAmount: 500000,
+  heading: 'Make a payment',
+  intro: 'Pay your Instacertify invoice or quotation securely online.',
+};
+const symbol = new Intl.NumberFormat('en-IN', { style: 'currency', currency: pay.currency, currencyDisplay: 'narrowSymbol' })
+  .formatToParts(0)
+  .find((part) => part.type === 'currency')?.value ?? pay.currency;
+const points = [
+  pay.gateway ? `Secure checkout by ${pay.gateway}. Your card and bank details go straight to ${pay.gateway}; we never see or store them.` : 'Secure checkout through our payment partner.',
+  'Pay by card or any other method shown at checkout.',
+  'You get a payment reference straight away, and our accounts team is told automatically.',
+];
+---
+
+<Layout title={`${pay.heading} | ${site.name}`} description={`Pay your ${site.name} invoice securely online.`} noindex autoPopup={false} ctaBar={false}>
+  <section class="surface-tint">
+    <div class="container-page py-8 sm:py-12 lg:py-16">
+      <div class="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-14">
+        <div>
+          <Breadcrumbs items={[{ label: pay.heading }]} />
+          <h1 class="mt-5 text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{pay.heading}</h1>
+          <p class="mt-4 text-lg text-slate-600">{pay.intro}</p>
+
+          <ul class="mt-8 space-y-3">
+            {points.map((t) => (
+              <li class="flex gap-3 text-slate-700"><Icon name="check-circle" class="size-5 shrink-0 text-emerald-600" />{t}</li>
+            ))}
+          </ul>
+
+          <div class="mt-10 rounded-xl border border-slate-200 bg-white p-5">
+            <p class="font-semibold text-slate-900">Questions about your invoice?</p>
+            <p class="mt-1 text-sm text-slate-600">For bank transfer details, a revised invoice or anything else, talk to our accounts team.</p>
+            <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
+              <a href={`tel:${site.contact.phoneE164}`} class="inline-flex items-center gap-2 text-brand-700 hover:underline" data-track="call"><Icon name="phone" class="size-4" />{site.contact.phone}</a>
+              <a href={`mailto:${site.contact.email}`} class="inline-flex items-center gap-2 text-brand-700 hover:underline" data-track="email"><Icon name="mail" class="size-4" />{site.contact.email}</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card relative p-6 sm:p-8" data-pay data-currency={pay.currency} data-site-name={site.name}>
+          {pay.enabled ? (
+            <form data-pay-form class="space-y-4">
+              <div>
+                <p class="text-lg font-bold text-slate-900">Payment details</p>
+                <p class="mt-1 text-sm text-slate-500">Fields marked optional can be left empty.</p>
+              </div>
+              {pay.testMode && (
+                <p class="rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">Test mode: no real money is taken.</p>
+              )}
+              <div class="absolute -left-[9999px]" aria-hidden="true">
+                <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="label" for="pay-amount">Amount ({pay.currency})</label>
+                  <div class="relative">
+                    <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center font-semibold text-slate-500">{symbol}</span>
+                    <input id="pay-amount" name="amount" type="number" inputmode="decimal" step="0.01" min={pay.minAmount} max={pay.maxAmount} required class="field pl-9" placeholder="0.00" />
+                  </div>
+                  <p data-error-for="amount" class="mt-1 text-sm text-red-600 empty:hidden" />
+                </div>
+                <div>
+                  <label class="label" for="pay-invoice">Invoice or quotation no. <span class="font-normal text-slate-500">(optional)</span></label>
+                  <input id="pay-invoice" name="invoice_number" class="field" maxlength="60" placeholder="e.g. IC/2026/0142" />
+                  <p data-error-for="invoice_number" class="mt-1 text-sm text-red-600 empty:hidden" />
+                </div>
+                <div>
+                  <label class="label" for="pay-name">Full name</label>
+                  <input id="pay-name" name="name" class="field" autocomplete="name" required minlength="2" maxlength="120" />
+                  <p data-error-for="name" class="mt-1 text-sm text-red-600 empty:hidden" />
+                </div>
+                <div>
+                  <label class="label" for="pay-company">Company <span class="font-normal text-slate-500">(optional)</span></label>
+                  <input id="pay-company" name="company" class="field" autocomplete="organization" maxlength="160" />
+                </div>
+                <div>
+                  <label class="label" for="pay-email">Email</label>
+                  <input id="pay-email" name="email" type="email" class="field" autocomplete="email" required />
+                  <p data-error-for="email" class="mt-1 text-sm text-red-600 empty:hidden" />
+                </div>
+                <div>
+                  <label class="label" for="pay-phone">Phone <span class="font-normal text-slate-500">(optional)</span></label>
+                  <input id="pay-phone" name="phone" type="tel" class="field" autocomplete="tel" inputmode="tel" pattern="\+?[0-9 \-]{8,20}" title="Mobile number with country code, e.g. +91 98765 43210" />
+                  <p data-error-for="phone" class="mt-1 text-sm text-red-600 empty:hidden" />
+                </div>
+              </div>
+              <div>
+                <label class="label" for="pay-note">What is this payment for? <span class="font-normal text-slate-500">(optional)</span></label>
+                <textarea id="pay-note" name="note" rows="2" class="field py-2.5" maxlength="500" placeholder="e.g. BIS registration for LED drivers, first instalment" />
+              </div>
+
+              <button type="submit" class="btn-primary w-full">
+                <Icon name="shield" class="size-4" /><span data-pay-label>Pay securely</span>
+              </button>
+              <p class="text-center text-xs text-slate-500">
+                Your details are used to process and record this payment. See our <a href="/privacy-policy" class="underline hover:text-slate-700">Privacy Policy</a>.
+              </p>
+              <p data-form-error role="alert" class="text-sm text-red-600 empty:hidden" />
+            </form>
+          ) : (
+            <div class="py-6 text-center" data-cannot-pay>
+              <span class="mx-auto flex size-14 items-center justify-center rounded-full bg-brand-50 text-brand-700"><Icon name="file" class="size-7" /></span>
+              <p class="mt-4 text-lg font-semibold text-slate-900">Online payments are paused</p>
+              <p class="mt-1 text-sm text-slate-600">Please contact our accounts team for bank transfer details. We reply within one business day.</p>
+              <a href="/contact" class="btn-primary mt-5">Contact us <Icon name="arrow-right" class="size-4" /></a>
+            </div>
+          )}
+
+          <div data-pay-result hidden tabindex="-1" class="py-6 text-center outline-none">
+            <span data-pay-icon="paid" hidden class="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><Icon name="check-circle" class="size-8" /></span>
+            <span data-pay-icon="pending" hidden class="mx-auto flex size-14 items-center justify-center rounded-full bg-amber-50 text-amber-600"><Icon name="clock" class="size-8" /></span>
+            <span data-pay-icon="failed" hidden class="mx-auto flex size-14 items-center justify-center rounded-full bg-red-50 text-red-600"><Icon name="x" class="size-8" /></span>
+            <p data-pay-title class="mt-4 text-lg font-semibold text-slate-900"></p>
+            <p data-pay-text class="mt-1 text-sm text-slate-600"></p>
+            <dl data-pay-details hidden class="mx-auto mt-5 max-w-xs space-y-1.5 rounded-xl bg-slate-50 p-4 text-left text-sm">
+              <div class="flex justify-between gap-4"><dt class="text-slate-500">Amount</dt><dd data-pay-amount class="font-semibold text-slate-900"></dd></div>
+              <div class="flex justify-between gap-4" data-pay-invoice-row><dt class="text-slate-500">Invoice</dt><dd data-pay-invoice class="font-semibold text-slate-900"></dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-slate-500">Reference</dt><dd data-pay-reference class="font-mono font-semibold text-slate-900"></dd></div>
+            </dl>
+            <a href="/pay" data-pay-again hidden class="btn-ghost mt-5">Make another payment</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import '../scripts/pay';
+</script>

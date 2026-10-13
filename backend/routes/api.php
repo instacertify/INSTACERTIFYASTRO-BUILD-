@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\EditorialController;
 use App\Http\Controllers\Api\V1\IntegrationLeadController;
 use App\Http\Controllers\Api\V1\LeadController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PreviewController;
 use App\Http\Controllers\Api\V1\SubscriberController;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,19 @@ Route::prefix('v1')->name('api.')->group(function () {
     Route::post('consents', [ConsentController::class, 'store'])
         ->middleware('throttle:consents')
         ->name('consents.store');
+
+    Route::post('payments', [PaymentController::class, 'store'])
+        ->middleware('throttle:payments')
+        ->name('payments.store');
+    Route::post('payments/{reference}/confirm', [PaymentController::class, 'confirm'])
+        ->where('reference', 'IC[A-Z0-9]{14}')
+        ->middleware('throttle:payment-checks')
+        ->name('payments.confirm');
+    // Razorpay and Stripe call these from their servers; each request is checked against the webhook secret.
+    Route::post('payments/webhooks/{gateway}', [PaymentController::class, 'webhook'])
+        ->whereIn('gateway', ['razorpay', 'stripe'])
+        ->middleware('throttle:240,1')
+        ->name('payments.webhook');
 
     Route::post('subscribers', [SubscriberController::class, 'store'])
         ->middleware('throttle:leads')

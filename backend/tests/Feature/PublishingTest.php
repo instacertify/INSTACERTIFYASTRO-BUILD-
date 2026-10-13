@@ -18,6 +18,7 @@ use Illuminate\Bus\UniqueLock;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
@@ -94,6 +95,10 @@ class PublishingTest extends TestCase
     public function test_dates_publish_only_when_they_change_what_the_website_shows(): void
     {
         $this->configure();
+        // Content migrations publish at the real current time, which can fall inside the dates below.
+        foreach (['posts', 'events', 'pages', 'landing_pages', 'standards', 'vacancies'] as $table) {
+            DB::table($table)->whereNotNull('published_at')->update(['published_at' => '2026-01-01 00:00:00']);
+        }
         Queue::fake();
         $this->travelTo('2026-10-13 10:00:00');
         Event::create(['title' => 'Fair', 'slug' => 'fair', 'starts_at' => '2026-10-11 09:00', 'ends_at' => '2026-10-13 18:00', 'status' => 'published']);

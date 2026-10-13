@@ -8,6 +8,7 @@ use App\Models\JobApplication;
 use App\Models\Lead;
 use App\Models\Office;
 use App\Models\Page;
+use App\Models\Payment;
 use App\Models\Post;
 use App\Models\Standard;
 use App\Models\StandardCategory;
@@ -82,5 +83,6 @@ class AdminScreensTest extends TestCase
         Office::create(['name' => 'Noida head office', 'type' => 'head', 'street' => 'A-34, Sector 63A', 'city' => 'Noida', 'country' => 'India', 'is_published' => true]);
         $vacancy = Vacancy::create(['title' => 'Certification Executive', 'slug' => 'certification-executive', 'department' => 'Certification', 'summary' => 'BIS and WPC projects.', 'description' => '<p>Details</p>', 'status' => 'open']);
         JobApplication::create(['vacancy_id' => $vacancy->id, 'name' => 'Riya Kapoor', 'email' => 'riya@example.com', 'cv_path' => 'cvs/riya.pdf']);
+        Payment::create(['gateway' => 'razorpay', 'amount' => 150050, 'currency' => 'INR', 'name' => 'Asha Verma', 'email' => 'asha@example.com', 'status' => 'paid', 'paid_at' => now()]);
     }
 }

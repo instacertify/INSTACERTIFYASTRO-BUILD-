@@ -80,6 +80,17 @@ export interface Site {
   };
   privacy?: { version: string; grievanceOfficer: string; grievanceEmail: string; applicationMonths?: number; consentLogMonths?: number; ipDays?: number };
   careers?: { headline: string; intro: string; perks: { title: string; text: string }[]; generalApplications: boolean };
+  /** Admin → Settings → Payments; never carries the gateway keys. */
+  payments?: {
+    enabled: boolean;
+    gateway: string | null;
+    testMode: boolean;
+    currency: string;
+    minAmount: number;
+    maxAmount: number;
+    heading: string;
+    intro: string;
+  };
   integrations?: Integrations;
   offices?: Office[];
   social?: Partial<Record<'linkedin' | 'youtube' | 'instagram' | 'facebook' | 'twitter' | 'pinterest', string | null>>;
