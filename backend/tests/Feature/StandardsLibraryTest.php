@@ -99,6 +99,8 @@ class StandardsLibraryTest extends TestCase
 
         $rings = $this->page('mandatory-crs-standards', 'crs-mark-smart-rings');
         $this->assertSame(['library', 'mandatory', '2026-01-01'], [$rings->source, $rings->regulation_status, $rings->mandatory_from->toDateString()]);
+        $this->assertSame([35000, 'IS 13252 (Part 1):2010'], [$rings->products[0]['test_min'], $rings->products[0]['replaces']]);
+        $this->assertSame(' 62368-p1 13252-p1 ', $rings->is_keys, 'Buyers still find the product by the superseded standard.');
 
         $ac = $this->page('bee-mandatory-star-labelling', 'bee-star-label-inverter-air-conditioner');
         $this->assertSame(['bee', 'mandatory', '2020'], [$ac->category->group, $ac->regulation_status, $ac->mandatory_since]);

@@ -265,7 +265,7 @@ const tile = 'flex cursor-pointer flex-col rounded-xl border border-slate-300 px
   import { rupees } from '../lib/standards';
   import type { FinderProduct } from '../lib/types';
 
-  type Row = FinderProduct & { key: string; isKey: string };
+  type Row = FinderProduct & { key: string; isKey: string; oldKeys: string[] };
   type Scale = 'micro' | 'small' | 'medium' | 'large' | 'foreign';
 
   const section = document.querySelector<HTMLElement>('[data-finder]');
@@ -301,7 +301,7 @@ const tile = 'flex cursor-pointer flex-col rounded-xl border border-slate-300 px
     const load = () =>
       (loading ??= fetch('/resources/standards/products.json')
         .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-        .then((data: FinderProduct[]) => (rows = data.map((p) => ({ ...p, key: norm(p.n), isKey: isKey(p.i) }))))
+        .then((data: FinderProduct[]) => (rows = data.map((p) => ({ ...p, key: norm(p.n), isKey: isKey(p.i), oldKeys: p.r ? p.r.split(' / ').map(isKey) : [] }))))
         .catch((e) => {
           loading = null;
           throw e;
@@ -317,10 +317,12 @@ const tile = 'flex cursor-pointer flex-col rounded-xl border border-slate-300 px
         return h === q ? 0 : q.startsWith(h) ? 1 : h.startsWith(q) ? 2 : -1;
       }
       if (m === 'is') {
-        if (p.isKey === q || p.isKey.startsWith(`${q} `)) return 0;
-        if (p.isKey.startsWith(q)) return 1;
-        if (p.isKey.replaceAll(' ', '').startsWith(q.replaceAll(' ', ''))) return 1;
-        return p.isKey.includes(` ${q}`) ? 2 : -1;
+        const ranks = [p.isKey, ...p.oldKeys].map((k) => {
+          if (k === q || k.startsWith(`${q} `)) return 0;
+          if (k.startsWith(q) || k.replaceAll(' ', '').startsWith(q.replaceAll(' ', ''))) return 1;
+          return k.includes(` ${q}`) ? 2 : -1;
+        }).filter((r) => r >= 0);
+        return ranks.length ? Math.min(...ranks) : -1;
       }
       const tokens = q.split(' ').map(stem);
       if (!tokens.every((t) => p.key.includes(t))) return -1;

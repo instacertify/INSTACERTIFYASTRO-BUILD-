@@ -107,7 +107,9 @@ class Standard extends Model
     public function deriveFromProducts(): void
     {
         $rows = collect($this->products ?? []);
-        $keys = $rows->map(fn ($row) => IsNumber::key($row['is_number'] ?? null))->filter()->unique();
+        // Superseded standards stay searchable: buyers still look products up by the number on older labels.
+        $keys = $rows->flatMap(fn ($row) => [$row['is_number'] ?? null, ...explode(' / ', (string) ($row['replaces'] ?? ''))])
+            ->map(fn ($is) => IsNumber::key($is))->filter()->unique();
         $this->is_keys = $keys->isEmpty() ? null : ' '.$keys->implode(' ').' ';
 
         $rank = array_flip(array_keys(self::REGULATION));

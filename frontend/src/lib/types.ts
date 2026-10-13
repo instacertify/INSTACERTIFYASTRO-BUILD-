@@ -410,6 +410,8 @@ export interface StandardProduct {
   labs?: number;
   lab_names?: string;
   note?: string;
+  /** Superseded standard(s) still accepted during a transition, e.g. "IS 13252 (Part 1):2010". */
+  replaces?: string;
 }
 
 /** One row of /resources/standards/products.json, behind the BIS fee finder. */
@@ -429,6 +431,8 @@ export interface FinderProduct {
   u?: string;
   /** Lowest lab testing charge */
   t?: number;
+  /** Superseded IS number(s), so a search for the old number still finds the product */
+  r?: string;
 }
 
 export interface Standard {

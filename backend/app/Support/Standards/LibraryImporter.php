@@ -55,6 +55,9 @@ class LibraryImporter
     /** Sheet rows that repeat a product already covered by another row. */
     public const CRS_SKIP = [43, 44, 45];
 
+    /** Our quoted starting price for testing, by IS key, where it is below the lowest lab list price. */
+    public const TESTING_FROM = ['62368-p1' => 35000];
+
     public const BEE_SLUGS = [
         'Room Air Conditioner (Fixed' => 'room-air-conditioner-fixed-speed', 'Room AC (Inverter' => 'inverter-air-conditioner',
         'Colour TV' => 'colour-television', 'Electric Storage Water Heater' => 'electric-storage-water-heater',
@@ -95,6 +98,14 @@ class LibraryImporter
         $this->isiPages();
         $this->bee();
         $this->fillDefaults();
+    }
+
+    /** Re-applies crs.json to the CRS pages only, e.g. after a change to the CRO schedule. */
+    public function refreshCrsPages(): void
+    {
+        $this->load();
+        $this->syncCategories();
+        $this->crs();
     }
 
     private function load(): void
@@ -160,7 +171,19 @@ class LibraryImporter
             'fee_small' => $row['fees']['small'] ?? null,
             'fee_micro' => $row['fees']['micro'] ?? null,
             'unit_fee' => LibraryData::unitFee($row['unit'], $row['slabs'] ?? []),
-        ], fn ($v) => $v !== null && $v !== '') + (LibraryData::testing($this->labs[$row['key']] ?? []) ?? []);
+        ], fn ($v) => $v !== null && $v !== '') + $this->testing($row['key']);
+    }
+
+    /** Lab price range for one standard, starting at our own quoted price where we have one. */
+    private function testing(?string $key): array
+    {
+        $testing = ($key ? LibraryData::testing($this->labs[$key] ?? []) : null) ?? [];
+        if ($from = self::TESTING_FROM[$key] ?? null) {
+            $testing['test_min'] = $from;
+            $testing['test_max'] = max($testing['test_max'] ?? 0, $from);
+        }
+
+        return $testing;
     }
 
     private function crsFields(array $row): array
@@ -184,7 +207,8 @@ class LibraryImporter
             'fee_small' => $row['fees']['small'] ?? null,
             'fee_micro' => $row['fees']['micro'] ?? null,
             'note' => $row['remarks'] ?: null,
-        ], fn ($v) => $v !== null && $v !== '') + (($key ? LibraryData::testing($this->labs[$key] ?? []) : null) ?? []);
+            'replaces' => $row['replaces'] ?? null,
+        ], fn ($v) => $v !== null && $v !== '') + $this->testing($key);
     }
 
     /** Keeps the row's own IS number and name (and anything an editor added), replacing the library fields. */

@@ -63,7 +63,7 @@
   {
    "product": "Colour TV / Ultra-HD TV",
    "regime": "Mandatory 2010; UHD 1 Jan 2026",
-   "testStandard": "IS 616 (safety); IEC 62087 energy method",
+   "testStandard": "IS/IEC 62368-1:2023 (safety); IEC 62087 energy method",
    "ratingTable": "Revised table effective 1 Jan 2026 (TV ratings shifted up 1 star)",
    "testingPrice": "50,000 - 90,000 / model",
    "labs": "Intertek, UL India, TUV Rheinland, Spectro",

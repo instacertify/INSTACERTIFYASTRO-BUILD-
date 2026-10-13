@@ -208,7 +208,10 @@ if (standard.faqs?.length) {
               <tbody class="divide-y divide-slate-100 max-sm:block">
                 {products.map((p, pi) => (
                   <tr class="align-top max-sm:block max-sm:px-4 max-sm:py-3.5">
-                    <td class="px-4 py-3 font-medium whitespace-nowrap text-slate-900 max-sm:block max-sm:p-0">{isLabel(p.is_number)}</td>
+                    <td class="px-4 py-3 font-medium whitespace-nowrap text-slate-900 max-sm:block max-sm:p-0">
+                      {isLabel(p.is_number)}
+                      {p.replaces && <span class="mt-0.5 block text-xs font-normal whitespace-normal text-slate-500">Replaces {p.replaces}</span>}
+                    </td>
                     <td class="px-4 py-3 text-slate-600 max-sm:mt-2 max-sm:block max-sm:p-0">
                       <div class={hasImages ? 'flex items-center gap-4' : undefined}>
                         {p.image ? (

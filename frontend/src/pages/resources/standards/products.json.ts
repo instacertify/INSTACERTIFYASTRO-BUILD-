@@ -33,6 +33,7 @@ export const GET: APIRoute = async () => {
           f: fees,
           u: s.scheme === 'isi' ? p.unit_fee || undefined : undefined,
           t: p.test_min || undefined,
+          r: p.replaces || undefined,
         });
       }
     }

@@ -67,6 +67,9 @@ class StandardResource extends Resource
                         ->schema([
                             TextInput::make('is_number')->label('IS number')->required(),
                             TextInput::make('name')->label('Product')->required(),
+                            TextInput::make('replaces')->label('Replaces (older standard)')->columnSpanFull()
+                                ->placeholder('IS 13252 (Part 1):2010')
+                                ->helperText('Shown under the IS number, and the page is still found when visitors search the old number.'),
                             ImageUpload::make('image', 'standards/products', maxWidth: 800)->label('Product photo')
                                 ->imagePreviewHeight('120')->columnSpanFull(),
                             Select::make('status')->options(Standard::REGULATION),
