@@ -26,7 +26,7 @@ const links = [
       <a href={`tel:${site.contact.phoneE164}`} class="tap hover:text-brand-700">{site.contact.phone}</a>{' · '}
       <a href={`mailto:${site.contact.email}`} class="tap hover:text-brand-700">{site.contact.email}</a> · {site.contact.hours}
     </p>
-    <p class="text-xs text-slate-500">A private certification consultancy, not a government body. Government fees and lab testing are billed separately, against receipts.</p>
+    <p class="text-xs leading-relaxed text-slate-500">A private certification consultancy, not a government body. Government fees and lab testing are billed separately, against receipts.</p>
     <ul class="flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-200 pt-4 text-sm">
       <li>© {year} Instacertify</li>
       {links.map((l) => <li><a href={l.href} class="tap hover:text-brand-700">{l.label}</a></li>)}

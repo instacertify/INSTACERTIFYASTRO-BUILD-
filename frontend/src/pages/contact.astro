@@ -72,7 +72,7 @@ const branchSchema = offices.filter((o) => o.type !== 'head').map((o) => ({
               </span>
               <span class="min-w-0">
                 <span class="block text-xs text-slate-500">{c.title}</span>
-                <span class="block truncate text-[0.9375rem] font-semibold text-slate-900">{c.value}</span>
+                <span class="block truncate text-base font-semibold text-slate-900">{c.value}</span>
               </span>
             </a>
           </li>
@@ -82,7 +82,7 @@ const branchSchema = offices.filter((o) => o.type !== 'head').map((o) => ({
             <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><Icon name="clock" /></span>
             <span class="min-w-0">
               <span class="block text-xs text-slate-500">{page.hoursLabel}</span>
-              <span class="block text-[0.9375rem] font-semibold text-slate-900">{site.contact.hours}</span>
+              <span class="block text-base font-semibold text-slate-900">{site.contact.hours}</span>
             </span>
           </li>
         )}

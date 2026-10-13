@@ -212,7 +212,7 @@ const presetRequirement = services.find((s) => s.path === servicePath);
             <input id={`${id}-product`} name="product" class="field" maxlength="190" placeholder={labels.productPlaceholder} />
           </div>
         </div>
-        <div class:list={['space-y-1.5 text-slate-600', hero ? 'text-[0.8125rem] leading-snug' : 'text-xs']}>
+        <div class="space-y-1.5 text-sm leading-snug text-slate-600">
           <label class="flex min-h-6 items-start gap-2">
             <input type="checkbox" name="consent" value="1" required class="mt-px size-4 shrink-0 rounded border-slate-300 accent-brand-700" />
             <ConsentText text={form.consent} />
@@ -224,7 +224,7 @@ const presetRequirement = services.find((s) => s.path === servicePath);
           </label>
         </div>
         <button type="submit" class:list={[buttonClass, 'w-full']}>{button} <Icon name="arrow-right" class="size-4" /></button>
-        {privacyNote && <p class:list={['flex items-center justify-center gap-1.5 text-center text-slate-500', hero ? 'text-[0.8125rem]' : 'text-xs']}><Icon name="shield" class="size-3.5 shrink-0" />{privacyNote}</p>}
+        {privacyNote && <p class="flex items-center justify-center gap-1.5 text-center text-xs text-slate-500"><Icon name="shield" class="size-3.5 shrink-0" />{privacyNote}</p>}
       </>
     )}
 

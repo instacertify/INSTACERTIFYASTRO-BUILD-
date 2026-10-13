@@ -16,7 +16,7 @@ const { newsletter } = await getContactBoxes();
   </div>
   <label for={`${id}-email`} class="sr-only">Email address</label>
   <div class="flex gap-2">
-    <input id={`${id}-email`} name="email" type="email" required placeholder={newsletter.placeholder} autocomplete="email" class="min-h-11 w-full min-w-0 rounded-lg border border-white/15 bg-white/5 px-3.5 text-base text-white lg:text-sm placeholder:text-brand-200 focus:border-accent-400 focus:outline-none" />
+    <input id={`${id}-email`} name="email" type="email" required placeholder={newsletter.placeholder} autocomplete="email" class="min-h-11 w-full min-w-0 rounded-lg border border-white/15 bg-white/5 px-3.5 text-base text-white placeholder:text-brand-200 focus:border-accent-400 focus:outline-none" />
     <button type="submit" class="btn-primary shrink-0 px-4">{newsletter.button}</button>
   </div>
   <p class="mt-2 text-xs text-brand-200">{newsletter.note} <a href="/privacy-policy" class="underline hover:text-white">Privacy Policy</a></p>

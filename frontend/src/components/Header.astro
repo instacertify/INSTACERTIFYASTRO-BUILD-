@@ -117,7 +117,7 @@ function panelColumns(groups: Link[]): Block[][] {
                                 tabindex={block.continued ? -1 : undefined}
                                 aria-current={!block.continued && current === block.group.href ? 'page' : undefined}
                               >
-                                <span class="text-[0.9375rem] leading-snug font-bold text-slate-900 group-hover/head:text-brand-700">
+                                <span class="text-base leading-snug font-bold text-slate-900 group-hover/head:text-brand-700">
                                   {headWords(block.group.label).lead}
                                   <span class="whitespace-nowrap">
                                     {headWords(block.group.label).last}
@@ -154,7 +154,7 @@ function panelColumns(groups: Link[]): Block[][] {
                             aria-current={current === link.href ? 'page' : undefined}
                           >
                             <span class="min-w-0">
-                              <span class="block text-[0.9375rem] font-semibold text-slate-900 group-hover/tile:text-brand-700">{link.label}</span>
+                              <span class="block text-base font-semibold text-slate-900 group-hover/tile:text-brand-700">{link.label}</span>
                               {link.description && <span class="mt-0.5 block text-sm text-slate-500">{link.description}</span>}
                             </span>
                             <Icon name="arrow-right" class="size-4 shrink-0 text-accent-600 transition-transform group-hover/tile:translate-x-1" />

@@ -252,6 +252,10 @@
   & p {
     @apply mb-[0.9em] leading-[1.65] last:mb-0;
   }
+  /* About 75 characters a line at most; longer lines are hard to follow back to the next one. */
+  & :where(p, ul, ol, blockquote) {
+    max-width: 38em;
+  }
   /* Each level differs in size, weight and colour; a hairline above each H2 marks where a new topic starts. */
   & :where(h2) {
     @apply section-title mt-10 mb-3 scroll-mt-36 border-t border-slate-200 pt-8 text-xl leading-tight sm:text-2xl first:mt-0 first:border-t-0 first:pt-0;

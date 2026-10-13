@@ -397,7 +397,7 @@ const eventName = (title: string) => {
               <div class="pt-1 sm:pt-5">
                 <p class="text-xs font-semibold tracking-wider text-accent-200 uppercase">Step {i + 1}</p>
                 <h3 class="mt-1 text-lg leading-snug font-bold text-white">{step.title}</h3>
-                <p class:list={['mt-1.5 text-[0.9375rem] leading-relaxed text-brand-200 sm:max-w-64', stepAlign.box]}>{step.text}</p>
+                <p class:list={['mt-1.5 text-base leading-relaxed text-brand-200 sm:max-w-64', stepAlign.box]}>{step.text}</p>
               </div>
             </li>
           ))}
@@ -662,7 +662,7 @@ const eventName = (title: string) => {
                 )}
                 <span class="mt-4 block text-sm text-slate-500">{formatDate(first.publishedAt)}</span>
                 <span class="mt-1 block line-clamp-3 text-lg leading-snug font-bold text-slate-950 group-hover:text-brand-700">{first.title}</span>
-                {first.excerpt && <span class="mt-2 block line-clamp-2 text-[0.9375rem] leading-relaxed text-slate-600">{first.excerpt}</span>}
+                {first.excerpt && <span class="mt-2 block line-clamp-2 text-base leading-relaxed text-slate-600">{first.excerpt}</span>}
               </a>
               {rest.length > 0 && (
                 <ul class="mt-5 divide-y divide-slate-200 border-t border-slate-200">

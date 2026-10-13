@@ -197,7 +197,7 @@ const figures = [
         <p data-std-empty hidden class="mt-6 text-center text-slate-500">No product found. <a href="/contact" class="font-semibold text-brand-700">Ask our team</a> and we will tell you which standard applies, within one day.</p>
 
         {(showFees || showTesting) && (
-          <p class="mt-4 max-w-2xl text-xs leading-relaxed text-slate-500">
+          <p class="mt-4 max-w-2xl text-sm leading-relaxed text-slate-500">
             {scheme === 'crs'
               ? 'BIS fee: the fee for each application, from micro to large firms.'
               : `Minimum marking fee per year, from micro to large firms. Other BIS charges for every ISI mark product: application charge ${rupees(ISI_OTHER_CHARGES.application)}, licence fee ${rupees(ISI_OTHER_CHARGES.licence)} and audit charges ${rupees(ISI_OTHER_CHARGES.audit)}. Foreign manufacturers get a detailed quote.`}
