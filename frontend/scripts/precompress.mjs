@@ -1,6 +1,6 @@
 // Writes .br and .gz copies of text files in dist/ so Caddy can serve them without compressing per request
 // (Caddy only compresses on the fly with gzip/zstd; Brotli is about 20% smaller for HTML).
-import { readdirSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
@@ -15,8 +15,9 @@ const gz = promisify(gzip);
 const walk = (dir) => readdirSync(dir).flatMap((n) => (statSync(join(dir, n)).isDirectory() ? walk(join(dir, n)) : [join(dir, n)]));
 const all = walk(DIST);
 
-// A page whose API data failed to load renders as a bare doctype; never ship those.
-const blank = all.filter((f) => f.endsWith('.html') && statSync(f).size < 100);
+// A page whose API data failed to load renders as a bare doctype; never ship those. Small files with text in them
+// are site verification files from the admin (e.g. google1234abcd.html).
+const blank = all.filter((f) => f.endsWith('.html') && statSync(f).size < 100 && !readFileSync(f, 'utf8').replace(/<[^>]*>/g, '').trim());
 if (blank.length) {
   console.error(`precompress: ${blank.length} blank pages, the API probably failed during the build:\n  ${blank.join('\n  ')}`);
   process.exit(1);

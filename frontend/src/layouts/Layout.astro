@@ -99,6 +99,7 @@ const verification = Object.entries({
   'yandex-verification': site.integrations?.yandexVerification,
   'p:domain_verify': site.integrations?.pinterestVerification,
   'facebook-domain-verification': site.integrations?.facebookVerification,
+  'ahrefs-site-verification': site.integrations?.ahrefsVerification,
 }).filter((entry): entry is [string, string] => !!entry[1]);
 
 const headOffice = site.offices?.find((o) => o.type === 'head' && o.street);
@@ -184,10 +185,16 @@ const ldJson = (schema: Record<string, unknown>) => JSON.stringify(schema).repla
         (function () {
           var u = matomoUrl.replace(/\/$/, '') + '/';
           _paq.push(['setTrackerUrl', u + 'matomo.php'], ['setSiteId', matomoSiteId]);
-          var g = document.createElement('script');
-          g.async = true;
-          g.src = u + 'matomo.js';
-          document.head.appendChild(g);
+          var load = function () {
+            var g = document.createElement('script');
+            g.async = true;
+            g.src = u + 'matomo.js';
+            document.head.appendChild(g);
+          };
+          // Waits for the page to finish loading so the tracker never competes with it.
+          addEventListener('load', function () {
+            'requestIdleCallback' in window ? requestIdleCallback(load, { timeout: 4000 }) : setTimeout(load, 1500);
+          });
         })();
       </script>
     )}

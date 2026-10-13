@@ -60,7 +60,7 @@ function expire(prefixes: string[]) {
 }
 
 const tracking: Tracking = JSON.parse(root?.dataset.tracking || '{}');
-const loaded = new Set<'google' | 'clarity' | 'meta' | 'linkedin'>();
+const loaded = new Set<'google' | 'clarity' | 'meta' | 'linkedin' | 'uet'>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const w = window as any;
 
@@ -69,6 +69,14 @@ function addScript(src: string) {
   script.async = true;
   script.src = src;
   document.head.appendChild(script);
+  return script;
+}
+
+/** Runs once the page has finished loading and the browser is idle, so tags never delay what the visitor sees. */
+function afterLoad(run: () => void) {
+  const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(run, { timeout: 4000 }) : setTimeout(run, 1500));
+  if (document.readyState === 'complete') idle();
+  else addEventListener('load', idle, { once: true });
 }
 
 /** Tag Manager, GA4 and Google Ads share one dataLayer and Google Consent Mode. */
@@ -161,6 +169,23 @@ function loadLinkedIn(c: Choices) {
   if (!c.marketing) expire(['li_fat_id', 'li_sugr']);
 }
 
+/** Microsoft Advertising (Bing Ads) UET tag. */
+function loadMicrosoftAds(c: Choices) {
+  if (!tracking.uet) return;
+  if (c.marketing && !loaded.has('uet')) {
+    loaded.add('uet');
+    w.uetq = w.uetq || [];
+    w.uetq.push('consent', 'default', { ad_storage: 'granted' });
+    addScript('https://bat.bing.com/bat.js').addEventListener('load', () => {
+      w.uetq = new w.UET({ ti: tracking.uet, enableAutoSpaTracking: false, q: w.uetq });
+      w.uetq.push('pageLoad');
+    });
+  } else if (loaded.has('uet')) {
+    w.uetq.push('consent', 'update', { ad_storage: c.marketing ? 'granted' : 'denied' });
+  }
+  if (!c.marketing) expire(['_uet']);
+}
+
 /** Conversion for every ad platform the visitor has allowed; Tag Manager picks up the dataLayer event. */
 export function trackLead(form?: string) {
   if (loaded.has('google')) {
@@ -169,9 +194,11 @@ export function trackLead(form?: string) {
     w.dataLayer.push({ event: 'generate_lead', form_name: form });
   }
   if (loaded.has('meta') && hasConsent('marketing')) w.fbq('track', 'Lead');
+  if (loaded.has('uet') && hasConsent('marketing')) w.uetq.push('event', 'submit_lead_form', {});
 }
 
-function apply() {
+/** @param onPageLoad true on page load: tags then wait for the page; after a click in the banner they start at once. */
+function apply(onPageLoad = false) {
   const c = current?.c ?? { preferences: false, analytics: false, marketing: false };
 
   if (!c.preferences) {
@@ -186,10 +213,17 @@ function apply() {
     if (!c.analytics) expire(['_pk_', 'mtm_']);
   }
 
-  loadGoogle(c);
-  loadClarity(c);
-  loadMeta(c);
-  loadLinkedIn(c);
+  const tags = () => {
+    // Read again: the visitor may have changed their choice while the page was loading.
+    const now = current?.c ?? c;
+    loadGoogle(now);
+    loadClarity(now);
+    loadMeta(now);
+    loadLinkedIn(now);
+    loadMicrosoftAds(now);
+  };
+  if (onPageLoad) afterLoad(tags);
+  else tags();
 
   window.dispatchEvent(new CustomEvent('ic:consent', { detail: current }));
 }
@@ -262,5 +296,5 @@ if (root) {
   });
 
   banner.hidden = !!current;
-  apply();
+  apply(true);
 }

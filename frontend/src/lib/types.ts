@@ -41,12 +41,16 @@ export interface Integrations {
   clarity?: string | null;
   metaPixel?: string | null;
   linkedinPartner?: string | null;
+  microsoftAds?: string | null;
   matomoSiteId?: string | number | null;
   googleVerification?: string | null;
   bingVerification?: string | null;
   yandexVerification?: string | null;
   pinterestVerification?: string | null;
   facebookVerification?: string | null;
+  ahrefsVerification?: string | null;
+  /** Files a tool asks to find at the top of the site, e.g. google1234abcd.html. */
+  verificationFiles?: { name?: string | null; content?: string | null }[] | Record<string, { name?: string | null; content?: string | null }> | null;
 }
 
 export interface Site {

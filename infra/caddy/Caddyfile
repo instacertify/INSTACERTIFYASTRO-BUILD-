@@ -60,7 +60,7 @@ http://:2020 {
 
 	# Legacy URL redirects generated at build time from the admin's Redirects screen.
 	import /srv/site/current/redirects*.caddy
-	@internal path /redirects.caddy
+	@internal path /redirects.caddy /verification.caddy
 	respond @internal 404
 
 	# The page list is built as /sitemap.xml (scripts/sitemap-file.mjs); keep the old chunk name working.
@@ -90,6 +90,8 @@ http://:2020 {
 
 	# Pages are built as /about.html; serve them at /about only, so each page has one URL.
 	route {
+		# Verification files from the admin answer at their exact name (frontend/src/pages/verification.caddy.ts).
+		import /srv/site/current/verification*.caddy
 		redir /index.html / permanent
 		@dotHtml path_regexp dothtml ^/(.+)\.html$
 		redir @dotHtml /{re.dothtml.1}{?query} permanent

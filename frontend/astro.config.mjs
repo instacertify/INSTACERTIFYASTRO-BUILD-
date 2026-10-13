@@ -41,7 +41,7 @@ export default defineConfig({
     sitemap({
       // Only pages that are their own canonical URL: duplicates such as the old root-level industry pages are left out.
       filter: (url) => {
-        if (/\/(404|redirects\.caddy)$|\/page\/\d+$/.test(url)) return false;
+        if (/\/(404|redirects\.caddy)$|\/page\/\d+$|\.(html|txt|xml|json)$/.test(url)) return false;
         const head = builtHead(url);
         const canonical = head.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
         return !/<meta name="robots" content="noindex/.test(head) && (!canonical || canonical.replace(/\/$/, '') === url.replace(/\/$/, ''));

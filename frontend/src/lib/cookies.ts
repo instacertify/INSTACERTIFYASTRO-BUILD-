@@ -31,6 +31,7 @@ export interface Tracking {
   clarity?: string;
   meta?: string;
   linkedin?: string;
+  uet?: string;
 }
 
 export function trackingConfig(site: Site): Tracking {
@@ -43,6 +44,7 @@ export function trackingConfig(site: Site): Tracking {
     clarity: i.clarity ?? undefined,
     meta: i.metaPixel ?? undefined,
     linkedin: i.linkedinPartner ?? undefined,
+    uet: i.microsoftAds ?? undefined,
   };
   return Object.fromEntries(Object.entries(config).filter(([, v]) => v)) as Tracking;
 }
@@ -54,7 +56,7 @@ export function cookieCatalog(site: Site, matomo: boolean): CategoryInfo[] {
   const google = !!(t.ga || t.gtm);
   const googleAds = !!(t.ga || t.gtm || t.ads);
   const ga = t.ga?.replace(/^G-/, '') ?? '<ID>';
-  const adPlatforms = [googleAds && 'Google', t.linkedin && 'LinkedIn', t.meta && 'Facebook / Instagram'].filter(Boolean) as string[];
+  const adPlatforms = [googleAds && 'Google', t.uet && 'Microsoft Bing', t.linkedin && 'LinkedIn', t.meta && 'Facebook / Instagram'].filter(Boolean) as string[];
   const platforms = adPlatforms.length > 1 ? `${adPlatforms.slice(0, -1).join(', ')} and ${adPlatforms.at(-1)}` : (adPlatforms[0] ?? '');
 
   const categories: CategoryInfo[] = [
@@ -129,6 +131,12 @@ export function cookieCatalog(site: Site, matomo: boolean): CategoryInfo[] {
       items: [
         ...(googleAds
           ? [{ name: '_gcl_au', provider: 'Google Ads', storage: 'Cookie' as const, duration: '90 days', purpose: 'Links an ad click to a later enquiry (conversion measurement).' }]
+          : []),
+        ...(t.uet
+          ? [
+              { name: '_uetsid, _uetvid', provider: 'Microsoft Advertising', storage: 'Cookie' as const, duration: '1 day to 13 months', purpose: 'Links a Bing ad click to a later enquiry (conversion measurement).' },
+              { name: 'MUID', provider: 'Microsoft (bing.com)', storage: 'Cookie' as const, duration: '13 months', purpose: 'Set by Microsoft on its own domain to recognise the browser and report ad results.' },
+            ]
           : []),
         ...(t.linkedin
           ? [

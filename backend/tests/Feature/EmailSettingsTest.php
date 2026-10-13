@@ -258,4 +258,36 @@ class EmailSettingsTest extends TestCase
             ->call('save')
             ->assertHasErrors(['data.integrations.gtm', 'data.integrations.metaPixel']);
     }
+
+    public function test_pasted_code_snippets_keep_only_the_id(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+
+        Livewire::test(ManageSite::class)
+            ->set('data.integrations.gtm', "<!-- Google Tag Manager -->\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];})(window,document,'script','dataLayer','GTM-NJQ6BK77');</script>")
+            ->set('data.integrations.googleTag', '<script async src="https://www.googletagmanager.com/gtag/js?id=G-AB12CD34EF"></script>')
+            ->set('data.integrations.clarity', '<script type="text/javascript">(function(c,l,a,r,i,t,y){})(window, document, "clarity", "script", "x9uh7uca0f");</script>')
+            ->set('data.integrations.metaPixel', "<script>fbq('init', '123456789012345'); fbq('track', 'PageView');</script>")
+            ->set('data.integrations.linkedinPartner', '<script type="text/javascript">_linkedin_partner_id = "7654321";</script>')
+            ->set('data.integrations.microsoftAds', '<script>(function(w,d,t,r,u){var o={ti:"343210987", enableAutoSpaTracking: true};})(window,document,"script","//bat.bing.com/bat.js","uetq");</script>')
+            ->set('data.integrations.ahrefsVerification', '<meta name="ahrefs-site-verification" content="0123abcd4567ef89">')
+            ->set('data.integrations.verificationFiles', ['a' => ['name' => ' BingSiteAuth.xml ', 'content' => '<users><user>ABC</user></users>']])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->getJson('/api/v1/site')
+            ->assertJsonPath('data.integrations.gtm', 'GTM-NJQ6BK77')
+            ->assertJsonPath('data.integrations.googleTag', 'G-AB12CD34EF')
+            ->assertJsonPath('data.integrations.clarity', 'x9uh7uca0f')
+            ->assertJsonPath('data.integrations.metaPixel', '123456789012345')
+            ->assertJsonPath('data.integrations.linkedinPartner', '7654321')
+            ->assertJsonPath('data.integrations.microsoftAds', '343210987')
+            ->assertJsonPath('data.integrations.ahrefsVerification', '0123abcd4567ef89')
+            ->assertJsonPath('data.integrations.verificationFiles.0.name', 'BingSiteAuth.xml');
+
+        Livewire::test(ManageSite::class)
+            ->set('data.integrations.verificationFiles', ['a' => ['name' => '../secret.php', 'content' => 'x'], 'b' => ['name' => 'robots.txt', 'content' => 'x']])
+            ->call('save')
+            ->assertHasErrors(['data.integrations.verificationFiles.a.name', 'data.integrations.verificationFiles.b.name']);
+    }
 }

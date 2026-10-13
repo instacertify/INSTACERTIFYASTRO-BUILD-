@@ -223,19 +223,19 @@ class ManageSite extends Page
                     ]),
                 ]),
                 Tab::make('Tracking & verification')->icon('heroicon-o-chart-bar')->statePath('integrations')->schema([
-                    Text::make('Every tool below loads only after the visitor accepts the matching cookie category (analytics or marketing), and is listed in the cookie notice and Cookie Policy automatically. Leave a field empty to switch that tool off. Changes go live with the next website build.'),
+                    Text::make('Every tool below loads only after the visitor accepts the matching cookie category (analytics or marketing), and is listed in the cookie notice and Cookie Policy automatically. Tools start after the page has finished loading, so they do not slow it down. Leave a field empty to switch that tool off. You can paste the ID or the whole code snippet the tool gives you; only the ID is kept. Changes go live a few minutes after saving.'),
                     Section::make('Analytics & tag management')->compact()->columns(2)->schema([
-                        self::trackingId('gtm', 'Google Tag Manager container ID', 'GTM-XXXXXXX', '/^GTM-[A-Z0-9]{4,12}$/')
+                        self::trackingId('gtm', 'Google Tag Manager container ID', 'GTM-XXXXXXX', '/^GTM-[A-Z0-9]{4,12}$/', find: '/GTM-[A-Z0-9]{4,12}/i')
                             ->helperText('Tag Manager → the ID next to the container name. Loads after analytics or marketing consent, with Google Consent Mode set to the visitor\'s choice.'),
-                        self::trackingId('googleTag', 'Google Analytics 4 measurement ID', 'G-XXXXXXXXXX', '/^(G|GT)-[A-Z0-9]{4,15}$/')
-                            ->helperText('Analytics → Admin → Data streams → your web stream. Leave empty if GA4 is already set up inside Tag Manager, or visits are counted twice.'),
-                        self::trackingId('clarity', 'Microsoft Clarity project ID', 'abcd1234ef', '/^[a-z0-9]{6,20}$/', upper: false)
-                            ->helperText('Clarity → Settings → Overview → Project ID. Session recordings and heatmaps; loads after analytics consent.'),
+                        self::trackingId('googleTag', 'Google Analytics 4 measurement ID', 'G-XXXXXXXXXX', '/^(G|GT)-[A-Z0-9]{4,15}$/', find: '/\b(?:G|GT)-[A-Z0-9]{4,15}\b/i')
+                            ->helperText('Analytics → Admin → Data streams → your web stream. Leave empty if GA4 is already set up inside Tag Manager, or visits are counted twice. Check it in Analytics → Reports → Realtime.'),
+                        self::trackingId('clarity', 'Microsoft Clarity project ID', 'abcd1234ef', '/^[a-z0-9]{6,20}$/', upper: false, find: '/(?:"script",\s*"|clarity\.ms\/tag\/)([a-z0-9]{6,20})/i')
+                            ->helperText('Clarity → Settings → Overview → Project ID. Session recordings and heatmaps; loads after analytics consent. Clarity shows "Installed" once the first visitor has accepted analytics cookies.'),
                         TextInput::make('matomoSiteId')->label('Matomo site ID')->numeric()->placeholder('1')
                             ->helperText('Only used when the self-hosted Matomo server is configured.'),
                     ]),
                     Section::make('Advertising & conversions')->compact()->columns(2)->schema([
-                        self::trackingId('googleAds', 'Google Ads tag ID', 'AW-123456789', '/^AW-\d{6,15}$/')
+                        self::trackingId('googleAds', 'Google Ads tag ID', 'AW-123456789', '/^AW-\d{6,15}$/', find: '/AW-\d{6,15}/i')
                             ->helperText('Google Ads → Goals → Conversions → your lead action → Tag setup.'),
                         TextInput::make('googleAdsLeadLabel')->label('Google Ads lead conversion label')->placeholder('AbC-D_efGhIjKlMnOp')
                             ->dehydrateStateUsing(fn (?string $state) => filled($state) ? trim(Str::afterLast($state, '/')) : null)
@@ -245,10 +245,12 @@ class ManageSite extends Page
                                 }
                             })
                             ->helperText('The part after the slash in "AW-123456789/AbC-D_efG". Counted each time an enquiry form is sent.'),
-                        self::trackingId('metaPixel', 'Meta (Facebook) Pixel ID', '123456789012345', '/^\d{10,20}$/')
+                        self::trackingId('metaPixel', 'Meta (Facebook) Pixel ID', '123456789012345', '/^\d{10,20}$/', find: '/\b(\d{10,20})\b/')
                             ->helperText('Meta Events Manager → Data sources → your pixel. Sends a "Lead" event when an enquiry is sent.'),
-                        self::trackingId('linkedinPartner', 'LinkedIn Insight Tag partner ID', '1234567', '/^\d{4,12}$/')
+                        self::trackingId('linkedinPartner', 'LinkedIn Insight Tag partner ID', '1234567', '/^\d{4,12}$/', find: '/\b(\d{4,12})\b/')
                             ->helperText('LinkedIn Campaign Manager → Analyze → Insight Tag.'),
+                        self::trackingId('microsoftAds', 'Microsoft Advertising (Bing Ads) UET tag ID', '123456789', '/^\d{4,12}$/', find: '/\b(\d{4,12})\b/')
+                            ->helperText('Microsoft Advertising → Tools → UET tag → the tag ID. Sends a "submit_lead_form" event when an enquiry is sent.'),
                     ]),
                     Section::make('Site ownership verification')->compact()->columns(2)
                         ->description('Paste the code or the whole <meta> tag the tool gives you; only the code is kept. Not needed if you verified through DNS.')
@@ -258,6 +260,29 @@ class ManageSite extends Page
                             self::verification('yandexVerification', 'Yandex Webmaster', 'yandex-verification'),
                             self::verification('pinterestVerification', 'Pinterest', 'p:domain_verify'),
                             self::verification('facebookVerification', 'Meta (Facebook) domain verification', 'facebook-domain-verification'),
+                            self::verification('ahrefsVerification', 'Ahrefs Webmaster Tools', 'ahrefs-site-verification'),
+                        ]),
+                    Section::make('Verification files')->compact()->collapsed()
+                        ->description('For tools that verify with an uploaded file instead of a meta tag, e.g. Google\'s google1234abcd.html or Bing\'s BingSiteAuth.xml. Each file is served from the top of the website, e.g. https://instacertify.com/BingSiteAuth.xml.')
+                        ->schema([
+                            Repeater::make('verificationFiles')->hiddenLabel()
+                                ->schema([
+                                    TextInput::make('name')->label('File name')->required()->maxLength(100)
+                                        ->placeholder('google1234abcd.html')
+                                        ->dehydrateStateUsing(fn (?string $state) => trim((string) $state))
+                                        ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail) {
+                                            $name = trim((string) $value);
+                                            if (! preg_match('/^[A-Za-z0-9_-][A-Za-z0-9_.-]{0,95}\.(html|txt|xml)$/', $name)) {
+                                                $fail('Use the exact file name the tool gives you, ending in .html, .txt or .xml (letters, numbers, dots, dashes and underscores only).');
+                                            } elseif (preg_match('/^(robots\.txt|index\.html|404\.html|sitemap.*\.xml)$/i', $name)) {
+                                                $fail('This name is used by the website itself.');
+                                            }
+                                        }),
+                                    Textarea::make('content')->label('File contents')->required()->rows(3)->maxLength(5000)
+                                        ->helperText('Paste everything inside the file, exactly as downloaded.'),
+                                ])
+                                ->collapsed()->defaultItems(0)->maxItems(10)->addActionLabel('Add verification file')
+                                ->itemLabel(fn (array $state) => $state['name'] ?? null),
                         ]),
                 ]),
             ]),
@@ -285,6 +310,7 @@ class ManageSite extends Page
         $previous = collect($uploads)->mapWithKeys(fn (string $key) => [$key => Arr::get($setting->value ?? [], $key)]);
         $state = $this->form->getState();
         $state['popup'] = [...($setting->value['popup'] ?? []), ...($state['popup'] ?? [])];
+        $state['integrations']['verificationFiles'] = array_values($state['integrations']['verificationFiles'] ?? []);
         $setting->value = array_replace($setting->value ?? [], $state);
         $setting->save();
 
@@ -297,12 +323,23 @@ class ManageSite extends Page
         Notification::make()->success()->title('Settings saved')->body('The website picks this up on its next build.')->send();
     }
 
-    private static function trackingId(string $name, string $label, string $example, string $pattern, bool $upper = true): TextInput
+    /** @param  string|null  $find  picks the ID out of a pasted code snippet; the first capture group, else the whole match */
+    private static function trackingId(string $name, string $label, string $example, string $pattern, bool $upper = true, ?string $find = null): TextInput
     {
-        return TextInput::make($name)->label($label)->placeholder($example)->maxLength(40)
-            ->dehydrateStateUsing(fn (?string $state) => filled($state) ? ($upper ? strtoupper(trim($state)) : strtolower(trim($state))) : null)
-            ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail) use ($pattern, $upper, $example) {
-                $value = $upper ? strtoupper(trim((string) $value)) : strtolower(trim((string) $value));
+        $id = function (?string $state) use ($pattern, $upper, $find): ?string {
+            $case = fn (string $value) => $upper ? strtoupper($value) : strtolower($value);
+            $value = $case(trim((string) $state));
+            if ($value === '' || preg_match($pattern, $value) || ! $find || ! preg_match($find, (string) $state, $m)) {
+                return $value === '' ? null : $value;
+            }
+
+            return $case($m[1] ?? $m[0]);
+        };
+
+        return TextInput::make($name)->label($label)->placeholder($example)->maxLength(5000)
+            ->dehydrateStateUsing($id)
+            ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail) use ($id, $pattern, $example) {
+                $value = $id((string) $value);
                 if (filled($value) && ! preg_match($pattern, $value)) {
                     $fail("This does not look like a valid ID. It should look like {$example}.");
                 }
