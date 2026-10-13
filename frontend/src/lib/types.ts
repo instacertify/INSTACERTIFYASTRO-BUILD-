@@ -497,6 +497,13 @@ export interface PageRecord {
 /** Sections of the "About us" page template; each is hidden when it has no items. */
 export interface AboutBlocks {
   milestones?: { year: string; text: string }[];
+  quality_standard?: string | null;
+  quality_heading?: string | null;
+  quality_text?: string | null;
+  quality_points?: string[];
+  quality_certificate_no?: string | null;
+  quality_certified_by?: string | null;
+  quality_image?: string | null;
   stats_heading?: string | null;
   stats?: { value: string; label: string }[];
   values_heading?: string | null;

@@ -123,6 +123,18 @@ class PageResource extends Resource
                     ])->columns(['default' => 1, 'sm' => 4])->maxItems(6)->reorderableWithDragAndDrop()->addActionLabel('Add milestone')
                         ->itemLabel(fn (array $state) => $state['year'] ?? null),
                 ]),
+                Fieldset::make('Quality certification')->columns(2)->schema([
+                    TextInput::make('quality_standard')->label('Standard')->maxLength(40)->placeholder('ISO 9001:2015')
+                        ->helperText('Also shown as a badge under the page title. Leave empty to hide this section.'),
+                    TextInput::make('quality_heading')->label('Heading')->maxLength(100),
+                    Textarea::make('quality_text')->label('Text')->rows(3)->maxLength(500)->columnSpanFull(),
+                    Repeater::make('quality_points')->label('Points')->simple(TextInput::make('text')->required()->maxLength(120))
+                        ->maxItems(6)->reorderableWithDragAndDrop()->addActionLabel('Add point')->columnSpanFull(),
+                    TextInput::make('quality_certificate_no')->label('Certificate number')->maxLength(60),
+                    TextInput::make('quality_certified_by')->label('Certified by')->maxLength(100),
+                    ImageUpload::make('quality_image', 'pages/quality', maxWidth: 800)->label('Certificate or badge image')->columnSpanFull()
+                        ->helperText('Optional: your certificate or the certification body\'s mark. Do not use the ISO logo; ISO does not allow certified companies to use it.'),
+                ]),
                 Fieldset::make('Numbers')->columns(1)->schema([
                     TextInput::make('stats_heading')->label('Heading')->maxLength(80),
                     Repeater::make('stats')->hiddenLabel()->schema([

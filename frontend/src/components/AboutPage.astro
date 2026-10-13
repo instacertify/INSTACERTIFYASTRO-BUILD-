@@ -26,6 +26,8 @@ const milestones = (blocks.milestones ?? []).filter((m) => m.year && m.text);
 const stats = (blocks.stats ?? []).filter((s) => s.value && s.label);
 const values = (blocks.values ?? []).filter((v) => v.title);
 const reasons = (blocks.reasons ?? []).filter((r) => r.title);
+const quality = blocks.quality_standard?.trim() || null;
+const qualityPoints = (blocks.quality_points ?? []).filter(Boolean);
 const valuesAlign = iconAlign(blocks.values_icon_align);
 const reasonsAlign = iconAlign(blocks.reasons_icon_align);
 ---
@@ -36,6 +38,12 @@ const reasonsAlign = iconAlign(blocks.reasons_icon_align);
       <Breadcrumbs items={trail} />
       <h1 class="mt-5 max-w-3xl text-[2rem] leading-tight font-bold sm:text-[2.5rem]">{page.title}</h1>
       {page.excerpt && <p class="mt-4 max-w-3xl text-lg leading-relaxed text-slate-700">{page.excerpt}</p>}
+      {quality && (
+        <a href="#about-quality-h" class="tap mt-5 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-4 py-1.5 text-sm font-semibold text-brand-800 shadow-sm hover:border-brand-400">
+          <Icon name="badge" class="size-5 text-brand-700" />
+          {quality} certified company
+        </a>
+      )}
       <div class="mt-7 flex flex-wrap gap-3">
         <a href="/contact" class="btn-primary">Get started <Icon name="arrow-right" class="size-4" /></a>
         <a href="/services" class="btn-ghost">Our services</a>
@@ -55,6 +63,48 @@ const reasonsAlign = iconAlign(blocks.reasons_icon_align);
             </div>
           ))}
         </dl>
+      </div>
+    </section>
+  )}
+
+  {quality && (
+    <section class="section-tight border-b border-slate-200" aria-labelledby="about-quality-h">
+      <div class="container-page">
+        <div class="grid items-center gap-8 overflow-hidden rounded-2xl border border-brand-100 bg-brand-50/60 p-6 sm:p-10 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
+          <div class="mx-auto flex w-full max-w-[16rem] justify-center">
+            {blocks.quality_image ? (
+              <img src={blocks.quality_image} alt={`${quality} certificate of Instacertify`} class="max-h-72 w-auto rounded-xl bg-white object-contain p-2 shadow-sm" loading="lazy" decoding="async" />
+            ) : (
+              <div class="flex aspect-square w-52 flex-col items-center justify-center rounded-full border-[6px] border-double border-brand-700 bg-white text-center shadow-sm" aria-hidden="true">
+                <Icon name="badge" class="size-10 text-brand-700" />
+                <span class="mt-2 text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">Certified</span>
+                <span class="mt-1 px-4 text-xl leading-tight font-bold text-brand-800">{quality}</span>
+                <span class="mt-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">Quality management</span>
+              </div>
+            )}
+          </div>
+          <div>
+            <p class="text-sm font-semibold tracking-wide text-brand-700 uppercase">{quality} certified</p>
+            <h2 id="about-quality-h" class="mt-2 text-2xl section-title sm:text-3xl">{blocks.quality_heading || `An ${quality} certified company`}</h2>
+            {blocks.quality_text && <p class="mt-4 max-w-3xl text-lg leading-relaxed text-slate-700">{blocks.quality_text}</p>}
+            {qualityPoints.length > 0 && (
+              <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+                {qualityPoints.map((point) => (
+                  <li class="flex gap-3 text-slate-700">
+                    <Icon name="check-circle" class="mt-0.5 size-5 shrink-0 text-brand-700" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {(blocks.quality_certificate_no || blocks.quality_certified_by) && (
+              <dl class="mt-6 flex flex-wrap gap-x-8 gap-y-2 border-t border-brand-100 pt-5 text-sm">
+                {blocks.quality_certificate_no && <div class="flex gap-2"><dt class="text-slate-500">Certificate no.</dt><dd class="font-semibold text-slate-900">{blocks.quality_certificate_no}</dd></div>}
+                {blocks.quality_certified_by && <div class="flex gap-2"><dt class="text-slate-500">Certified by</dt><dd class="font-semibold text-slate-900">{blocks.quality_certified_by}</dd></div>}
+              </dl>
+            )}
+          </div>
+        </div>
       </div>
     </section>
   )}

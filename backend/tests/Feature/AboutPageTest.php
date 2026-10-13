@@ -65,6 +65,51 @@ class AboutPageTest extends TestCase
         $this->assertNull($blocks['reasons'][0]['iconImage']);
     }
 
+    public function test_the_quality_certification_section_is_edited_in_the_admin_and_served_by_the_api(): void
+    {
+        $page = Page::create(['title' => 'About', 'path' => 'about', 'template' => 'about', 'status' => 'published', 'data' => [
+            'quality_points' => ['Documented processes', 'Internal audits'],
+        ]]);
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+
+        Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
+            ->fillForm([
+                'about.quality_standard' => 'ISO 9001:2015',
+                'about.quality_heading' => 'An ISO certified company',
+                'about.quality_certificate_no' => 'QMS-123',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(['Documented processes', 'Internal audits'], array_values($page->refresh()->data['quality_points']));
+
+        $page->update(['data' => [...$page->data, 'quality_image' => 'pages/quality/certificate.webp']]);
+        $blocks = $this->getJson('/api/v1/pages/about')->assertOk()->json('data.blocks');
+
+        $this->assertSame('ISO 9001:2015', $blocks['quality_standard']);
+        $this->assertSame('QMS-123', $blocks['quality_certificate_no']);
+        $this->assertStringStartsWith('http', $blocks['quality_image']);
+        $this->assertStringEndsWith('/pages/quality/certificate.webp', $blocks['quality_image']);
+    }
+
+    public function test_the_iso_migration_fills_the_quality_section_once_and_rolls_back(): void
+    {
+        $page = Page::create(['title' => 'About', 'path' => 'about', 'template' => 'about', 'status' => 'published', 'data' => ['stats' => [['value' => '3000+', 'label' => 'Customers']]]]);
+        $migration = require database_path('migrations/2026_10_13_170000_add_iso_9001_quality_section_to_about_page.php');
+
+        $migration->up();
+        $data = $page->refresh()->data;
+        $this->assertSame('ISO 9001:2015', $data['quality_standard']);
+        $this->assertSame('3000+', $data['stats'][0]['value']);
+
+        $page->update(['data' => [...$data, 'quality_heading' => 'Edited in the admin']]);
+        $migration->up();
+        $this->assertSame('Edited in the admin', $page->refresh()->data['quality_heading']);
+
+        $migration->down();
+        $this->assertSame(['stats' => [['value' => '3000+', 'label' => 'Customers']]], $page->refresh()->data);
+    }
+
     public function test_saving_a_hub_page_keeps_its_structured_blocks(): void
     {
         $sections = ['sections' => [['title' => 'Chemical testing', 'items' => [['title' => 'REACH', 'link_custom' => '/reach-testing']]]]];
