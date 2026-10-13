@@ -19,8 +19,9 @@ const newsletter = site.footer.newsletter === undefined
   ? { title: 'Regulatory updates', text: 'New QCOs, BIS deadlines and standard revisions — one short email a month.' }
   : site.footer.newsletter;
 const copyright = (site.footer.copyright || '© {year} Instacertify. All rights reserved.').replaceAll('{year}', String(year));
-// Each page is linked once: the contact column and "Contact us" button already cover /contact.
-const seen = new Set(['/contact']);
+const payments = site.payments?.enabled ?? false;
+// Each page is linked once: the contact column and "Contact us" button already cover /contact, the payment button /pay.
+const seen = new Set(['/contact', ...(payments ? ['/pay'] : [])]);
 const unseen = (l: { href: string }) => !seen.has(l.href) && !!seen.add(l.href);
 const columns = (site.footer.columns ?? [])
   .slice(0, 4)
@@ -126,7 +127,14 @@ const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURICompo
               </ul>
             </div>
           )}
-          <a href="/contact" class="btn-primary h-11 self-start rounded-full px-6 sm:ml-auto sm:self-auto">Contact us <Icon name="arrow-right" class="size-4" /></a>
+          <div class="flex flex-wrap gap-3 self-start sm:ml-auto sm:self-auto">
+            {payments && (
+              <a href="/pay" class="inline-flex h-11 items-center gap-2 rounded-full border border-white/40 px-5 text-sm font-semibold text-white transition-colors hover:border-white hover:bg-white hover:text-brand-700">
+                <Icon name="card" class="size-4" />Pay now
+              </a>
+            )}
+            <a href="/contact" class="btn-primary h-11 rounded-full px-6">Contact us <Icon name="arrow-right" class="size-4" /></a>
+          </div>
         </div>
       </div>
     </div>

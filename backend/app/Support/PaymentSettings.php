@@ -42,7 +42,7 @@ class PaymentSettings
         'minAmount' => 100,
         'maxAmount' => 500000,
         'heading' => 'Make a payment',
-        'intro' => 'Pay your Instacertify invoice or quotation securely online. Enter the amount and invoice number exactly as they appear on your invoice.',
+        'intro' => 'Pay your Instacertify invoice or quotation securely online. Enter your invoice number and the amount exactly as they appear on your invoice.',
         'razorpay' => ['keyId' => null],
         'stripe' => [],
     ];

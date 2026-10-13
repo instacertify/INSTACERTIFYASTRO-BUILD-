@@ -62,8 +62,11 @@ class PaymentTest extends TestCase
         $this->seed(ContentSeeder::class);
         $this->actingAs(User::factory()->create(['role' => 'admin']));
 
+        $site = Setting::find('site');
+        $site->value = [...$site->value, 'footer' => [...($site->value['footer'] ?? []), 'bottomLinks' => [['label' => 'Pay online', 'href' => '/pay']]]];
+        $site->save();
         $this->getJson('/api/v1/site')->assertJsonPath('data.payments.enabled', false)
-            ->assertJsonMissingPath('data.footer.bottomLinks.2');
+            ->assertJsonPath('data.footer.bottomLinks', []);
 
         Livewire::test(ManagePayments::class)
             ->set('data.enabled', true)
@@ -85,7 +88,7 @@ class PaymentTest extends TestCase
             ->assertJsonPath('data.payments.gateway', 'Razorpay')
             ->assertJsonPath('data.payments.testMode', false)
             ->assertJsonPath('data.payments.heading', 'Pay an invoice');
-        $this->assertContains(['label' => 'Make a payment', 'href' => '/pay'], $response->json('data.footer.bottomLinks'));
+        $this->assertSame([['label' => 'Pay online', 'href' => '/pay']], $response->json('data.footer.bottomLinks'));
         $this->assertStringNotContainsString('rzp-key-secret', $response->getContent());
         $this->assertStringNotContainsString($stored['razorpay']['keySecret'], $response->getContent());
     }
@@ -113,6 +116,7 @@ class PaymentTest extends TestCase
 
         $this->postJson('/api/v1/payments', $this->payer(['amount' => '9,00,000']))->assertUnprocessable()->assertJsonValidationErrors('amount');
         $this->postJson('/api/v1/payments', $this->payer(['amount' => '50']))->assertUnprocessable()->assertJsonValidationErrors('amount');
+        $this->postJson('/api/v1/payments', $this->payer(['invoice_number' => '']))->assertUnprocessable()->assertJsonValidationErrors('invoice_number');
         $this->postJson('/api/v1/payments', $this->payer(['website' => 'spam']))->assertUnprocessable();
     }
 

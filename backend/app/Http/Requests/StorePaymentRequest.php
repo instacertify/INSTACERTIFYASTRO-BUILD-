@@ -35,7 +35,7 @@ class StorePaymentRequest extends FormRequest
             'email' => ['required', 'email:rfc', 'max:190'],
             'phone' => ['nullable', 'regex:/^\+?\d{8,15}$/'],
             'company' => ['nullable', 'string', 'max:160'],
-            'invoice_number' => ['nullable', 'string', 'max:60', 'regex:/^[A-Z0-9\/\-_. ]+$/'],
+            'invoice_number' => ['required', 'string', 'max:60', 'regex:/^[A-Z0-9\/\-_. ]+$/'],
             'amount' => ['required', 'numeric', 'decimal:0,2', 'min:'.$settings['minAmount'], 'max:'.$settings['maxAmount']],
             'note' => ['nullable', 'string', 'max:500'],
         ];
@@ -47,6 +47,7 @@ class StorePaymentRequest extends FormRequest
         $currency = $settings['currency'];
 
         return [
+            'invoice_number.required' => 'Enter the invoice number shown on your invoice.',
             'phone.regex' => 'Please enter a valid phone number with country code.',
             'invoice_number.regex' => 'Use only the letters, numbers and - / . shown on your invoice.',
             'amount.decimal' => 'Enter the amount with at most two decimal places.',
