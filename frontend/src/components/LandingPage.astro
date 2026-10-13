@@ -7,7 +7,7 @@ import Faq from './Faq.astro';
 import ReviewedBy from './ReviewedBy.astro';
 import Testimonials from './Testimonials.astro';
 import { getPage, getSite, getTestimonials, linkResolver } from '../lib/content';
-import { responsive, type Responsive } from '../lib/images';
+import { atHeight, responsive, type Responsive } from '../lib/images';
 import type { PageRecord } from '../lib/types';
 
 interface Props {
@@ -38,7 +38,14 @@ const wanted: [string, number[]][] = blocks.flatMap(({ config: c }) => [
   ...list<any>(c.cards ?? c.items).filter((i) => typeof i?.image === 'string').map((i) => [i.image, [400, 640]] as [string, number[]]),
 ]);
 const pictures = new Map<string, Responsive | null>(await Promise.all(wanted.map(async ([src, widths]) => [src, await responsive(src, widths)] as const)));
-const pic = (src: string) => pictures.get(src) ?? { src };
+const pic = (src: string): Responsive => pictures.get(src) ?? { src };
+/** Client logos and uploaded card icons, both shown 40px high. */
+const smallImages = blocks.flatMap(({ config: c }) => [
+  ...list<any>(c.logos).filter((l) => typeof l?.image === 'string').map((l) => l.image as string),
+  ...list<any>(c.cards ?? c.items).filter((i) => typeof i?.icon === 'string' && i.icon.startsWith('http')).map((i) => i.icon as string),
+]);
+const small = new Map(await Promise.all(smallImages.map(async (src) => [src, await atHeight(src, 40)] as const)));
+const at40 = (src: string): Responsive => small.get(src) ?? { src, height: 40 };
 const whatsapp = `https://wa.me/${site.contact.whatsapp}?text=${encodeURIComponent(`Hi, I need help with ${page.title}.`)}`;
 
 const jsonLd = faqs.length
@@ -52,7 +59,7 @@ const jsonLd = faqs.length
       case 'hero':
         return (
           <section class="relative overflow-hidden panel-map bg-brand-700 text-white">
-            {c.background_image && <img src={pic(c.background_image).src} srcset={pic(c.background_image).srcset} sizes="100vw" alt="" class="absolute inset-0 size-full object-cover opacity-20" loading="eager" decoding="async" />}
+            {c.background_image && <img src={pic(c.background_image).src} srcset={pic(c.background_image).srcset} width={pic(c.background_image).width} height={pic(c.background_image).height} sizes="100vw" alt="" class="absolute inset-0 size-full object-cover opacity-20" loading="eager" decoding="async" />}
             <div class="container-page relative grid gap-10 py-10 sm:py-16 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center">
               <div>
                 {has(c.subtitle) && <p class="eyebrow text-accent-200">{txt(c.subtitle)}</p>}
@@ -101,7 +108,7 @@ const jsonLd = faqs.length
             <div class="container-page">
               {has(c.title) && <p class="text-center text-xs font-semibold tracking-[0.15em] text-slate-500 uppercase">{txt(c.title)}</p>}
               <ul class="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
-                {logos.map((l) => <li><img src={l.image} alt={txt(l.name) || 'Client logo'} loading="lazy" class="h-10 w-auto object-contain" /></li>)}
+                {logos.map((l) => <li><img src={at40(l.image).src} width={at40(l.image).width} height={at40(l.image).height} alt={txt(l.name) || 'Client logo'} loading="lazy" decoding="async" class="h-10 w-auto object-contain" /></li>)}
               </ul>
             </div>
           </section>
@@ -125,7 +132,7 @@ const jsonLd = faqs.length
                 {has(c.cta_text) && <a href={resolve(c.cta_link) ?? '#enquire'} class="btn-primary mt-6">{txt(c.cta_text)}</a>}
               </div>
               {c.image ? (
-                <img src={pic(c.image).src} srcset={pic(c.image).srcset} sizes="(min-width: 1024px) 600px, 100vw" alt={txt(c.heading)} loading="lazy" decoding="async" class:list={['w-full rounded-2xl object-cover', c.image_position === 'left' && 'lg:order-first']} />
+                <img src={pic(c.image).src} srcset={pic(c.image).srcset} width={pic(c.image).width} height={pic(c.image).height} sizes="(min-width: 1024px) 600px, 100vw" alt={txt(c.heading)} loading="lazy" decoding="async" class:list={['w-full rounded-2xl object-cover', c.image_position === 'left' && 'lg:order-first']} />
               ) : points.length > 0 && (
                 <div class="card p-6">
                   {has(c.fact_heading, c.checklist_heading) && <p class="font-semibold text-slate-900">{txt(c.fact_heading ?? c.checklist_heading)}</p>}
@@ -156,8 +163,8 @@ const jsonLd = faqs.length
                   return (
                     <li>
                       <Tag href={href || undefined} class:list={['flex h-full flex-col p-5', href ? 'card-hover group' : 'card']}>
-                        {i.image && <img src={pic(i.image).src} srcset={pic(i.image).srcset} sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" alt="" loading="lazy" decoding="async" class="mb-4 aspect-video w-full rounded-lg object-cover" />}
-                        {!i.image && typeof i.icon === 'string' && i.icon.startsWith('http') && <img src={i.icon} alt="" loading="lazy" class="mb-3 size-10 object-contain" />}
+                        {i.image && <img src={pic(i.image).src} srcset={pic(i.image).srcset} width={pic(i.image).width} height={pic(i.image).height} sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" alt="" loading="lazy" decoding="async" class="mb-4 aspect-video w-full rounded-lg object-cover" />}
+                        {!i.image && typeof i.icon === 'string' && i.icon.startsWith('http') && <img src={at40(i.icon).src} width={at40(i.icon).width} height={at40(i.icon).height} alt="" loading="lazy" decoding="async" class="mb-3 size-10 object-contain" />}
                         <h3 class:list={['font-semibold text-slate-900', href && 'group-hover:text-brand-700']}>{txt(i.title ?? i.name)}</h3>
                         {has(i.description, i.desc) && <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{txt(i.description ?? i.desc)}</p>}
                         {href && <span class="mt-auto inline-flex items-center gap-1 pt-3 text-sm font-semibold text-brand-700">Learn more <Icon name="arrow-right" class="size-4" /></span>}

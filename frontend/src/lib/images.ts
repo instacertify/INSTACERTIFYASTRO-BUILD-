@@ -8,6 +8,9 @@ export interface Responsive {
   height?: number;
 }
 
+/** Social card for pages without their own image (public/og-default.png). */
+export const DEFAULT_SHARE_IMAGE = { src: '/og-default.png', width: 1200, height: 630 } as const;
+
 const RASTER = /\.(jpe?g|png|webp|avif)(?:[?#]|$)/i;
 const done = new Map<string, Promise<Responsive>>();
 const natural = new Map<string, ReturnType<typeof inferRemoteSize>>();
@@ -108,8 +111,12 @@ export async function responsiveHtml(input: string | null | undefined, sizes: st
       const image = await responsive(src.replace(/&amp;/g, '&'), BODY_WIDTHS);
       if (!image?.srcset) return tag;
       const declared = Number(tag.match(/\swidth="(\d+)"/i)?.[1]) || 0;
-      const fit = declared && declared < 760 ? `min(${declared}px, 100vw)` : sizes;
+      const sized = declared || /\sheight="/i.test(tag);
+      // Without a width, srcset alone would stretch a small original to the column width.
+      const shown = declared || (image.width && image.width < 760 ? image.width : 0);
+      const fit = shown && shown < 760 ? `min(${shown}px, 100vw)` : sizes;
       let out = tag.replace(/\ssrc="[^"]+"/i, ` src="${image.src}" srcset="${image.srcset}" sizes="${fit}"`);
+      if (!sized && image.width && image.height) out = out.replace(/^<img/i, `<img width="${image.width}" height="${image.height}"`);
       if (!/\sloading=/i.test(out)) out = out.replace(/^<img/i, '<img loading="lazy"');
       if (!/\sdecoding=/i.test(out)) out = out.replace(/^<img/i, '<img decoding="async"');
       return out;

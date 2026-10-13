@@ -10,7 +10,7 @@ import HeroBackdrop from './HeroBackdrop.astro';
 import ReviewProof from './ReviewProof.astro';
 import Testimonials from './Testimonials.astro';
 import { getHome, getLandingPage, getLatestPosts, getSite, getTestimonials } from '../lib/content';
-import { responsive } from '../lib/images';
+import { atHeight, responsive, type Responsive } from '../lib/images';
 import { statIcon, stepIcon } from '../lib/stepIcons';
 import { boxClass, iconAlign, rowClass, textClass } from '../lib/iconAlign';
 
@@ -75,6 +75,9 @@ const intro = c.intro?.text ? c.intro : null;
 const introImage = intro?.image ? await responsive(intro.image, [480, 760, 1140]) : null;
 const benefitsImage = c.benefits?.items?.length && c.benefits.image ? await responsive(c.benefits.image, [480, 760, 1140]) : null;
 const checklistImage = c.checklist?.groups?.length && c.checklist.image ? await responsive(c.checklist.image, [480, 760, 1140]) : null;
+/** Option marks are shown up to 96px (size-24). */
+const optionImages = new Map(await Promise.all((c.options?.items ?? []).flatMap((o) => (o.image ? [o.image] : [])).map(async (src) => [src, await atHeight(src, 96)] as const)));
+const optionImage = (src: string): Responsive => optionImages.get(src) ?? { src };
 
 /*
  * Only audits relevant to the page are shown: those tagged with the page's certifications (and work types) when the
@@ -106,6 +109,11 @@ const workItems = work.hidden
         .slice(0, 6)
         .map(async (item) => ({ ...item, img: (await responsive(item.image, [400, 760]))! })),
     );
+/** Tiles are cropped to 4:3; a wider photo has to be drawn wider than its tile to fill it. */
+const workSizes = (img: Responsive) => {
+  const k = img.width && img.height ? Math.max(1, img.width / img.height / (4 / 3)) : 1;
+  return `(min-width: 1024px) ${Math.round(400 * k)}px, (min-width: 640px) ${Math.round(50 * k)}vw, ${Math.round(80 * k)}vw`;
+};
 
 /* Reviews come from the website-wide testimonials; those that mention this page's service are shown first. */
 const reviewTerms = [...new Set([...words, ...(work.schemes ?? []).flatMap((s) => s.split('-'))])];
@@ -307,7 +315,7 @@ if (c.faqs?.items?.length) {
             <article class="flex flex-col rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-6">
               <div class:list={['flex gap-4 sm:gap-5', rowClass[align.options], align.options !== 'center' && 'items-start']}>
                 {o.image ? (
-                  <img src={o.image} alt={o.image_alt || `${o.title} mark`} loading="lazy" decoding="async" class="size-20 shrink-0 object-contain sm:size-24" />
+                  <img src={optionImage(o.image).src} width={optionImage(o.image).width} height={optionImage(o.image).height} alt={o.image_alt || `${o.title} mark`} loading="lazy" decoding="async" class="size-20 shrink-0 object-contain sm:size-24" />
                 ) : o.icon || o.iconImage ? (
                   <span class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><MaterialIcon name={o.icon} src={o.iconImage} class="size-8" /></span>
                 ) : null}
@@ -420,7 +428,7 @@ if (c.faqs?.items?.length) {
                 <img
                   src={item.img.src}
                   srcset={item.img.srcset}
-                  sizes="(min-width: 1024px) 25rem, (min-width: 640px) 50vw, 80vw"
+                  sizes={workSizes(item.img)}
                   width={item.img.width}
                   height={item.img.height}
                   alt={item.alt}

@@ -10,7 +10,7 @@ import LeadDialog from '../components/LeadDialog.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import { socialLinks } from '../lib/social';
 import { getSite, linkResolver } from '../lib/content';
-import { atHeight } from '../lib/images';
+import { DEFAULT_SHARE_IMAGE, atHeight } from '../lib/images';
 import type { Link, Seo } from '../lib/types';
 
 interface Props {
@@ -51,7 +51,7 @@ interface Props {
 const {
   title: rawTitle,
   description: rawDescription,
-  image = '/og-default.png',
+  image = DEFAULT_SHARE_IMAGE.src,
   noindex = false,
   canonical: canonicalOverride,
   type = 'website',
@@ -81,6 +81,7 @@ const pathname = Astro.url.pathname.replace(/\.html$/, '').replace(/\/index$/, '
 // Admin-entered canonicals may carry www, a trailing slash or a retired URL; point them at the live page.
 const canonical = new URL(resolveLink(canonicalOverride) ?? pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
+const [ogWidth, ogHeight] = image === DEFAULT_SHARE_IMAGE.src ? [DEFAULT_SHARE_IMAGE.width, DEFAULT_SHARE_IMAGE.height] : [imageWidth, imageHeight];
 const socialTitle = ogTitle || seo?.ogTitle || title;
 const socialDescription = ogDescription || seo?.ogDescription || description;
 const hidden = noindex || /noindex/i.test(seo?.robots ?? '');
@@ -163,8 +164,8 @@ const ldJson = (schema: Record<string, unknown>) => JSON.stringify(schema).repla
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     {ogImage.protocol === 'https:' && <meta property="og:image:secure_url" content={ogImage} />}
-    {imageWidth && imageHeight && <meta property="og:image:width" content={String(imageWidth)} />}
-    {imageWidth && imageHeight && <meta property="og:image:height" content={String(imageHeight)} />}
+    {ogWidth && ogHeight && <meta property="og:image:width" content={String(ogWidth)} />}
+    {ogWidth && ogHeight && <meta property="og:image:height" content={String(ogHeight)} />}
     {imageAlt && <meta property="og:image:alt" content={imageAlt} />}
     {published && <meta property="article:published_time" content={published} />}
     {modified && <meta property="article:modified_time" content={modified} />}

@@ -36,8 +36,8 @@ const photos = await Promise.all(industries.map((ind) => responsive(ind.image, [
         <article class="card flex flex-col overflow-hidden sm:flex-row">
           <a href={ind.url} tabindex="-1" aria-hidden="true" class="shrink-0">
             {photo ? (
-              <img src={photo.src} srcset={photo.srcset} sizes="(min-width: 640px) 224px, 100vw" alt={ind.name} loading="lazy" decoding="async" class="h-44 w-full object-cover sm:h-full sm:w-56" />
-            ) : img && <Image src={img} alt={ind.name} widths={[320, 480]} sizes="(min-width: 640px) 220px, 100vw" class="h-44 w-full object-cover sm:h-full sm:w-56" />}
+              <img src={photo.src} srcset={photo.srcset} sizes="(min-width: 640px) 360px, 100vw" alt={ind.name} loading="lazy" decoding="async" class="h-44 w-full object-cover sm:h-full sm:w-56" />
+            ) : img && <Image src={img} alt={ind.name} widths={[320, 480]} sizes="(min-width: 640px) 360px, 100vw" class="h-44 w-full object-cover sm:h-full sm:w-56" />}
           </a>
           <div class="flex flex-1 flex-col p-5">
             <h2 class="text-lg font-semibold">

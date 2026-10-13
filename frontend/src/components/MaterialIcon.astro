@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+import { atHeight } from '../lib/images';
 
 /** Google Material Symbols (Rounded), inlined at build time so no icon font is downloaded. Names as on fonts.google.com/icons. */
 interface Props {
@@ -26,6 +27,8 @@ function load(icon: string): string | null {
   }
 }
 
+// Uploaded icons are shown at most 40px high.
+const image = await atHeight(src, 40);
 let body = '';
 if (!src) {
   const key = (name ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
@@ -38,8 +41,8 @@ if (!src) {
 }
 ---
 
-{src ? (
-  <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" class:list={[className, 'object-contain']} />
+{image ? (
+  <img src={image.src} width={image.width} height={image.height} alt="" aria-hidden="true" loading="lazy" decoding="async" class:list={[className, 'object-contain']} />
 ) : (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true" class={className} set:html={body} />
 )}

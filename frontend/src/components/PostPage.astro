@@ -11,7 +11,7 @@ import { POST_TYPES, formatDate, getPosts, getSite } from '../lib/content';
 import { breadcrumbSchema } from '../lib/breadcrumbs';
 import { createAutolinker } from '../lib/autolink';
 import { fixHeadings } from '../lib/outline';
-import { responsive, responsiveHtml } from '../lib/images';
+import { DEFAULT_SHARE_IMAGE, responsive, responsiveHtml } from '../lib/images';
 import type { Post } from '../lib/types';
 
 interface Props {
@@ -36,7 +36,7 @@ const imageWidth = post.imageWidth ?? null;
 const imageHeight = post.imageHeight ?? null;
 const imageObject = post.image
   ? { '@type': 'ImageObject', url: post.image, width: imageWidth ?? undefined, height: imageHeight ?? undefined, caption: post.imageAlt ?? undefined }
-  : undefined;
+  : { '@type': 'ImageObject', url: `${site.url}${DEFAULT_SHARE_IMAGE.src}`, width: DEFAULT_SHARE_IMAGE.width, height: DEFAULT_SHARE_IMAGE.height };
 const editorial = { name: `${site.name} Editorial Team`, url: '/about' };
 const authorUrl = post.author ? `${site.url}${post.author.url}` : `${site.url}${editorial.url}`;
 const wordCount = post.content ? post.content.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length : undefined;
