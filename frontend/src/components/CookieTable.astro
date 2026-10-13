@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import { cookieCatalog } from '../lib/cookies';
+import { mainEntity } from '../lib/entities';
 import type { Site } from '../lib/types';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 const { site } = Astro.props;
 const categories = cookieCatalog(site, !!import.meta.env.PUBLIC_MATOMO_URL);
 const privacy = site.privacy;
+const entity = mainEntity(site);
 ---
 
 <section class="mt-12 max-w-4xl" aria-labelledby="cookie-table-title">
@@ -54,7 +56,7 @@ const privacy = site.privacy;
   {privacy && (
     <div class="mt-10 rounded-2xl bg-brand-50/60 p-5 text-sm text-slate-700">
       <p class="font-semibold text-slate-900">Grievance Officer</p>
-      <p class="mt-1">{privacy.grievanceOfficer}, Instacertify Labs Private Limited, {site.contact.address}</p>
+      <p class="mt-1">{privacy.grievanceOfficer}, {entity.name}, {entity.address}</p>
       <p class="mt-1">Email: <a href={`mailto:${privacy.grievanceEmail}`} class="font-semibold text-brand-700 underline">{privacy.grievanceEmail}</a> · Phone: <a href={`tel:${site.contact.phoneE164}`} class="font-semibold text-brand-700 underline">{site.contact.phone}</a></p>
       <p class="mt-2 text-slate-600">We acknowledge requests promptly and aim to resolve them within 30 days.</p>
     </div>

@@ -1,4 +1,5 @@
 ---
+import { mainEntity } from '../lib/entities';
 import type { Site } from '../lib/types';
 
 interface Props {
@@ -6,6 +7,7 @@ interface Props {
 }
 
 const { site } = Astro.props;
+const entity = mainEntity(site);
 const year = new Date().getFullYear();
 const links = [
   { label: 'About us', href: '/about' },
@@ -18,7 +20,7 @@ const links = [
 <footer class="border-t border-slate-200 surface-tint text-sm text-slate-600">
   <div class="container-page space-y-3 py-8">
     <p>
-      <strong class="font-semibold text-slate-800">Instacertify Labs Private Limited</strong> · CIN U74999UP2022PTC170291 · {site.contact.address}
+      <strong class="font-semibold text-slate-800">{entity.name}</strong>{entity.registration && ` · ${entity.registration}`} · {entity.address}
     </p>
     <p>
       <a href={`tel:${site.contact.phoneE164}`} class="tap hover:text-brand-700">{site.contact.phone}</a>{' · '}

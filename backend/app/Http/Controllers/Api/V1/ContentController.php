@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\IndustryResource;
 use App\Http\Resources\ServiceResource;
 use App\Models\Industry;
+use App\Models\LegalEntity;
 use App\Models\Office;
 use App\Models\Service;
 use App\Models\Setting;
@@ -43,6 +44,7 @@ class ContentController extends Controller
         $site['careers'] = Careers::settings();
         $site['contactBoxes'] = ContactBoxes::settings();
         $site['payments'] = PaymentSettings::forSite();
+        $site['entities'] = LegalEntity::forSite();
         $site['integrations'] = [...($site['integrations'] ?? []), 'serverSide' => ConversionApis::publicFlags()];
         $site['offices'] = Office::published()->orderBy('sort')->orderBy('id')->get()
             ->map(fn (Office $office) => [

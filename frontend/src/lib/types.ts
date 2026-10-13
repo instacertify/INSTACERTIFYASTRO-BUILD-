@@ -60,6 +60,19 @@ export interface Integrations {
   serverSide?: { ga4?: string | null; uet?: boolean; linkedin?: boolean } | null;
 }
 
+export interface LegalEntity {
+  name: string;
+  market: string;
+  country: string;
+  registrationLabel: string | null;
+  registrationNumber: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  primary: boolean;
+  showOnWebsite: boolean;
+}
+
 export interface Site {
   name: string;
   tagline: string;
@@ -91,6 +104,8 @@ export interface Site {
     heading: string;
     intro: string;
   };
+  /** Admin → Settings → Company entities: the companies sharing the brand, main company first. */
+  entities?: LegalEntity[];
   integrations?: Integrations;
   offices?: Office[];
   social?: Partial<Record<'linkedin' | 'youtube' | 'instagram' | 'facebook' | 'twitter' | 'pinterest', string | null>>;

@@ -62,7 +62,7 @@ class AppServiceProvider extends ServiceProvider
                 Models\LandingPage::class, Models\Scheme::class,
             ],
             CrmPolicy::class => [Models\Lead::class, Models\Subscriber::class, Models\Payment::class],
-            AdminPolicy::class => [Models\User::class, Models\ConsentLog::class, Activity::class, PersonalAccessToken::class],
+            AdminPolicy::class => [Models\User::class, Models\ConsentLog::class, Activity::class, PersonalAccessToken::class, Models\LegalEntity::class],
             VacancyPolicy::class => [Models\Vacancy::class],
             JobApplicationPolicy::class => [Models\JobApplication::class],
         ];
@@ -76,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
         // Listeners must not return false: that stops the listeners after them (e.g. the activity log).
         // A save that changes nothing (e.g. pressing Save twice) leaves the website as it is.
         $changed = fn (Model $model): bool => array_diff(array_keys($model->getChanges()), [$model->getUpdatedAtColumn()]) !== [];
-        foreach ([...$policies[ContentPolicy::class], Models\Vacancy::class, Models\SchemeLink::class] as $model) {
+        foreach ([...$policies[ContentPolicy::class], Models\Vacancy::class, Models\SchemeLink::class, Models\LegalEntity::class] as $model) {
             $model::created(fn () => SitePublisher::queue());
             $model::updated(function (Model $record) use ($changed): void {
                 if ($changed($record)) {

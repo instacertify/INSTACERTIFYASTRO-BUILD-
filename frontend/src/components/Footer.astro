@@ -6,6 +6,7 @@ import NewsletterForm from './NewsletterForm.astro';
 import type { Site } from '../lib/types';
 import { getContactBoxes } from '../lib/content';
 import { socialLinks } from '../lib/social';
+import { shownEntities } from '../lib/entities';
 
 interface Props {
   site: Site;
@@ -14,6 +15,7 @@ interface Props {
 const { site } = Astro.props;
 const { footerLocation } = await getContactBoxes();
 const social = socialLinks(site);
+const entities = shownEntities(site);
 const year = new Date().getFullYear();
 const newsletter = site.footer.newsletter === undefined
   ? { title: 'Regulatory updates', text: 'New QCOs, BIS deadlines and standard revisions — one short email a month.' }
@@ -96,14 +98,26 @@ const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURICompo
           <div class="col-span-2 sm:col-span-1">
             <p class="text-base font-semibold text-white">Contact {site.name}</p>
             <ul class="mt-4 space-y-3 text-sm">
-              <li class="font-semibold text-white">Instacertify Labs Private Limited</li>
-              <li class="flex gap-2.5"><Icon name="map-pin" class="mt-0.5 size-4 shrink-0 text-accent-400" />{site.contact.address}</li>
               <li><a href={`tel:${site.contact.phoneE164}`} class="-my-2 inline-flex items-center gap-2.5 py-2 hover:text-white"><Icon name="phone" class="size-4 text-accent-400" />{site.contact.phone}</a></li>
               <li><a href={`mailto:${site.contact.email}`} class="-my-2 inline-flex items-center gap-2.5 py-2 hover:text-white"><Icon name="mail" class="size-4 shrink-0 text-accent-400" />{site.contact.email}</a></li>
               <li class="flex gap-2.5"><Icon name="clock" class="mt-0.5 size-4 shrink-0 text-accent-400" />{site.contact.hours}</li>
             </ul>
           </div>
         </div>
+
+        {entities.length > 0 && (
+          <ul class:list={['mt-10 grid gap-6 border-t border-white/15 pt-8 text-sm lg:pb-10', entities.length > 1 && 'sm:grid-cols-2']}>
+            {entities.map((e) => (
+              <li>
+                {entities.length > 1 && <p class="text-xs font-semibold tracking-wider text-accent-400 uppercase">{e.market}</p>}
+                <p class="mt-1 font-semibold text-white">{e.name}</p>
+                {e.address && <p class="mt-2 flex gap-2.5"><Icon name="map-pin" class="mt-0.5 size-4 shrink-0 text-accent-400" />{e.address}</p>}
+                {e.phone && <a href={`tel:${e.phone.replace(/[^\d+]/g, '')}`} class="mt-2 flex items-center gap-2.5 hover:text-white"><Icon name="phone" class="size-4 text-accent-400" />{e.phone}</a>}
+                {e.email && <a href={`mailto:${e.email}`} class="mt-2 flex items-center gap-2.5 hover:text-white"><Icon name="mail" class="size-4 shrink-0 text-accent-400" />{e.email}</a>}
+              </li>
+            ))}
+          </ul>
+        )}
 
         <div class="mt-10 flex flex-col gap-5 border-t border-white/15 pt-8 sm:flex-row sm:items-center lg:mt-auto">
           {social.length > 0 && (

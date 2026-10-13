@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import MaterialIcon from '../components/MaterialIcon.astro';
 import { getContactBoxes, getSite } from '../lib/content';
+import { mainEntity } from '../lib/entities';
 
 const [site, { thankYou: copy }] = await Promise.all([getSite(), getContactBoxes()]);
 const waBase = `https://wa.me/${site.contact.whatsapp}`;
@@ -68,7 +69,7 @@ const line = `${copy.text.trim().replace(/[.\s]+$/, '')}${site.contact.hours ? `
     <div class="container-page max-w-4xl py-8">
       <h2 id="declaration-h" class="flex items-center gap-2 text-sm font-bold text-slate-800"><Icon name="shield" class="size-4 shrink-0 text-brand-700" />Declaration</h2>
       <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
-        Instacertify Labs Private Limited is a private consulting company and testing marketplace. We are not a government body and are not affiliated with, endorsed by or
+        {mainEntity(site).name} is a private consulting company and testing marketplace. We are not a government body and are not affiliated with, endorsed by or
         acting for any government department, regulator or certification authority. Testing is carried out by independent accredited partner laboratories; we coordinate it on
         your behalf. Certificates, registrations and licences are issued only by the relevant authority or certification body.
       </p>

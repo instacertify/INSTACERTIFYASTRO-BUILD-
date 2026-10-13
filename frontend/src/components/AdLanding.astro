@@ -10,6 +10,7 @@ import HeroBackdrop from './HeroBackdrop.astro';
 import ReviewProof from './ReviewProof.astro';
 import Testimonials from './Testimonials.astro';
 import { getHome, getLandingPage, getLatestPosts, getSite, getTestimonials } from '../lib/content';
+import { mainEntity } from '../lib/entities';
 import { atHeight, responsive, type Responsive } from '../lib/images';
 import { statIcon, stepIcon } from '../lib/stepIcons';
 import { boxClass, iconAlign, rowClass, textClass } from '../lib/iconAlign';
@@ -40,7 +41,7 @@ const waHref = `https://wa.me/${site.contact.whatsapp}?text=${encodeURIComponent
 const thankYou = `/thank-you?for=${encodeURIComponent(topic)}`;
 const disclaimer =
   c.disclaimer ??
-  'Instacertify Labs Private Limited is a private consulting company and testing marketplace. We are not a government body and are not affiliated with, endorsed by or acting for any government department, regulator or certification authority. Testing is carried out by independent accredited partner laboratories; we coordinate it on your behalf. Certificates, registrations and licences are issued only by the relevant authority or certification body. Government and laboratory fees are charged at actuals unless your quote says they are included.';
+  `${mainEntity(site).name} is a private consulting company and testing marketplace. We are not a government body and are not affiliated with, endorsed by or acting for any government department, regulator or certification authority. Testing is carried out by independent accredited partner laboratories; we coordinate it on your behalf. Certificates, registrations and licences are issued only by the relevant authority or certification body. Government and laboratory fees are charged at actuals unless your quote says they are included.`;
 const telHref = `tel:${site.contact.phoneE164}`;
 /* 48px tall: Google's minimum comfortable tap target. */
 const ctaClass = 'btn min-h-12 bg-cta px-6 text-base font-semibold text-white shadow-sm hover:bg-cta-hover sm:text-[1.0625rem]';
