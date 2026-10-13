@@ -342,7 +342,7 @@ const eventName = (title: string) => {
   )}
 
   {whatWeDo && shown(whatWeDo) && whatWeDo.items?.length > 0 && (
-    <section class="section surface-tint" aria-labelledby="what-we-do-h">
+    <section class="section-tight surface-tint" aria-labelledby="what-we-do-h">
       <div class="container-page">
         <div class="mx-auto max-w-2xl text-center">
           {whatWeDo.eyebrow && <p class="eyebrow mb-2">{whatWeDo.eyebrow}</p>}
@@ -377,7 +377,7 @@ const eventName = (title: string) => {
   )}
 
   {shown(process) && process.items?.length > 0 && (
-    <section id="how-it-works" class="section scroll-mt-16 panel-map bg-brand-700 text-brand-100" style={`--steps: ${stepColumns}`} aria-labelledby="how-it-works-h">
+    <section id="how-it-works" class="section-tight scroll-mt-16 panel-map bg-brand-700 text-brand-100" style={`--steps: ${stepColumns}`} aria-labelledby="how-it-works-h">
       <div class="container-page">
         <div class="mx-auto max-w-2xl sm:text-center">
           {process.eyebrow && <p class="eyebrow mb-2 text-accent-200">{process.eyebrow}</p>}
@@ -413,7 +413,7 @@ const eventName = (title: string) => {
   )}
 
   {shown(home.industries) && industries.length > 0 && (
-    <section class="section defer-render">
+    <section class="section-tight defer-render">
       <div class="container-page">
         <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div class="max-w-2xl">
@@ -451,7 +451,7 @@ const eventName = (title: string) => {
   )}
 
   {fieldwork && shown(fieldwork) && (leadAudit || homeEvents.length > 0) && (
-    <section class="section defer-render surface-tint" aria-labelledby="fieldwork-h">
+    <section class="section-tight defer-render surface-tint" aria-labelledby="fieldwork-h">
       <div class="container-page">
         <div class="max-w-2xl">
           {fieldwork.eyebrow && <p class="eyebrow mb-2">{fieldwork.eyebrow}</p>}
@@ -533,7 +533,7 @@ const eventName = (title: string) => {
   )}
 
   {((shown(popular) && lead) || shown(marksSection)) && (
-    <section class="section defer-render">
+    <section class="section-tight defer-render">
       <div class="container-page">
         <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
@@ -582,7 +582,7 @@ const eventName = (title: string) => {
   )}
 
   {shown(explore) && exploreTabs.length > 0 && (
-    <section class="section defer-render surface-tint" aria-labelledby="explore-h">
+    <section class="section-tight defer-render surface-tint" aria-labelledby="explore-h">
       <div class="container-page">
         <div class="max-w-2xl">
           {explore.eyebrow && <p class="eyebrow mb-2">{explore.eyebrow}</p>}
@@ -638,7 +638,7 @@ const eventName = (title: string) => {
   )}
 
   {latest && latestColumns.length > 0 && (
-    <section class="section defer-render" style={`--latest: repeat(${latestColumns.length}, minmax(0, 1fr))`} aria-labelledby="latest-h">
+    <section class="section-tight defer-render" style={`--latest: repeat(${latestColumns.length}, minmax(0, 1fr))`} aria-labelledby="latest-h">
       <div class="container-page">
         <div class="max-w-2xl">
           {latest.eyebrow && <p class="eyebrow mb-2">{latest.eyebrow}</p>}
@@ -684,7 +684,7 @@ const eventName = (title: string) => {
   )}
 
   {shown(whyUs) && (
-    <section class="section defer-render border-t border-slate-200" aria-labelledby="why-h">
+    <section class="section-tight defer-render border-t border-slate-200" aria-labelledby="why-h">
       <div class="container-page grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
         <div>
           {whyUs.eyebrow && <p class="eyebrow mb-2">{whyUs.eyebrow}</p>}
@@ -708,7 +708,7 @@ const eventName = (title: string) => {
   )}
 
   {shown(home.testimonials) && testimonials.length > 0 && (
-    <section class="section defer-render surface-tint">
+    <section class="section-tight defer-render surface-tint">
       <div class="container-page">
         <div class="max-w-2xl">
           {home.testimonials.eyebrow && <p class="eyebrow mb-2">{home.testimonials.eyebrow}</p>}
@@ -720,7 +720,7 @@ const eventName = (title: string) => {
   )}
 
   {shown(promos) && promoCards.length > 0 && (
-    <section class="section defer-render">
+    <section class="section-tight defer-render">
       <div class="container-page grid gap-4 md:grid-cols-2">
         {promoCards.map((p) => (
           <a href={p.href || undefined} class="card-hover group flex gap-5 overflow-hidden p-4">
@@ -745,7 +745,7 @@ const eventName = (title: string) => {
   )}
 
   {shown(faq) && faq.items?.length > 0 && (
-    <section class="section defer-render">
+    <section class="section-tight defer-render">
       <div class="container-page">
         {faq.eyebrow && <p class="eyebrow mb-2">{faq.eyebrow}</p>}
         <h2 class="text-2xl section-title sm:text-3xl">{faq.heading}</h2>
