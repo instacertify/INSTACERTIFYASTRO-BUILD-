@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Components\IconPicker;
 use App\Filament\Pages\ManageHomePage;
+use App\Models\Event;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\HomePage;
@@ -168,6 +169,35 @@ class HomePageTest extends TestCase
             ->assertJsonPath('data.home.whatWeDo.heading', 'Our services')
             ->assertJsonPath('data.home.whatWeDo.items.0.title', 'Inspection')
             ->assertJsonPath('data.home.whatWeDo.items.0.iconImage', null);
+    }
+
+    public function test_home_events_and_latest_resources_are_chosen_in_the_admin(): void
+    {
+        $this->assertSame(['blog', 'news', 'update'], HomePage::settings()['latest']['types']);
+        $this->assertSame('upcoming', HomePage::settings()['fieldwork']['eventsShow']);
+        Event::create(['title' => 'Electronica', 'slug' => 'electronica', 'starts_at' => now()->addMonth(), 'status' => 'published']);
+        Event::create(['title' => 'IFA', 'slug' => 'ifa', 'starts_at' => now()->subMonth(), 'status' => 'published']);
+        $this->actingAs(User::factory()->create(['role' => 'editor']));
+
+        Livewire::test(ManageHomePage::class)
+            ->set('data.fieldwork.eventsShow', 'picked')
+            ->call('save')
+            ->assertHasErrors(['data.fieldwork.events']);
+
+        Livewire::test(ManageHomePage::class)
+            ->set('data.fieldwork.eventsShow', 'picked')
+            ->set('data.fieldwork.events', ['ifa', 'electronica'])
+            ->set('data.latest.types', ['news', 'blog'])
+            ->set('data.latest.perType', 4)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->getJson('/api/v1/site')
+            ->assertJsonPath('data.home.fieldwork.eventsShow', 'picked')
+            ->assertJsonPath('data.home.fieldwork.events', ['ifa', 'electronica'])
+            ->assertJsonPath('data.home.latest.types', ['news', 'blog'])
+            ->assertJsonPath('data.home.latest.perType', 4);
+        $this->assertNotNull($this->getJson('/api/v1/events')->json('data.0.publishedAt'));
     }
 
     public function test_unknown_icons_are_rejected(): void

@@ -7,12 +7,15 @@ use App\Filament\Components\IconPicker;
 use App\Filament\Components\ImageUpload;
 use App\Filament\Components\RichSnippetFields;
 use App\Filament\Concerns\PreviewsOnWebsite;
+use App\Models\Event;
+use App\Models\Post;
 use App\Models\Service;
 use App\Models\Setting;
 use App\Support\HomePage;
 use App\Support\Preview;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -227,10 +230,36 @@ class ManageHomePage extends Page
                         ->description('The testimonials themselves are managed under Website → Testimonials.')
                         ->schema(self::sectionHeading()),
                     Section::make('Audits & events')->statePath('fieldwork')->compact()->columns(2)
-                        ->description('Shown after the industries. Lists the 3 newest articles from Audits & inspections and the next 4 upcoming trade fairs automatically.')
+                        ->description('Shown after the industries. Lists the 3 newest articles from Audits & inspections beside the events chosen below.')
                         ->schema([
                             ...self::sectionHeading(),
                             TextInput::make('intro')->label('Line under the heading')->maxLength(160)->columnSpanFull(),
+                            Select::make('eventsShow')->label('Events to show')->live()->selectablePlaceholder(false)->default('upcoming')
+                                ->options([
+                                    'upcoming' => 'Next upcoming events (recent past ones fill any gap)',
+                                    'recent' => 'Most recently added events',
+                                    'picked' => 'Only the events I pick',
+                                ]),
+                            Select::make('eventsCount')->label('How many')->options(array_combine(range(2, 6), range(2, 6)))
+                                ->default(4)->selectablePlaceholder(false)
+                                ->visible(fn ($get) => $get('eventsShow') !== 'picked'),
+                            Select::make('events')->label('Events')->multiple()->maxItems(6)->searchable()->columnSpanFull()
+                                ->options(fn () => Event::published()->orderByDesc('starts_at')->pluck('title', 'slug')->all())
+                                ->helperText('Shown in the order you pick them; past and upcoming events alike.')
+                                ->visible(fn ($get) => $get('eventsShow') === 'picked')
+                                ->required(fn ($get) => $get('eventsShow') === 'picked'),
+                            TextInput::make('eventsHeading')->label('Events column heading')->maxLength(60)->columnSpanFull()
+                                ->placeholder('Upcoming trade fairs')
+                                ->helperText('Leave empty for “Upcoming trade fairs”, or “Trade fairs & events” when past events are among them.'),
+                        ]),
+                    Section::make('Latest resources')->statePath('latest')->compact()->columns(2)
+                        ->description('The newest posts from each section ticked below, one column per section. Updates itself on every build.')
+                        ->schema([
+                            ...self::sectionHeading(),
+                            TextInput::make('intro')->label('Line under the heading')->maxLength(160)->columnSpanFull(),
+                            CheckboxList::make('types')->label('Sections')->options(Post::SECTIONS)->columns(2)->required(),
+                            Select::make('perType')->label('Posts per section')->options(array_combine(range(2, 5), range(2, 5)))
+                                ->default(3)->selectablePlaceholder(false),
                         ]),
                     Section::make('Promo cards')->statePath('promos')->compact()->schema([
                         Toggle::make('visible')->label('Show this section'),

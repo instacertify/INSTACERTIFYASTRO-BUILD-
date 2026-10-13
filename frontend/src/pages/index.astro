@@ -10,11 +10,11 @@ import CtaBand from '../components/CtaBand.astro';
 import LogoMarquee from '../components/LogoMarquee.astro';
 import HeroGlobe, { type GlobeMarket } from '../components/HeroGlobe.astro';
 import SiteSearch from '../components/SiteSearch.astro';
-import { KINDS, REGIONS, eventPlace, formatDate, getEvents, getHome, getIndustries, getLatestPosts, getServices, getSite, getTestimonials, serviceIcon } from '../lib/content';
+import { KINDS, POST_TYPES, REGIONS, eventPlace, formatDate, getEvents, getHome, getIndustries, getLatestPosts, getServices, getSite, getTestimonials, serviceIcon } from '../lib/content';
 import { responsive } from '../lib/images';
 import { stepIcon } from '../lib/stepIcons';
 import { boxClass, iconAlign, rowClass, selfClass, stackClass, textClass } from '../lib/iconAlign';
-import type { Service } from '../lib/types';
+import type { EventItem, Post, PostType, Service } from '../lib/types';
 
 import crs from '../assets/marks/crs.png';
 import isi from '../assets/marks/isi.png';
@@ -184,18 +184,45 @@ const showLogos = home.clientLogosEnabled !== false && (home.clientLogos ?? []).
 const showStats = shown(stats) && (stats.items?.length ?? 0) > 0;
 
 const fieldwork = home.fieldwork;
-const [audits, events] = shown(fieldwork) ? await Promise.all([getLatestPosts('audit', 3), getEvents()]) : [[], []];
+const latest = home.latest;
+const latestTypes = shown(latest) ? (latest?.types ?? []).filter((t) => t in POST_TYPES) : [];
+const perType = Math.min(Math.max(Number(latest?.perType) || 3, 2), 5);
+const [audits, events, latestPosts] = await Promise.all([
+  shown(fieldwork) ? getLatestPosts('audit', 3) : [],
+  shown(fieldwork) ? getEvents() : [],
+  Promise.all(latestTypes.map((type) => getLatestPosts(type, perType))),
+]);
 const [leadAudit, ...moreAudits] = audits;
-const [leadAuditImage, moreAuditImages, industryPhotos] = await Promise.all([
+const [leadAuditImage, moreAuditImages, industryPhotos, latestImages] = await Promise.all([
   responsive(leadAudit?.image, [480, 720, 960]),
   Promise.all(moreAudits.map((p) => responsive(p.image, [112, 224]))),
   Promise.all(industries.map((ind) => responsive(ind.image, [400, 640, 800]))),
+  Promise.all(latestPosts.map((posts) => responsive(posts[0]?.image, [400, 640, 800]))),
 ]);
+const latestColumns = latestTypes
+  .map((type, i) => ({ type, posts: latestPosts[i], image: latestImages[i] }))
+  .filter((c) => c.posts.length > 0);
+const postTypeIcon: Record<PostType, string> = { blog: 'article', news: 'newspaper', update: 'campaign', audit: 'factory' };
+/** Banners often carry text, so only images close to the 2.2:1 frame are cropped to fill it. */
+const croppable = (p: Post) => !p.imageWidth || !p.imageHeight || Math.abs(p.imageWidth / p.imageHeight - 2.2) < 0.25;
+
 const today = new Date().toISOString().slice(0, 10);
-const upcomingEvents = events
-  .filter((e) => (e.endsAt ?? e.startsAt).slice(0, 10) >= today)
-  .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
-  .slice(0, 4);
+const isPast = (e: EventItem) => (e.endsAt ?? e.startsAt).slice(0, 10) < today;
+const eventCount = Math.min(Math.max(Number(fieldwork?.eventsCount) || 4, 2), 6);
+const homeEvents = ((): EventItem[] => {
+  if (fieldwork?.eventsShow === 'picked') {
+    const bySlug = new Map(events.map((e) => [e.slug, e]));
+    return (fieldwork.events ?? []).flatMap((slug) => bySlug.get(slug) ?? []);
+  }
+  if (fieldwork?.eventsShow === 'recent') {
+    const added = (e: EventItem) => e.publishedAt ?? e.updatedAt ?? '';
+    return [...events].sort((a, b) => added(b).localeCompare(added(a)) || b.startsAt.localeCompare(a.startsAt)).slice(0, eventCount);
+  }
+  const upcoming = events.filter((e) => !isPast(e)).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  const past = events.filter(isPast).sort((a, b) => b.startsAt.localeCompare(a.startsAt));
+  return [...upcoming, ...past].slice(0, eventCount);
+})();
+const eventsHeading = fieldwork?.eventsHeading || (homeEvents.some(isPast) ? 'Trade fairs & events' : 'Upcoming trade fairs');
 /** "Electronica 2026 | Global Electronics Trade Fair Munich" → name and tagline. */
 const eventName = (title: string) => {
   const [name, ...rest] = title.split(' | ');
@@ -423,7 +450,7 @@ const eventName = (title: string) => {
     </section>
   )}
 
-  {fieldwork && shown(fieldwork) && (leadAudit || upcomingEvents.length > 0) && (
+  {fieldwork && shown(fieldwork) && (leadAudit || homeEvents.length > 0) && (
     <section class="section defer-render surface-tint" aria-labelledby="fieldwork-h">
       <div class="container-page">
         <div class="max-w-2xl">
@@ -465,24 +492,28 @@ const eventName = (title: string) => {
               )}
             </div>
           )}
-          {upcomingEvents.length > 0 && (
+          {homeEvents.length > 0 && (
             <div>
               <div class="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
-                <h3 class="flex items-center gap-2 text-lg font-bold text-slate-950"><MaterialIcon name="event" class="size-5 text-brand-700" />Upcoming trade fairs</h3>
+                <h3 class="flex items-center gap-2 text-lg font-bold text-slate-950"><MaterialIcon name="event" class="size-5 text-brand-700" />{eventsHeading}</h3>
                 <a href="/resources/events" class="-my-3 inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">All events <Icon name="arrow-right" class="size-4" /></a>
               </div>
               <ul class="divide-y divide-slate-200">
-                {upcomingEvents.map((e) => {
+                {homeEvents.map((e) => {
                   const { name, tagline } = eventName(e.title);
                   return (
                     <li>
                       <a href={e.url} class="group flex items-start gap-4 py-4">
-                        <span class="flex w-14 shrink-0 flex-col items-center rounded-lg border border-slate-200 bg-white py-2 text-brand-700">
+                        <span class:list={['flex w-14 shrink-0 flex-col items-center rounded-lg border py-2', isPast(e) ? 'border-slate-200 bg-slate-50 text-slate-500' : 'border-slate-200 bg-white text-brand-700']}>
                           <span class="text-xs font-semibold uppercase">{formatDate(e.startsAt, { month: 'short' })}</span>
                           <span class="text-xl leading-none font-bold">{formatDate(e.startsAt, { day: 'numeric' })}</span>
+                          {isPast(e) && <span class="mt-0.5 text-[0.6875rem] font-medium">{formatDate(e.startsAt, { year: 'numeric' })}</span>}
                         </span>
                         <span class="min-w-0 pt-0.5">
-                          <span class="block font-semibold text-slate-900 group-hover:text-brand-700">{name}</span>
+                          <span class="block font-semibold text-slate-900 group-hover:text-brand-700">
+                            {name}
+                            {isPast(e) && <span class="ml-1.5 rounded bg-slate-100 px-1.5 py-0.5 align-middle text-xs font-medium text-slate-600">Past event</span>}
+                          </span>
                           {tagline && <span class="mt-0.5 block line-clamp-1 text-sm text-slate-600">{tagline}</span>}
                           {eventPlace(e) && <span class="mt-0.5 flex items-center gap-1 text-sm text-slate-500"><Icon name="map-pin" class="size-3.5 shrink-0" /><span class="truncate">{eventPlace(e)}</span></span>}
                         </span>
@@ -598,6 +629,52 @@ const eventName = (title: string) => {
                 <a href={t.href} class="btn-secondary mt-6">
                   {t.count > t.services.length ? `See all ${t.count} in ${t.title}` : `More about ${t.title}`} <Icon name="arrow-right" class="size-4" />
                 </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {latest && latestColumns.length > 0 && (
+    <section class="section defer-render" style={`--latest: repeat(${latestColumns.length}, minmax(0, 1fr))`} aria-labelledby="latest-h">
+      <div class="container-page">
+        <div class="max-w-2xl">
+          {latest.eyebrow && <p class="eyebrow mb-2">{latest.eyebrow}</p>}
+          <h2 id="latest-h" class="text-2xl section-title sm:text-3xl">{latest.heading}</h2>
+          {latest.intro && <p class="mt-3 text-lg text-slate-600">{latest.intro}</p>}
+        </div>
+        <div class="mt-10 grid gap-10 lg:grid-cols-(--latest) [&>*+*]:border-slate-200 max-lg:[&>*+*]:border-t max-lg:[&>*+*]:pt-10 lg:[&>*+*]:border-l lg:[&>*+*]:pl-10">
+          {latestColumns.map(({ type, posts: [first, ...rest], image }) => (
+            <div class="min-w-0">
+              <div class="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
+                <h3 class="flex items-center gap-2 text-lg font-bold text-slate-950"><MaterialIcon name={postTypeIcon[type]} class="size-5 text-brand-700" />{POST_TYPES[type].plural}</h3>
+                <a href={`/${POST_TYPES[type].listPath}`} aria-label={`See all ${POST_TYPES[type].plural.toLowerCase()}`} class="-my-3 inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">See all <Icon name="arrow-right" class="size-4" /></a>
+              </div>
+              <a href={first.url} class="group mt-5 block">
+                {image ? (
+                  <img src={image.src} srcset={image.srcset} sizes={`(min-width: 1024px) ${Math.round(1200 / latestColumns.length)}px, 100vw`} alt={first.imageAlt || ''} width="880" height="400" loading="lazy" decoding="async" class:list={['aspect-[2.2/1] w-full rounded-xl bg-slate-50', croppable(first) ? 'object-cover' : 'object-contain']} />
+                ) : (
+                  <span class="flex aspect-[2.2/1] w-full items-center justify-center rounded-xl bg-brand-50 text-brand-700" aria-hidden="true">
+                    <MaterialIcon name={postTypeIcon[type]} class="size-12 opacity-60" />
+                  </span>
+                )}
+                <span class="mt-4 block text-sm text-slate-500">{formatDate(first.publishedAt)}</span>
+                <span class="mt-1 block line-clamp-3 text-lg leading-snug font-bold text-slate-950 group-hover:text-brand-700">{first.title}</span>
+                {first.excerpt && <span class="mt-2 block line-clamp-2 text-[0.9375rem] leading-relaxed text-slate-600">{first.excerpt}</span>}
+              </a>
+              {rest.length > 0 && (
+                <ul class="mt-5 divide-y divide-slate-200 border-t border-slate-200">
+                  {rest.map((p) => (
+                    <li>
+                      <a href={p.url} class="group block py-3.5">
+                        <span class="block line-clamp-2 font-semibold text-slate-900 group-hover:text-brand-700">{p.title}</span>
+                        <span class="mt-0.5 block text-sm text-slate-500">{formatDate(p.publishedAt)}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           ))}

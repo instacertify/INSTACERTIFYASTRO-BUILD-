@@ -197,7 +197,17 @@ export interface Home {
   testingProcess?: { items: HomeTile[] };
   whyUs: HomeSection & { intro?: string | null; items: HomeTile[] };
   testimonials: HomeSection;
-  fieldwork?: HomeSection & { intro?: string | null };
+  fieldwork?: HomeSection & {
+    intro?: string | null;
+    /** upcoming: soonest first, topped up with the latest past events; recent: newest published; picked: `events` in that order. */
+    eventsShow?: 'upcoming' | 'recent' | 'picked';
+    eventsCount?: number | string | null;
+    /** Event slugs, used when eventsShow is "picked". */
+    events?: string[];
+    eventsHeading?: string | null;
+  };
+  /** One column per post type with its newest posts. */
+  latest?: HomeSection & { intro?: string | null; types?: PostType[]; perType?: number | string | null };
   promos: { visible: boolean; items: (HomeTile & { eyebrow?: string | null; image?: string | null; imageAlt?: string | null })[] };
   faq: HomeSection & { intro?: string | null; items: { q: string; a: string }[] };
 }
@@ -369,6 +379,7 @@ export interface EventItem {
   imageAlt?: string | null;
   imageWidth?: number | null;
   imageHeight?: number | null;
+  publishedAt?: string | null;
   updatedAt?: string | null;
   content?: string | null;
   seo?: Seo;

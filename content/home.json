@@ -149,7 +149,19 @@
     "visible": true,
     "eyebrow": null,
     "heading": "Audits, inspections and trade fairs",
-    "intro": "Recent factory audits and inspections handled by our engineers, and the trade fairs coming up next."
+    "intro": "Recent factory audits and inspections handled by our engineers, and the trade fairs coming up next.",
+    "eventsShow": "upcoming",
+    "eventsCount": 4,
+    "events": [],
+    "eventsHeading": null
+  },
+  "latest": {
+    "visible": true,
+    "eyebrow": "Resources",
+    "heading": "Latest guides, news and regulatory updates",
+    "intro": "Fresh from our compliance team: new BIS rules, deadlines and practical certification guides.",
+    "types": ["blog", "news", "update"],
+    "perType": 3
   },
   "whatWeDo": {
     "visible": true,

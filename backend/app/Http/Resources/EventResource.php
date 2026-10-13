@@ -34,6 +34,7 @@ class EventResource extends JsonResource
             'imageAlt' => $this->image_alt ?: $this->title,
             'imageWidth' => $this->image_width,
             'imageHeight' => $this->image_height,
+            'publishedAt' => $this->published_at?->toIso8601String(),
             'updatedAt' => $this->updated_at?->toIso8601String(),
             'content' => $this->when($full, fn () => RichContent::render($this->content)),
             'seo' => $this->when($full, fn () => $this->seoMeta($this->title, $this->excerpt ?: $this->content)),
