@@ -422,7 +422,7 @@
  {
   "sno": 26,
   "product": "Self-Ballasted LED Lamps",
-  "is": "IS 16102 (Part 1)",
+  "is": "IS 16102 (Part 1):2026",
   "broad": "Lighting Products",
   "hsn4": "8539",
   "hsn8": "85395000",
@@ -433,12 +433,13 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS 16102 (Part 1):2026 replaces IS 16102 (Part 1):2012; the old version can still be used until 2 Feb 2027, after which only the 2026 version is accepted.",
+  "replaces": "IS 16102 (Part 1):2012"
  },
  {
   "sno": 27,
   "product": "Fixed General Purpose LED Luminaires",
-  "is": "IS 10322 (Part 5/Sec 1)",
+  "is": "IS 10322 (Part 5/Sec 1):2026",
   "broad": "Lighting Products",
   "hsn4": "9405",
   "hsn8": "94051100",
@@ -449,12 +450,13 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. Fancy lights are registered under this category as a separate product name. IS 10322 (Part 5/Sec 1):2026 (based on IEC 60598-2-1:2020) replaces IS 10322 (Part 5/Sec 1):2012; the old version can still be used until 2 Feb 2027, after which only the 2026 version is accepted.",
+  "replaces": "IS 10322 (Part 5/Sec 1):2012"
  },
  {
   "sno": 28,
   "product": "LED Luminaires for Road & Street Lighting",
-  "is": "IS 10322 (Part 5/Sec 3)",
+  "is": "IS 10322 (Part 5/Sec 3):2026",
   "broad": "Lighting Products",
   "hsn4": "9405",
   "hsn8": "94054090",
@@ -465,12 +467,13 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS 10322 (Part 5/Sec 3):2026 (based on IEC 60598-2-3:2002 + Amd 1:2011) replaces IS 10322 (Part 5/Sec 3):2012; the old version can still be used until 2 Feb 2027, after which only the 2026 version is accepted.",
+  "replaces": "IS 10322 (Part 5/Sec 3):2012"
  },
  {
   "sno": 29,
   "product": "LED Flood Lights",
-  "is": "IS 10322 (Part 5/Sec 5)",
+  "is": "IS 10322 (Part 5/Sec 5):2026",
   "broad": "Lighting Products",
   "hsn4": "9405",
   "hsn8": "94054090",
@@ -481,12 +484,13 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS 10322 (Part 5/Sec 5):2026 (based on IEC 60598-2-5:2015) replaces IS 10322 (Part 5/Sec 5):2013; the old version can still be used until 2 Feb 2027, after which only the 2026 version is accepted.",
+  "replaces": "IS 10322 (Part 5/Sec 5):2013"
  },
  {
   "sno": 30,
   "product": "LED Hand Lamps",
-  "is": "IS 10322 (Part 5/Sec 6)",
+  "is": "IS 10322 (Part 5/Sec 6):2026",
   "broad": "Lighting Products",
   "hsn4": "9405",
   "hsn8": "94054090",
@@ -497,12 +501,13 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS 10322 (Part 5/Sec 6):2026 (based on IEC 60598-2-8:2013) replaces IS 10322 (Part 5/Sec 6):2013; the old version can still be used until 2 Feb 2027, after which only the 2026 version is accepted.",
+  "replaces": "IS 10322 (Part 5/Sec 6):2013"
  },
  {
   "sno": 31,
   "product": "LED Lighting Chains (Rope Lights)",
-  "is": "IS 10322 (Part 5/Sec 7)",
+  "is": "IS 10322 (Part 5/Sec 7):2026",
   "broad": "Lighting Products",
   "hsn4": "9405",
   "hsn8": "94053100",
@@ -513,12 +518,13 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS 10322 (Part 5/Sec 7):2026 (based on IEC 60598-2-20:2022) replaces IS 10322 (Part 5/Sec 7):2017; the old version can still be used until 2 Feb 2027, after which only the 2026 version is accepted.",
+  "replaces": "IS 10322 (Part 5/Sec 7):2017"
  },
  {
   "sno": 32,
   "product": "LED Luminaires for Emergency Lighting",
-  "is": "IS 10322 (Part 5/Sec 8)",
+  "is": "IS 10322 (Part 5/Sec 8):2026",
   "broad": "Lighting Products",
   "hsn4": "9405",
   "hsn8": "94054090",
@@ -529,12 +535,13 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS 10322 (Part 5/Sec 8):2026 (based on IEC 60598-2-22:2022) replaces IS 10322 (Part 5/Sec 8):2013; the old version can still be used until 2 Feb 2027, after which only the 2026 version is accepted.",
+  "replaces": "IS 10322 (Part 5/Sec 8):2013"
  },
  {
   "sno": 33,
   "product": "Recessed LED Luminaires",
-  "is": "IS 10322 (Part 5/Sec 2)",
+  "is": "IS 10322 (Part 5/Sec 2):2026",
   "broad": "Lighting Products",
   "hsn4": "9405",
   "hsn8": "94051900",
@@ -545,7 +552,8 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines"
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS 10322 (Part 5/Sec 2):2026 (based on IEC 60598-2-2:2023) replaces IS 10322 (Part 5/Sec 2):2012; the old version can still be used until 2 Feb 2027, after which only the 2026 version is accepted.",
+  "replaces": "IS 10322 (Part 5/Sec 2):2012"
  },
  {
   "sno": 34,
@@ -645,7 +653,7 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS/IEC 62368-1:2023 replaces IS 616:2017; the old standard can still be used until 1 Nov 2028, after which it is withdrawn.",
+  "remarks": "Registration per model per factory; renewal as per BIS CRS guidelines. IS/IEC 62368-1:2023 replaces IS 616:2017; the old standard can still be used until 1 Nov 2028, after which it is withdrawn. Audio glasses (wireless audio, calls and music, with or without a voice assistant, and no camera) are registered under this category as sub-category Audio Glasses (BIS guidance of 13 Aug 2026).",
   "replaces": "IS 616:2017"
  },
  {
@@ -953,7 +961,7 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory. Smart glasses with a camera that takes photos only are registered under this category as sub-category Smart Glasses (BIS guidance of 13 Aug 2026)."
  },
  {
   "sno": 59,
@@ -969,7 +977,7 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory. Smart glasses with a camera that takes both photos and videos are registered under this category as sub-category Smart Glasses (BIS guidance of 13 Aug 2026)."
  },
  {
   "sno": 60,
@@ -1049,7 +1057,7 @@
    "small": 14500,
    "large": 27000
   },
-  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory."
+  "remarks": "CRS: testing at BIS-recognised lab + self-declaration; NO physical sample drawn by BIS. Registration per model per factory. Product names: AR Glasses, Other AR Devices, VR Headset, MR Glasses and Other MR Devices, each needing its own licence; AR and MR glasses (with a display visible through the lenses) are registered here (BIS guidance of 13 Aug 2026). Testing under IS 13252 (Part 1) or IS 616 was accepted only until 1 May 2026."
  },
  {
   "sno": 65,
@@ -1242,21 +1250,5 @@
    "large": 27000
   },
   "remarks": "RESCINDED w.e.f. 09-06-2026 (Cotton Bales QCO rescind order). No longer mandatory - retained for record."
- },
- {
-  "sno": 77,
-  "product": "Extended Reality Products (AR, VR, MR)",
-  "is": "IS/IEC 62368-1:2023",
-  "broad": "Electronics & IT Goods",
-  "hsn4": "",
-  "hsn8": "",
-  "status": "Mandatory (CRS Registration)",
-  "order": "CRO 2021, S.No. 65; effective 05-12-2025",
-  "fees": {
-   "micro": 7000,
-   "small": 14500,
-   "large": 27000
-  },
-  "remarks": "Augmented, virtual and mixed reality products, added at S.No. 65 of the CRO schedule. Registration per model per factory. Testing under IS 13252 (Part 1) or IS 616 was accepted only until 1 May 2026; new registrations must use IS/IEC 62368-1:2023."
  }
 ]
